@@ -1,0 +1,5 @@
+﻿date_yyyymmdd,experiment_round,days_since_first,temperature_c,temperature_step_code,sample_count,avg_success_score,avg_quality_score_100,avg_particle_score,avg_volume_score,avg_transparency_score,avg_overheat_score,result_code_mode,pre_image_missing_count
+20250508,1,0,800,1,10,1.0,20.0,0.0,0.0,0.0,2.0,1,0
+20250516,2,8,780,2,7,1.143,22.857,0.0,0.0,0.286,2.0,1,0
+20250522,3,14,760,3,8,4.0,80.0,4.0,2.0,2.0,0.0,3,1
+20250530,4,22,760,3,5,5.0,95.0,3.0,5.0,5.0,0.0,4,2
