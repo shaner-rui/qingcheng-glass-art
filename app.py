@@ -507,7 +507,7 @@ hr {
     line-height: 1.75;
 }
 
-/* 项目优势卡片：严格四个，统一大小 */
+/* 项目优势卡片 */
 .advantage-card {
     height: 280px;
     padding: 1.45rem;
@@ -828,7 +828,7 @@ div[data-testid="stDataFrame"] {
 st.markdown(
     """
 <div class="navbar">
-    <div class="nav-logo">♻️ 青橙焕艺 Glass Recycling AI Platform</div>
+    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
     <div class="nav-links">
         <a href="#intro">项目简介</a>
         <a href="#database">工艺数据库</a>
@@ -852,10 +852,10 @@ st.markdown(
     """
 <div class="hero">
     <div class="hero-content">
-        <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART</div>
+        <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
         <h1>青橙焕艺</h1>
         <h2>
-            面向废旧玻璃热熔再生的艺术设计与数据分析平台。
+            由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
             项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
             数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
             科技感和商业展示力的数字化平台。
@@ -881,7 +881,7 @@ st.markdown('<div id="intro"></div>', unsafe_allow_html=True)
 section_title(
     "PROJECT INTRODUCTION",
     "项目简介",
-    "不只是展示玻璃作品，而是建立一套从废弃材料、热熔实验、烧制前后记录、艺术设计到数据推荐的完整创新创业链路。"
+    "青汐造物以青汐工坊为线下实验与艺术转化空间，建立从废弃材料、热熔实验、烧制前后记录、艺术设计到数据推荐的完整创新创业链路。"
 )
 
 c1, c2, c3 = st.columns(3)
@@ -896,8 +896,8 @@ with c1:
 with c2:
     glass_card(
         "🔥",
-        "热熔工艺实验",
-        "围绕温度变化建立实验数据库，对 800℃、780℃、760℃ 等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
+        "青汐工坊实验",
+        "依托青汐工坊开展热熔工艺实验，对 800℃、780℃、760℃ 等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
     )
 
 with c3:
@@ -913,7 +913,7 @@ with c4:
     glass_card(
         "🎨",
         "艺术产品转化",
-        "将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。"
+        "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。"
     )
 
 with c5:
@@ -940,7 +940,7 @@ st.markdown('<div id="database"></div>', unsafe_allow_html=True)
 section_title(
     "SPACE DATABASE PREVIEW",
     "预览玻璃热熔工艺数据库",
-    "基于真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
+    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
 )
 
 st.markdown('<div class="database-panel">', unsafe_allow_html=True)
@@ -1188,7 +1188,7 @@ with tab800:
 
 section_title(
     "PRODUCT SHOWCASE",
-    "剩余图片展示",
+    "青汐工坊作品展示",
     "保留灯具、花瓶与装饰类成品展示，用于体现废旧玻璃热熔再生后的产品转化方向。"
 )
 
@@ -1199,7 +1199,7 @@ with p1:
         IMAGE_DIR / "lamp.png",
         "灯具产品",
         "适合突出透光度、空间氛围和材料再生的设计价值。",
-        "青橙焕艺项目组"
+        "青汐工坊"
     )
 
 with p2:
@@ -1207,7 +1207,7 @@ with p2:
         IMAGE_DIR / "vase.png",
         "花瓶产品",
         "适合突出玻璃的体积感、成型感和装饰属性。",
-        "青橙焕艺项目组"
+        "青汐工坊"
     )
 
 with p3:
@@ -1215,12 +1215,12 @@ with p3:
         IMAGE_DIR / "decoration.jpg",
         "装饰艺术品",
         "适合突出色彩组合、颗粒肌理和艺术展示效果。",
-        "青橙焕艺项目组"
+        "青汐工坊"
     )
 
 
 # =========================================================
-# 项目优势：严格四个
+# 项目优势
 # =========================================================
 
 st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
@@ -1228,7 +1228,7 @@ st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
 section_title(
     "PROJECT ADVANTAGES",
     "项目优势",
-    "从环保、工艺、展示和产品转化四个维度体现项目价值。"
+    "从环保、工艺、展示和产品转化四个维度体现青汐造物的项目价值。"
 )
 
 a1, a2, a3, a4 = st.columns(4)
@@ -1243,8 +1243,8 @@ with a1:
 with a2:
     advantage_card(
         "🧪",
-        "实验可复现",
-        "通过温度、实验轮次和效果评分记录烧制过程，便于后续复盘、优化和扩展。"
+        "工坊实验可复现",
+        "依托青汐工坊记录温度、实验轮次和效果评分，便于后续复盘、优化和扩展。"
     )
 
 with a3:
@@ -1321,7 +1321,7 @@ with r2:
         IMAGE_DIR / "vase.png",
         "产品推荐展示",
         "系统根据用户选择的产品类型、材料和目标效果，给出温度区间与工艺建议。",
-        "青橙焕艺项目组"
+        "青汐工坊"
     )
 
 
@@ -1334,17 +1334,17 @@ st.markdown('<div id="future"></div>', unsafe_allow_html=True)
 section_title(
     "FUTURE VISION",
     "后期展望",
-    "围绕数据规模、AI模型、产品体系和商业落地继续升级。"
+    "围绕数据规模、AI模型、产品体系和商业落地继续升级青汐造物的再生玻璃艺术平台。"
 )
 
 with st.expander("01 建立更完整的玻璃热熔工艺数据库", expanded=True):
     st.write(
-        "后续继续补充保温时间、升温曲线、玻璃厚度、颗粒大小、颜色组合、摆放方式等参数，让数据库从展示型数据逐步升级为可建模数据。"
+        "青汐工坊后续将继续补充保温时间、升温曲线、玻璃厚度、颗粒大小、颜色组合、摆放方式等参数，让数据库从展示型数据逐步升级为可建模数据。"
     )
 
 with st.expander("02 从规则推荐升级为机器学习推荐"):
     st.write(
-        "当前系统基于真实实验规律和规则进行推荐，后续可使用回归模型或分类模型预测综合质量分，并自动生成最佳烧制方案。"
+        "当前系统基于真实实验规律和规则进行推荐，后续青汐造物可使用回归模型或分类模型预测综合质量分，并自动生成最佳烧制方案。"
     )
 
 with st.expander("03 扩展更多再生玻璃产品类型"):
@@ -1352,14 +1352,14 @@ with st.expander("03 扩展更多再生玻璃产品类型"):
         "产品可从花瓶、灯具、装饰画扩展到校园纪念品、公共艺术装置、家居软装和文旅文创产品。"
     )
 
-with st.expander("04 打造校园绿色工坊和商业闭环"):
+with st.expander("04 打造青汐工坊体验与商业闭环"):
     st.write(
-        "结合校园废玻璃回收、手作体验课程、线上展示平台和文创销售，形成环保教育、艺术体验和创业转化的闭环。"
+        "结合校园废玻璃回收、青汐工坊手作体验课程、线上展示平台和文创销售，形成环保教育、艺术体验和创业转化的闭环。"
     )
 
 
 # =========================================================
-# 联系我们：不使用 contact_html，避免 HTML 原样显示
+# 联系我们
 # =========================================================
 
 st.markdown('<div id="contact"></div>', unsafe_allow_html=True)
@@ -1373,8 +1373,8 @@ section_title(
 st.markdown(
     """
     <div class="contact-shell">
-        <h2>青橙焕艺</h2>
-        <p>Glass Recycling AI Platform</p>
+        <h2>青汐造物</h2>
+        <p>青汐工坊 · Glass Recycling AI Platform</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -1385,17 +1385,17 @@ cc1, cc2, cc3 = st.columns(3)
 with cc1:
     contact_card(
         "♻️",
-        "项目方向",
+        "公司定位",
+        "青汐造物",
         "废旧玻璃热熔再生",
-        "艺术产品设计",
-        "工艺数据分析"
+        "艺术产品设计"
     )
 
 with cc2:
     contact_card(
-        "🚀",
-        "适用场景",
-        "大学生创新创业大赛",
+        "🏛️",
+        "艺术中心",
+        "青汐工坊",
         "校园环保项目",
         "艺术工坊展示"
     )
@@ -1403,8 +1403,8 @@ with cc2:
 with cc3:
     contact_card(
         "🤖",
-        "团队定位",
-        "青橙焕艺项目组",
+        "平台方向",
+        "青橙焕艺项目",
         "绿色材料再生",
         "AI 推荐系统展示"
     )
