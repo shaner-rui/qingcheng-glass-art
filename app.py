@@ -7,9 +7,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 
-# =========================
+# =========================================================
 # 基础配置
-# =========================
+# =========================================================
 
 st.set_page_config(
     page_title="青橙焕艺 | Glass Recycling AI Platform",
@@ -18,32 +18,67 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-BASE_DIR = Path(__file__).parent
-DATA_PATH = BASE_DIR / "glass_experiment_numeric_only.csv"
-IMAGE_DIR = BASE_DIR / "images"
-FIGURE_DIR = BASE_DIR / "figures"
+
+# =========================================================
+# 路径兼容：支持 app.py 放在根目录或 src 目录
+# =========================================================
+
+APP_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = APP_DIR.parent if APP_DIR.name.lower() == "src" else APP_DIR
+
+IMAGE_DIR = PROJECT_DIR / "images"
+FIGURE_DIR = PROJECT_DIR / "figures"
+
+DATA_CANDIDATES = [
+    PROJECT_DIR / "glass_experiment_numeric_only.csv",
+    APP_DIR / "glass_experiment_numeric_only.csv",
+    PROJECT_DIR / "notebook-keshihua" / "glass_experiment_numeric_only.csv",
+]
 
 
-# =========================
+def find_data_path():
+    for path in DATA_CANDIDATES:
+        if path.exists():
+            return path
+    return DATA_CANDIDATES[0]
+
+
+DATA_PATH = find_data_path()
+
+
+# =========================================================
 # 工具函数
-# =========================
+# =========================================================
 
-def img_to_uri(path: Path):
+def img_to_uri(path: Path) -> str:
     if not path.exists():
         return ""
-    mime = "image/jpeg" if path.suffix.lower() in [".jpg", ".jpeg"] else "image/png"
-    data = base64.b64encode(path.read_bytes()).decode()
+
+    suffix = path.suffix.lower()
+    if suffix in [".jpg", ".jpeg"]:
+        mime = "image/jpeg"
+    else:
+        mime = "image/png"
+
+    data = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:{mime};base64,{data}"
 
 
 @st.cache_data
-def load_data():
-    if DATA_PATH.exists():
-        return pd.read_csv(DATA_PATH)
-    return pd.DataFrame()
+def load_data(path: str):
+    csv_path = Path(path)
+    if not csv_path.exists():
+        return pd.DataFrame()
+
+    df = pd.read_csv(csv_path)
+
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors="ignore")
+
+    return df
 
 
-def section_title(tag, title, desc):
+def section_title(tag: str, title: str, desc: str):
     st.markdown(
         f"""
         <div class="section-head">
@@ -56,10 +91,10 @@ def section_title(tag, title, desc):
     )
 
 
-def glass_card(icon, title, text):
+def glass_card(icon: str, title: str, text: str):
     st.markdown(
         f"""
-        <div class="glass-card reveal">
+        <div class="glass-card">
             <div class="icon">{icon}</div>
             <h3>{title}</h3>
             <p>{text}</p>
@@ -69,16 +104,22 @@ def glass_card(icon, title, text):
     )
 
 
-def image_card(path, title, desc):
+def image_card(path: Path, title: str, desc: str, maker: str = ""):
     uri = img_to_uri(path)
+
+    maker_html = ""
+    if maker:
+        maker_html = f'<div class="maker">制作人员：{maker}</div>'
+
     if uri:
         st.markdown(
             f"""
-            <div class="image-card reveal">
-                <img src="{uri}" />
+            <div class="image-card">
+                <img src="{uri}" alt="{title}" />
                 <div class="image-mask">
                     <h3>{title}</h3>
                     <p>{desc}</p>
+                    {maker_html}
                 </div>
             </div>
             """,
@@ -87,10 +128,11 @@ def image_card(path, title, desc):
     else:
         st.markdown(
             f"""
-            <div class="image-card image-missing reveal">
+            <div class="image-card image-missing">
                 <div>
                     <h3>{title}</h3>
-                    <p>请将图片放入 images 文件夹：{path.name}</p>
+                    <p>缺少图片：{path.name}</p>
+                    <small>请确认该图片已放入 images 文件夹</small>
                 </div>
             </div>
             """,
@@ -98,22 +140,56 @@ def image_card(path, title, desc):
         )
 
 
-def recommend(product_type, material, target_effect, temp):
+def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
+    before_path = IMAGE_DIR / before_name
+    after_path = IMAGE_DIR / after_name
+
+    st.markdown(
+        f"""
+        <div class="pair-title">
+            <span>{temp}℃</span>
+            <p>{result_desc}</p>
+            <div>制作人员：{maker}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        image_card(
+            before_path,
+            f"{temp}℃ · 烧制前",
+            f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
+            maker
+        )
+
+    with col2:
+        image_card(
+            after_path,
+            f"{temp}℃ · 烧制后",
+            f"{temp}hou：经过热熔后的成型状态与视觉效果。",
+            maker
+        )
+
+
+def recommend(product_type: str, material: str, target_effect: str, temp: int):
     if product_type == "花瓶":
         base_temp = "760℃ - 770℃"
-        product_tip = "花瓶需要一定体积感，建议保持玻璃局部堆叠，不要完全熔平。"
+        product_tip = "花瓶需要保留局部体积感，建议玻璃融合但不要完全摊平。"
     elif product_type == "灯具":
         base_temp = "755℃ - 765℃"
-        product_tip = "灯具更重视透光度，建议使用透明玻璃或浅色玻璃搭配。"
+        product_tip = "灯具更重视透光度，建议使用透明玻璃或浅色玻璃组合。"
     elif product_type == "装饰画":
         base_temp = "750℃ - 765℃"
-        product_tip = "装饰画适合保留颗粒肌理，温度不宜过高。"
+        product_tip = "装饰画适合保留颗粒边界和色彩层次，温度不宜过高。"
     elif product_type == "艺术摆件":
         base_temp = "760℃ - 775℃"
-        product_tip = "艺术摆件可适当增强体积感，但要避免形态塌陷。"
+        product_tip = "艺术摆件可适当增强体积感，但要避免温度过高造成形态塌陷。"
     else:
         base_temp = "755℃ - 770℃"
-        product_tip = "综合产品建议先做小样测试，再扩大成品尺寸。"
+        product_tip = "综合文创产品建议先做小样测试，再根据成品效果扩大尺寸。"
 
     if temp >= 790:
         risk = "当前温度偏高，容易导致玻璃过度熔融，颗粒感和体积感下降。建议明显降温。"
@@ -142,19 +218,19 @@ def recommend(product_type, material, target_effect, temp):
     elif material == "彩色玻璃":
         material_tip = "彩色玻璃视觉表现强，适合装饰画和艺术摆件。"
     elif material == "混合玻璃":
-        material_tip = "混合玻璃层次丰富，但要注意颜色过杂。"
+        material_tip = "混合玻璃层次丰富，但需要注意颜色过杂。"
     else:
         material_tip = "建议先做小样实验，记录温度和最终效果。"
 
     return base_temp, risk, score, product_tip, effect_tip, material_tip
 
 
-df = load_data()
+df = load_data(str(DATA_PATH))
 
 
-# =========================
+# =========================================================
 # 全局 CSS
-# =========================
+# =========================================================
 
 st.markdown(
     """
@@ -163,10 +239,13 @@ st.markdown(
 
 :root {
     --cyan: #25f4ee;
+    --cyan-soft: rgba(37,244,238,0.18);
     --orange: #ff9f43;
+    --orange-soft: rgba(255,159,67,0.20);
     --dark: #06131f;
     --deep: #020711;
     --white: #f6fbff;
+    --muted: rgba(246,251,255,0.70);
 }
 
 html, body, .stApp {
@@ -176,8 +255,8 @@ html, body, .stApp {
 
 .stApp {
     background:
-        radial-gradient(circle at 8% 12%, rgba(37,244,238,0.28), transparent 26%),
-        radial-gradient(circle at 88% 14%, rgba(255,159,67,0.24), transparent 24%),
+        radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
+        radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
         radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
         linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
     color: var(--white);
@@ -189,11 +268,10 @@ html, body, .stApp {
     padding-bottom: 5rem;
 }
 
-/* 弱化原来的线条分隔感 */
 hr {
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(37,244,238,0.25), rgba(255,159,67,0.25), transparent);
+    background: linear-gradient(90deg, transparent, rgba(37,244,238,0.22), rgba(255,159,67,0.22), transparent);
     margin: 3rem 0;
 }
 
@@ -283,7 +361,7 @@ hr {
 .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 820px;
+    max-width: 850px;
 }
 
 .hero-tag {
@@ -353,7 +431,7 @@ hr {
 .section-head {
     text-align: center;
     margin: 5rem auto 2rem;
-    max-width: 860px;
+    max-width: 880px;
 }
 
 .section-tag {
@@ -377,7 +455,7 @@ hr {
     line-height: 1.8;
 }
 
-/* 卡片 */
+/* 项目简介卡片 */
 .glass-card {
     height: 100%;
     min-height: 250px;
@@ -412,7 +490,7 @@ hr {
     line-height: 1.75;
 }
 
-/* 图片卡 */
+/* 图片卡片 */
 .image-card {
     position: relative;
     height: 360px;
@@ -443,8 +521,8 @@ hr {
 .image-mask {
     position: absolute;
     inset: auto 0 0 0;
-    padding: 1.4rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    padding: 1.35rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.20), transparent);
 }
 
 .image-mask h3 {
@@ -453,8 +531,16 @@ hr {
 }
 
 .image-mask p {
-    color: rgba(255,255,255,0.74);
-    margin: 0.4rem 0 0;
+    color: rgba(255,255,255,0.78);
+    margin: 0.35rem 0 0;
+    line-height: 1.55;
+}
+
+.maker {
+    margin-top: 0.5rem;
+    color: #ffcf9a;
+    font-weight: 800;
+    font-size: 0.92rem;
 }
 
 .image-missing {
@@ -463,6 +549,40 @@ hr {
     justify-content: center;
     text-align: center;
     border-style: solid;
+    color: rgba(246,251,255,0.82);
+}
+
+.image-missing small {
+    color: rgba(246,251,255,0.55);
+}
+
+/* 烧制前后对比标题 */
+.pair-title {
+    margin: 2.2rem 0 1rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: 24px;
+    background:
+        linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10)),
+        rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(16px);
+}
+
+.pair-title span {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--cyan);
+}
+
+.pair-title p {
+    margin: 0.35rem 0;
+    color: rgba(246,251,255,0.78);
+    line-height: 1.7;
+}
+
+.pair-title div {
+    color: #ffcf9a;
+    font-weight: 800;
 }
 
 /* 数据库太空区 */
@@ -518,10 +638,12 @@ hr {
 
 /* 联系我们 */
 .contact-card {
-    padding: 2.5rem;
+    padding: 2.8rem 2.2rem;
     border-radius: 34px;
     background:
-        linear-gradient(135deg, rgba(37,244,238,0.14), rgba(255,159,67,0.14)),
+        radial-gradient(circle at 15% 10%, rgba(37,244,238,0.20), transparent 28%),
+        radial-gradient(circle at 86% 20%, rgba(255,159,67,0.18), transparent 28%),
+        linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.12)),
         rgba(255,255,255,0.065);
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(20px);
@@ -537,12 +659,52 @@ hr {
     -webkit-text-fill-color: transparent;
 }
 
-.contact-card p {
-    color: rgba(246,251,255,0.72);
-    line-height: 1.8;
+.contact-subtitle {
+    margin-top: 0.6rem;
+    color: rgba(246,251,255,0.76);
+    font-size: 1.1rem;
 }
 
-/* 移动端适配 */
+.contact-grid {
+    margin-top: 1.8rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.contact-item {
+    padding: 1.2rem;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.contact-item strong {
+    display: block;
+    color: var(--cyan);
+    margin-bottom: 0.35rem;
+}
+
+.contact-item span {
+    color: rgba(246,251,255,0.72);
+    line-height: 1.65;
+}
+
+/* Streamlit 控件微调 */
+div[data-testid="stDataFrame"] {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.stSlider label,
+.stSelectbox label,
+.stMultiSelect label {
+    color: rgba(246,251,255,0.82) !important;
+    font-weight: 800 !important;
+}
+
+/* 手机适配 */
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
@@ -556,9 +718,15 @@ hr {
         gap: 0.6rem;
     }
 
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+    }
+
     .nav-links a {
         margin-left: 0;
-        margin-right: 0.8rem;
+        margin-right: 0.4rem;
         font-size: 0.82rem;
     }
 
@@ -575,6 +743,10 @@ hr {
     .image-card {
         height: 270px;
     }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 """,
@@ -582,9 +754,9 @@ hr {
 )
 
 
-# =========================
+# =========================================================
 # 顶部导航
-# =========================
+# =========================================================
 
 st.markdown(
     """
@@ -593,7 +765,8 @@ st.markdown(
     <div class="nav-links">
         <a href="#intro">项目简介</a>
         <a href="#database">工艺数据库</a>
-        <a href="#gallery">图片展示</a>
+        <a href="#gallery">烧制对比</a>
+        <a href="#advantage">项目优势</a>
         <a href="#recommend">产品推荐</a>
         <a href="#future">后期展望</a>
         <a href="#contact">联系我们</a>
@@ -604,25 +777,25 @@ st.markdown(
 )
 
 
-# =========================
+# =========================================================
 # Hero 首页
-# =========================
-
-banner_uri = img_to_uri(IMAGE_DIR / "banner.png")
+# =========================================================
 
 st.markdown(
-    f"""
+    """
 <div class="hero">
     <div class="hero-content">
         <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART</div>
         <h1>青橙焕艺</h1>
         <h2>
             面向废旧玻璃热熔再生的艺术设计与数据分析平台。
-            项目将废旧玻璃回收、热熔工艺实验、艺术产品转化、数据可视化与 AI 推荐系统结合，
-            为大学生创新创业大赛提供一个兼具环保价值、科技感和商业展示力的数字化平台。
+            项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
+            数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
+            科技感和商业展示力的数字化平台。
         </h2>
         <div class="hero-buttons">
             <a class="hero-btn" href="#database">预览工艺数据库</a>
+            <a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>
             <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
         </div>
     </div>
@@ -632,16 +805,16 @@ st.markdown(
 )
 
 
-# =========================
+# =========================================================
 # 项目简介
-# =========================
+# =========================================================
 
 st.markdown('<div id="intro"></div>', unsafe_allow_html=True)
 
 section_title(
     "PROJECT INTRODUCTION",
     "项目简介",
-    "不只是展示玻璃作品，而是建立一套从废弃材料、热熔实验、艺术设计到数据推荐的完整创新创业链路。"
+    "不只是展示玻璃作品，而是建立一套从废弃材料、热熔实验、烧制前后记录、艺术设计到数据推荐的完整创新创业链路。"
 )
 
 c1, c2, c3 = st.columns(3)
@@ -662,9 +835,9 @@ with c2:
 
 with c3:
     glass_card(
-        "🤖",
-        "AI 推荐与展示",
-        "面向不同用户需求，输入产品类型、材料和目标效果后，系统给出推荐温度区间、风险提示和适合产品方向，提升项目的科技感与实用性。"
+        "📷",
+        "烧制前后对比",
+        "通过 760℃、780℃、800℃ 三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
     )
 
 c4, c5, c6 = st.columns(3)
@@ -685,15 +858,15 @@ with c5:
 
 with c6:
     glass_card(
-        "🚀",
-        "创业比赛展示",
-        "页面采用青色与橙色渐变、深色科技背景、毛玻璃卡片和动态图片展示，适合路演现场快速呈现项目亮点。"
+        "🤖",
+        "AI 工艺推荐",
+        "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
     )
 
 
-# =========================
-# 数据库预览
-# =========================
+# =========================================================
+# 工艺数据库
+# =========================================================
 
 st.markdown('<div id="database"></div>', unsafe_allow_html=True)
 
@@ -706,33 +879,48 @@ section_title(
 st.markdown('<div class="database-panel">', unsafe_allow_html=True)
 
 if df.empty:
-    st.warning("没有找到 glass_experiment_numeric_only.csv，请将 CSV 放在 app.py 同级目录。")
+    st.warning(
+        f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}"
+    )
 else:
     temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
     selected_temp = st.multiselect("选择温度", temps, default=temps)
 
     show_df = df.copy()
+
     if selected_temp and "temperature_c" in show_df.columns:
         show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
 
     m1, m2, m3, m4 = st.columns(4)
 
     with m1:
-        st.markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>',
+            unsafe_allow_html=True
+        )
 
     with m2:
         avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
-        st.markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>',
+            unsafe_allow_html=True
+        )
 
     with m3:
         avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
-        st.markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>',
+            unsafe_allow_html=True
+        )
 
     with m4:
-        best_temp = "760℃"
+        best_temp = "暂无"
         if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
             best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
-        st.markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>',
+            unsafe_allow_html=True
+        )
 
     st.markdown("### 表格形式内容")
     st.dataframe(show_df, use_container_width=True, height=360)
@@ -757,34 +945,74 @@ else:
 st.markdown("</div>", unsafe_allow_html=True)
 
 
-# =========================
-# 图片展示区
-# =========================
+# =========================================================
+# 烧制前后动态滚动照片
+# =========================================================
 
 st.markdown('<div id="gallery"></div>', unsafe_allow_html=True)
 
 section_title(
-    "DYNAMIC PHOTO WALL",
-    "照片展示与动态滚动",
-    "保留项目现场、材料、成品、数据分析和 AI 推荐等图片，让页面更有比赛展示感。"
+    "FIRING COMPARISON",
+    "烧制前后照片展示",
+    "围绕 760℃、780℃、800℃ 三组温度，将烧制前 qian 与烧制后 hou 进行动态展示，突出不同温度下玻璃状态的变化。"
 )
 
-carousel_paths = [
-    IMAGE_DIR / "banner.png",
-    IMAGE_DIR / "vase.png",
-    IMAGE_DIR / "lamp.png",
-    IMAGE_DIR / "art.jpg",
-    IMAGE_DIR / "workshop.png",
-    IMAGE_DIR / "analysis_bg.png",
-    IMAGE_DIR / "ai_recommendation.jpg",
+scroll_items = [
+    {
+        "path": IMAGE_DIR / "760qian.png",
+        "title": "760℃ · 烧制前",
+        "desc": "760qian",
+        "maker": "李雨豪、芦子晴、刘鑫悦等"
+    },
+    {
+        "path": IMAGE_DIR / "760hou.png",
+        "title": "760℃ · 烧制后",
+        "desc": "760hou",
+        "maker": "李雨豪、芦子晴、刘鑫悦等"
+    },
+    {
+        "path": IMAGE_DIR / "780qian.png",
+        "title": "780℃ · 烧制前",
+        "desc": "780qian",
+        "maker": "芦子晴、刘鑫悦、刘关伟等"
+    },
+    {
+        "path": IMAGE_DIR / "780hou.png",
+        "title": "780℃ · 烧制后",
+        "desc": "780hou",
+        "maker": "芦子晴、刘鑫悦、刘关伟等"
+    },
+    {
+        "path": IMAGE_DIR / "800qian.png",
+        "title": "800℃ · 烧制前",
+        "desc": "800qian",
+        "maker": "芦子晴、刘鑫悦、刘关伟等"
+    },
+    {
+        "path": IMAGE_DIR / "800hou.png",
+        "title": "800℃ · 烧制后",
+        "desc": "800hou",
+        "maker": "芦子晴、刘鑫悦、刘关伟等"
+    },
 ]
 
-slides = [img_to_uri(p) for p in carousel_paths if img_to_uri(p)]
+slide_html = ""
 
-if slides:
-    slide_html = "".join([f'<div class="slide"><img src="{uri}"></div>' for uri in slides])
-    duplicated = slide_html + slide_html
+for item in scroll_items:
+    uri = img_to_uri(item["path"])
+    if uri:
+        slide_html += f"""
+        <div class="slide">
+            <img src="{uri}">
+            <div class="slide-caption">
+                <strong>{item["title"]}</strong>
+                <span>{item["desc"]}</span>
+                <em>制作人员：{item["maker"]}</em>
+            </div>
+        </div>
+        """
 
+if slide_html:
     components.html(
         f"""
 <style>
@@ -793,7 +1021,10 @@ if slides:
     overflow: hidden;
     border-radius: 32px;
     border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.06);
+    background:
+        radial-gradient(circle at 10% 20%, rgba(37,244,238,0.18), transparent 30%),
+        radial-gradient(circle at 90% 15%, rgba(255,159,67,0.16), transparent 28%),
+        rgba(255,255,255,0.06);
     box-shadow: 0 24px 70px rgba(0,0,0,0.35);
 }}
 .scroll-track {{
@@ -801,18 +1032,20 @@ if slides:
     gap: 24px;
     width: max-content;
     padding: 24px;
-    animation: scrollX 28s linear infinite;
+    animation: scrollX 30s linear infinite;
 }}
 .scroll-wrapper:hover .scroll-track {{
     animation-play-state: paused;
 }}
 .slide {{
+    position: relative;
     width: 420px;
-    height: 260px;
+    height: 280px;
     flex: 0 0 auto;
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
 }}
 .slide img {{
     width: 100%;
@@ -823,6 +1056,33 @@ if slides:
 .slide:hover img {{
     transform: scale(1.08);
 }}
+.slide-caption {{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
+    color: white;
+}}
+.slide-caption strong {{
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+}}
+.slide-caption span {{
+    display: block;
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+}}
+.slide-caption em {{
+    display: block;
+    color: #ffcf9a;
+    font-style: normal;
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: 700;
+}}
 @keyframes scrollX {{
     from {{ transform: translateX(0); }}
     to {{ transform: translateX(-50%); }}
@@ -830,58 +1090,105 @@ if slides:
 @media(max-width: 768px) {{
     .slide {{
         width: 280px;
-        height: 190px;
+        height: 210px;
     }}
 }}
 </style>
 <div class="scroll-wrapper">
     <div class="scroll-track">
-        {duplicated}
+        {slide_html}
+        {slide_html}
     </div>
 </div>
 """,
-        height=340
+        height=350
     )
 else:
-    st.info("请把图片放入 images 文件夹后，动态滚动照片墙会自动显示。")
+    st.info("请确认 images 文件夹中存在 760qian.png、760hou.png、780qian.png、780hou.png、800qian.png、800hou.png。")
+
+
+# =========================================================
+# 烧制前后对比
+# =========================================================
 
 section_title(
     "BEFORE & AFTER",
-    "废品新旧对比：废玻璃变成新玻璃",
-    "通过材料和成品对比，直观表达项目的环保价值、艺术价值和商业转化潜力。"
+    "烧制前后的对比",
+    "根据图片文件名中的数字识别温度，qian 表示烧制前，hou 表示烧制后。用户可以直观看到不同温度对玻璃热熔状态的影响。"
 )
 
-left, right = st.columns(2)
+tab760, tab780, tab800 = st.tabs(["760℃ 对比", "780℃ 对比", "800℃ 对比"])
 
-with left:
-    image_card(
-        IMAGE_DIR / "workshop.png",
-        "废旧玻璃材料",
-        "回收、清洗、分类后的玻璃材料，是项目的绿色再生起点。"
+with tab760:
+    before_after_pair(
+        760,
+        "760qian.png",
+        "760hou.png",
+        "李雨豪、芦子晴、刘鑫悦、刘关伟、闫续、高艺萌等",
+        "760℃ 组整体表现较好，记录中多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
     )
 
-with right:
+with tab780:
+    before_after_pair(
+        780,
+        "780qian.png",
+        "780hou.png",
+        "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹等",
+        "780℃ 组仍表现出温度偏高问题，部分样品出现颗粒感和体积感不足，个别样品透光效果一般。"
+    )
+
+with tab800:
+    before_after_pair(
+        800,
+        "800qian.png",
+        "800hou.png",
+        "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹、李若冰等",
+        "800℃ 组温度过高，记录中多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
+    )
+
+
+# =========================================================
+# 成品展示
+# =========================================================
+
+section_title(
+    "PRODUCT SHOWCASE",
+    "剩余图片展示",
+    "保留灯具、花瓶与装饰类成品展示，用于体现废旧玻璃热熔再生后的产品转化方向。"
+)
+
+p1, p2, p3 = st.columns(3)
+
+with p1:
+    image_card(
+        IMAGE_DIR / "lamp.png",
+        "灯具产品",
+        "适合突出透光度、空间氛围和材料再生的设计价值。",
+        "青橙焕艺项目组"
+    )
+
+with p2:
     image_card(
         IMAGE_DIR / "vase.png",
-        "再生玻璃成品",
-        "通过热熔、组合和艺术设计，转化为花瓶、灯具与艺术装置。"
+        "花瓶产品",
+        "适合突出玻璃的体积感、成型感和装饰属性。",
+        "青橙焕艺项目组"
     )
 
-g1, g2, g3 = st.columns(3)
-
-with g1:
-    image_card(IMAGE_DIR / "lamp.png", "灯具产品", "突出透光度和空间氛围。")
-
-with g2:
-    image_card(IMAGE_DIR / "art.jpg", "艺术装饰", "突出颗粒肌理和色彩组合。")
-
-with g3:
-    image_card(IMAGE_DIR / "analysis_bg.png", "数据分析", "将工艺实验转化为可视化数据。")
+with p3:
+    image_card(
+        IMAGE_DIR / "decoration.jpg",
+        "装饰艺术品",
+        "适合突出色彩组合、颗粒肌理和艺术展示效果。",
+        "青橙焕艺项目组"
+    )
 
 
-# =========================
+# =========================================================
 # 项目优势
-# =========================
+# =========================================================
+
+st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
 
 section_title(
     "PROJECT ADVANTAGES",
@@ -892,21 +1199,37 @@ section_title(
 a1, a2, a3, a4 = st.columns(4)
 
 with a1:
-    glass_card("🌱", "绿色低碳", "减少废旧玻璃浪费，体现循环经济和可持续设计理念。")
+    glass_card(
+        "🌱",
+        "绿色低碳",
+        "减少废旧玻璃浪费，体现循环经济和可持续设计理念。"
+    )
 
 with a2:
-    glass_card("🧪", "实验可复现", "通过 CSV 数据记录温度和效果，便于后续复盘和优化。")
+    glass_card(
+        "🧪",
+        "实验可复现",
+        "通过温度、实验轮次和效果评分记录烧制过程，便于后续复盘和优化。"
+    )
 
 with a3:
-    glass_card("📈", "可视化强", "适合生成趋势图、雷达图、热力图和比赛展示图表。")
+    glass_card(
+        "📷",
+        "对比展示直观",
+        "烧制前后照片能够直观展示温度变化对玻璃形态、颗粒感和体积感的影响。"
+    )
 
 with a4:
-    glass_card("🛍️", "产品可转化", "可延伸为灯具、花瓶、装饰画、摆件和校园文创。")
+    glass_card(
+        "🛍️",
+        "产品可转化",
+        "可延伸为灯具、花瓶、装饰画、摆件和校园文创，具有较强展示和销售空间。"
+    )
 
 
-# =========================
+# =========================================================
 # 产品推荐系统
-# =========================
+# =========================================================
 
 st.markdown('<div id="recommend"></div>', unsafe_allow_html=True)
 
@@ -960,15 +1283,16 @@ with r1:
 
 with r2:
     image_card(
-        IMAGE_DIR / "ai_recommendation.jpg",
-        "AI 工艺推荐",
-        "面向不同产品类型输出温度区间、风险提示和设计方向。"
+        IMAGE_DIR / "vase.png",
+        "产品推荐展示",
+        "系统根据用户选择的产品类型、材料和目标效果，给出温度区间与工艺建议。",
+        "青橙焕艺项目组"
     )
 
 
-# =========================
+# =========================================================
 # 后期展望
-# =========================
+# =========================================================
 
 st.markdown('<div id="future"></div>', unsafe_allow_html=True)
 
@@ -999,9 +1323,9 @@ with st.expander("04 打造校园绿色工坊和商业闭环"):
     )
 
 
-# =========================
+# =========================================================
 # 联系我们
-# =========================
+# =========================================================
 
 st.markdown('<div id="contact"></div>', unsafe_allow_html=True)
 
@@ -1015,10 +1339,22 @@ st.markdown(
     """
 <div class="contact-card">
     <h2>青橙焕艺</h2>
-    <p>Glass Recycling AI Platform</p>
-    <p>废旧玻璃热熔再生 · 艺术产品设计 · 工艺数据分析 · AI 推荐系统</p>
-    <p>适用场景：大学生创新创业大赛 / 校园环保项目 / 文创产品孵化 / 艺术工坊展示</p>
-    <p><b>团队：</b>青橙焕艺项目组　｜　<b>邮箱：</b>example@email.com</p>
+    <div class="contact-subtitle">Glass Recycling AI Platform</div>
+
+    <div class="contact-grid">
+        <div class="contact-item">
+            <strong>项目方向</strong>
+            <span>废旧玻璃热熔再生<br>艺术产品设计<br>工艺数据分析</span>
+        </div>
+        <div class="contact-item">
+            <strong>适用场景</strong>
+            <span>大学生创新创业大赛<br>校园环保项目<br>艺术工坊展示</span>
+        </div>
+        <div class="contact-item">
+            <strong>团队定位</strong>
+            <span>青橙焕艺项目组<br>绿色材料再生<br>AI 推荐系统展示</span>
+        </div>
+    </div>
 </div>
 """,
     unsafe_allow_html=True
