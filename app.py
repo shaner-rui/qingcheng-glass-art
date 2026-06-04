@@ -21,7 +21,6 @@ st.set_page_config(
 
 # =========================================================
 # 路径兼容
-# 支持 app.py 在根目录，也支持 app.py 在 src 目录
 # =========================================================
 
 APP_DIR = Path(__file__).resolve().parent
@@ -56,10 +55,7 @@ def img_to_uri(path: Path) -> str:
         return ""
 
     suffix = path.suffix.lower()
-    if suffix in [".jpg", ".jpeg"]:
-        mime = "image/jpeg"
-    else:
-        mime = "image/png"
+    mime = "image/jpeg" if suffix in [".jpg", ".jpeg"] else "image/png"
 
     data = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:{mime};base64,{data}"
@@ -118,6 +114,21 @@ def advantage_card(icon: str, title: str, text: str):
     )
 
 
+def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
+    st.markdown(
+        f"""
+        <div class="contact-item-card">
+            <div class="contact-icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{line1}</p>
+            <p>{line2}</p>
+            <p>{line3}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def image_card(path: Path, title: str, desc: str, maker: str = ""):
     uri = img_to_uri(path)
 
@@ -155,9 +166,6 @@ def image_card(path: Path, title: str, desc: str, maker: str = ""):
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    before_path = IMAGE_DIR / before_name
-    after_path = IMAGE_DIR / after_name
-
     st.markdown(
         f"""
         <div class="pair-title">
@@ -173,7 +181,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
 
     with col1:
         image_card(
-            before_path,
+            IMAGE_DIR / before_name,
             f"{temp}℃ · 烧制前",
             f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
             maker
@@ -181,7 +189,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
 
     with col2:
         image_card(
-            after_path,
+            IMAGE_DIR / after_name,
             f"{temp}℃ · 烧制后",
             f"{temp}hou：经过热熔后的成型状态与视觉效果。",
             maker
@@ -253,13 +261,8 @@ st.markdown(
 
 :root {
     --cyan: #25f4ee;
-    --cyan-soft: rgba(37,244,238,0.18);
     --orange: #ff9f43;
-    --orange-soft: rgba(255,159,67,0.20);
-    --dark: #06131f;
-    --deep: #020711;
     --white: #f6fbff;
-    --muted: rgba(246,251,255,0.70);
 }
 
 html, body, .stApp {
@@ -504,7 +507,7 @@ hr {
     line-height: 1.75;
 }
 
-/* 项目优势卡片：固定高度，确保四个一样大 */
+/* 项目优势卡片：严格四个，统一大小 */
 .advantage-card {
     height: 280px;
     padding: 1.45rem;
@@ -639,7 +642,7 @@ hr {
     font-weight: 800;
 }
 
-/* 数据库太空区 */
+/* 数据库区域 */
 .database-panel {
     padding: 1.4rem;
     border-radius: 32px;
@@ -691,7 +694,7 @@ hr {
 }
 
 /* 联系我们 */
-.contact-card {
+.contact-shell {
     padding: 2.8rem 2.2rem;
     border-radius: 34px;
     background:
@@ -703,9 +706,10 @@ hr {
     backdrop-filter: blur(20px);
     text-align: center;
     box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+    margin-top: 1rem;
 }
 
-.contact-card h2 {
+.contact-shell h2 {
     font-size: clamp(2rem, 5vw, 3rem);
     margin: 0;
     background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
@@ -713,37 +717,43 @@ hr {
     -webkit-text-fill-color: transparent;
 }
 
-.contact-subtitle {
-    margin-top: 0.6rem;
-    color: rgba(246,251,255,0.76);
-    font-size: 1.1rem;
-}
-
-.contact-grid {
-    margin-top: 1.8rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
-
-.contact-item {
-    padding: 1.2rem;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.14);
-    min-height: 150px;
-}
-
-.contact-item strong {
-    display: block;
-    color: var(--cyan);
-    margin-bottom: 0.55rem;
-    font-size: 1.05rem;
-}
-
-.contact-item span {
+.contact-shell p {
     color: rgba(246,251,255,0.72);
-    line-height: 1.75;
+    margin-top: 0.6rem;
+}
+
+.contact-item-card {
+    min-height: 190px;
+    padding: 1.4rem;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 16px 42px rgba(0,0,0,0.22);
+    transition: 0.25s ease;
+    text-align: center;
+}
+
+.contact-item-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(37,244,238,0.48);
+    box-shadow: 0 0 28px rgba(37,244,238,0.18);
+}
+
+.contact-icon {
+    font-size: 2rem;
+    margin-bottom: 0.6rem;
+}
+
+.contact-item-card h3 {
+    margin: 0 0 0.6rem 0;
+    color: var(--cyan);
+    font-size: 1.15rem;
+}
+
+.contact-item-card p {
+    margin: 0.25rem 0;
+    color: rgba(246,251,255,0.72);
+    line-height: 1.55;
 }
 
 /* Streamlit 控件微调 */
@@ -803,10 +813,6 @@ div[data-testid="stDataFrame"] {
     .advantage-card {
         height: auto;
         min-height: 230px;
-    }
-
-    .contact-grid {
-        grid-template-columns: 1fr;
     }
 }
 </style>
@@ -940,9 +946,7 @@ section_title(
 st.markdown('<div class="database-panel">', unsafe_allow_html=True)
 
 if df.empty:
-    st.warning(
-        f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}"
-    )
+    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
 else:
     temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
     selected_temp = st.multiselect("选择温度", temps, default=temps)
@@ -1019,42 +1023,12 @@ section_title(
 )
 
 scroll_items = [
-    {
-        "path": IMAGE_DIR / "760qian.png",
-        "title": "760℃ · 烧制前",
-        "desc": "760qian",
-        "maker": "李雨豪、芦子晴、刘鑫悦等"
-    },
-    {
-        "path": IMAGE_DIR / "760hou.png",
-        "title": "760℃ · 烧制后",
-        "desc": "760hou",
-        "maker": "李雨豪、芦子晴、刘鑫悦等"
-    },
-    {
-        "path": IMAGE_DIR / "780qian.png",
-        "title": "780℃ · 烧制前",
-        "desc": "780qian",
-        "maker": "芦子晴、刘鑫悦、刘关伟等"
-    },
-    {
-        "path": IMAGE_DIR / "780hou.png",
-        "title": "780℃ · 烧制后",
-        "desc": "780hou",
-        "maker": "芦子晴、刘鑫悦、刘关伟等"
-    },
-    {
-        "path": IMAGE_DIR / "800qian.png",
-        "title": "800℃ · 烧制前",
-        "desc": "800qian",
-        "maker": "芦子晴、刘鑫悦、刘关伟等"
-    },
-    {
-        "path": IMAGE_DIR / "800hou.png",
-        "title": "800℃ · 烧制后",
-        "desc": "800hou",
-        "maker": "芦子晴、刘鑫悦、刘关伟等"
-    },
+    {"path": IMAGE_DIR / "760qian.png", "title": "760℃ · 烧制前", "desc": "760qian", "maker": "李雨豪、芦子晴、刘鑫悦等"},
+    {"path": IMAGE_DIR / "760hou.png", "title": "760℃ · 烧制后", "desc": "760hou", "maker": "李雨豪、芦子晴、刘鑫悦等"},
+    {"path": IMAGE_DIR / "780qian.png", "title": "780℃ · 烧制前", "desc": "780qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": IMAGE_DIR / "780hou.png", "title": "780℃ · 烧制后", "desc": "780hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": IMAGE_DIR / "800qian.png", "title": "800℃ · 烧制前", "desc": "800qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": IMAGE_DIR / "800hou.png", "title": "800℃ · 烧制后", "desc": "800hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
 ]
 
 slide_html = ""
@@ -1385,7 +1359,7 @@ with st.expander("04 打造校园绿色工坊和商业闭环"):
 
 
 # =========================================================
-# 联系我们：已修复，不会再显示 HTML 代码
+# 联系我们：不使用 contact_html，避免 HTML 原样显示
 # =========================================================
 
 st.markdown('<div id="contact"></div>', unsafe_allow_html=True)
@@ -1396,28 +1370,41 @@ section_title(
     "让废旧玻璃重新发光，让绿色材料进入艺术生活。"
 )
 
-contact_html = """
-<div class="contact-card">
-    <h2>青橙焕艺</h2>
-    <div class="contact-subtitle">Glass Recycling AI Platform</div>
-
-    <div class="contact-grid">
-        <div class="contact-item">
-            <strong>项目方向</strong>
-            <span>废旧玻璃热熔再生<br>艺术产品设计<br>工艺数据分析</span>
-        </div>
-
-        <div class="contact-item">
-            <strong>适用场景</strong>
-            <span>大学生创新创业大赛<br>校园环保项目<br>艺术工坊展示</span>
-        </div>
-
-        <div class="contact-item">
-            <strong>团队定位</strong>
-            <span>青橙焕艺项目组<br>绿色材料再生<br>AI 推荐系统展示</span>
-        </div>
+st.markdown(
+    """
+    <div class="contact-shell">
+        <h2>青橙焕艺</h2>
+        <p>Glass Recycling AI Platform</p>
     </div>
-</div>
-"""
+    """,
+    unsafe_allow_html=True
+)
 
-st.markdown(contact_html, unsafe_allow_html=True)
+cc1, cc2, cc3 = st.columns(3)
+
+with cc1:
+    contact_card(
+        "♻️",
+        "项目方向",
+        "废旧玻璃热熔再生",
+        "艺术产品设计",
+        "工艺数据分析"
+    )
+
+with cc2:
+    contact_card(
+        "🚀",
+        "适用场景",
+        "大学生创新创业大赛",
+        "校园环保项目",
+        "艺术工坊展示"
+    )
+
+with cc3:
+    contact_card(
+        "🤖",
+        "团队定位",
+        "青橙焕艺项目组",
+        "绿色材料再生",
+        "AI 推荐系统展示"
+    )
