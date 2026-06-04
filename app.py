@@ -20,7 +20,8 @@ st.set_page_config(
 
 
 # =========================================================
-# 路径兼容：支持 app.py 放在根目录或 src 目录
+# 路径兼容
+# 支持 app.py 在根目录，也支持 app.py 在 src 目录
 # =========================================================
 
 APP_DIR = Path(__file__).resolve().parent
@@ -96,6 +97,19 @@ def glass_card(icon: str, title: str, text: str):
         f"""
         <div class="glass-card">
             <div class="icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{text}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def advantage_card(icon: str, title: str, text: str):
+    st.markdown(
+        f"""
+        <div class="advantage-card">
+            <div class="advantage-icon">{icon}</div>
             <h3>{title}</h3>
             <p>{text}</p>
         </div>
@@ -458,7 +472,7 @@ hr {
 /* 项目简介卡片 */
 .glass-card {
     height: 100%;
-    min-height: 250px;
+    min-height: 260px;
     padding: 1.5rem;
     border-radius: 28px;
     background: rgba(255,255,255,0.075);
@@ -488,6 +502,46 @@ hr {
 .glass-card p {
     color: rgba(246,251,255,0.72);
     line-height: 1.75;
+}
+
+/* 项目优势卡片：固定高度，确保四个一样大 */
+.advantage-card {
+    height: 280px;
+    padding: 1.45rem;
+    border-radius: 28px;
+    background:
+        linear-gradient(135deg, rgba(37,244,238,0.09), rgba(255,159,67,0.08)),
+        rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 18px 52px rgba(0,0,0,0.25);
+    transition: 0.28s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.advantage-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255,159,67,0.48);
+    box-shadow: 0 0 32px rgba(255,159,67,0.20), 0 18px 52px rgba(0,0,0,0.35);
+}
+
+.advantage-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.advantage-card h3 {
+    color: #fff;
+    margin: 0 0 0.8rem 0;
+    font-size: 1.22rem;
+}
+
+.advantage-card p {
+    color: rgba(246,251,255,0.72);
+    line-height: 1.7;
+    margin: 0;
 }
 
 /* 图片卡片 */
@@ -677,17 +731,19 @@ hr {
     border-radius: 22px;
     background: rgba(255,255,255,0.075);
     border: 1px solid rgba(255,255,255,0.14);
+    min-height: 150px;
 }
 
 .contact-item strong {
     display: block;
     color: var(--cyan);
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.55rem;
+    font-size: 1.05rem;
 }
 
 .contact-item span {
     color: rgba(246,251,255,0.72);
-    line-height: 1.65;
+    line-height: 1.75;
 }
 
 /* Streamlit 控件微调 */
@@ -742,6 +798,11 @@ div[data-testid="stDataFrame"] {
 
     .image-card {
         height: 270px;
+    }
+
+    .advantage-card {
+        height: auto;
+        min-height: 230px;
     }
 
     .contact-grid {
@@ -1125,7 +1186,7 @@ with tab760:
         "760qian.png",
         "760hou.png",
         "李雨豪、芦子晴、刘鑫悦、刘关伟、闫续、高艺萌等",
-        "760℃ 组整体表现较好，记录中多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
+        "760℃ 组整体表现较好，多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
     )
 
 with tab780:
@@ -1143,7 +1204,7 @@ with tab800:
         "800qian.png",
         "800hou.png",
         "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹、李若冰等",
-        "800℃ 组温度过高，记录中多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
+        "800℃ 组温度过高，多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
     )
 
 
@@ -1185,7 +1246,7 @@ with p3:
 
 
 # =========================================================
-# 项目优势
+# 项目优势：严格四个
 # =========================================================
 
 st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
@@ -1193,37 +1254,37 @@ st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
 section_title(
     "PROJECT ADVANTAGES",
     "项目优势",
-    "从环保、工艺、设计、数据和商业五个维度提升项目完整度。"
+    "从环保、工艺、展示和产品转化四个维度体现项目价值。"
 )
 
 a1, a2, a3, a4 = st.columns(4)
 
 with a1:
-    glass_card(
+    advantage_card(
         "🌱",
         "绿色低碳",
-        "减少废旧玻璃浪费，体现循环经济和可持续设计理念。"
+        "减少废旧玻璃浪费，体现循环经济、环保教育和可持续设计理念。"
     )
 
 with a2:
-    glass_card(
+    advantage_card(
         "🧪",
         "实验可复现",
-        "通过温度、实验轮次和效果评分记录烧制过程，便于后续复盘和优化。"
+        "通过温度、实验轮次和效果评分记录烧制过程，便于后续复盘、优化和扩展。"
     )
 
 with a3:
-    glass_card(
+    advantage_card(
         "📷",
         "对比展示直观",
         "烧制前后照片能够直观展示温度变化对玻璃形态、颗粒感和体积感的影响。"
     )
 
 with a4:
-    glass_card(
+    advantage_card(
         "🛍️",
         "产品可转化",
-        "可延伸为灯具、花瓶、装饰画、摆件和校园文创，具有较强展示和销售空间。"
+        "可延伸为灯具、花瓶、装饰画、摆件和校园文创，具有展示和销售空间。"
     )
 
 
@@ -1324,7 +1385,7 @@ with st.expander("04 打造校园绿色工坊和商业闭环"):
 
 
 # =========================================================
-# 联系我们
+# 联系我们：已修复，不会再显示 HTML 代码
 # =========================================================
 
 st.markdown('<div id="contact"></div>', unsafe_allow_html=True)
@@ -1335,8 +1396,7 @@ section_title(
     "让废旧玻璃重新发光，让绿色材料进入艺术生活。"
 )
 
-st.markdown(
-    """
+contact_html = """
 <div class="contact-card">
     <h2>青橙焕艺</h2>
     <div class="contact-subtitle">Glass Recycling AI Platform</div>
@@ -1346,16 +1406,18 @@ st.markdown(
             <strong>项目方向</strong>
             <span>废旧玻璃热熔再生<br>艺术产品设计<br>工艺数据分析</span>
         </div>
+
         <div class="contact-item">
             <strong>适用场景</strong>
             <span>大学生创新创业大赛<br>校园环保项目<br>艺术工坊展示</span>
         </div>
+
         <div class="contact-item">
             <strong>团队定位</strong>
             <span>青橙焕艺项目组<br>绿色材料再生<br>AI 推荐系统展示</span>
         </div>
     </div>
 </div>
-""",
-    unsafe_allow_html=True
-)
+"""
+
+st.markdown(contact_html, unsafe_allow_html=True)
