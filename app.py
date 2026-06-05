@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 # =========================================================
 
 st.set_page_config(
-    page_title="青橙焕艺 | Glass Recycling AI Platform",
+    page_title="青承焕艺 | Glass Recycling AI Platform",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -828,7 +828,7 @@ div[data-testid="stDataFrame"] {
 st.markdown(
     """
 <div class="navbar">
-    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
+    <div class="nav-logo">♻️ 青承焕艺 | 青汐造物</div>
     <div class="nav-links">
         <a href="#intro">项目简介</a>
         <a href="#database">工艺数据库</a>
@@ -853,7 +853,7 @@ st.markdown(
 <div class="hero">
     <div class="hero-content">
         <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
-        <h1>青橙焕艺</h1>
+        <h1>青承焕艺</h1>
         <h2>
             由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
             项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
@@ -1404,7 +1404,7 @@ with cc3:
     contact_card(
         "🤖",
         "平台方向",
-        "青橙焕艺项目",
+        "青承焕艺项目",
         "绿色材料再生",
         "AI 推荐系统展示"
     )
