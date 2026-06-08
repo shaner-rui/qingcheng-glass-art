@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 # =========================================================
 
 st.set_page_config(
-    page_title="青承焕艺 | Glass Recycling AI Platform",
+    page_title="青橙焕艺 | Glass Recycling AI Platform",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -49,6 +49,21 @@ DATA_PATH = find_data_path()
 # =========================================================
 # 工具函数
 # =========================================================
+
+def resolve_image(name: str) -> Path:
+    raw = IMAGE_DIR / name
+
+    if raw.exists():
+        return raw
+
+    suffixes = [".png", ".jpg", ".jpeg", ".webp"]
+    for suffix in suffixes:
+        candidate = IMAGE_DIR / f"{name}{suffix}"
+        if candidate.exists():
+            return candidate
+
+    return raw
+
 
 def img_to_uri(path: Path) -> str:
     if not path.exists():
@@ -129,12 +144,18 @@ def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
     )
 
 
-def image_card(path: Path, title: str, desc: str, maker: str = ""):
+def image_card(
+    path: Path,
+    title: str,
+    desc: str,
+    maker: str = "",
+    note_label: str = "制作人员"
+):
     uri = img_to_uri(path)
 
     maker_html = ""
     if maker:
-        maker_html = f'<div class="maker">制作人员：{maker}</div>'
+        maker_html = f'<div class="maker">{note_label}：{maker}</div>'
 
     if uri:
         st.markdown(
@@ -181,7 +202,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
 
     with col1:
         image_card(
-            IMAGE_DIR / before_name,
+            resolve_image(before_name),
             f"{temp}℃ · 烧制前",
             f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
             maker
@@ -189,7 +210,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
 
     with col2:
         image_card(
-            IMAGE_DIR / after_name,
+            resolve_image(after_name),
             f"{temp}℃ · 烧制后",
             f"{temp}hou：经过热熔后的成型状态与视觉效果。",
             maker
@@ -292,7 +313,6 @@ hr {
     margin: 3rem 0;
 }
 
-/* 顶部导航 */
 .navbar {
     position: sticky;
     top: 0;
@@ -330,7 +350,6 @@ hr {
     text-shadow: 0 0 14px rgba(37,244,238,0.6);
 }
 
-/* Hero */
 .hero {
     position: relative;
     overflow: hidden;
@@ -444,7 +463,6 @@ hr {
     box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
 
-/* 标题 */
 .section-head {
     text-align: center;
     margin: 5rem auto 2rem;
@@ -472,7 +490,6 @@ hr {
     line-height: 1.8;
 }
 
-/* 项目简介卡片 */
 .glass-card {
     height: 100%;
     min-height: 260px;
@@ -507,7 +524,6 @@ hr {
     line-height: 1.75;
 }
 
-/* 项目优势卡片 */
 .advantage-card {
     height: 280px;
     padding: 1.45rem;
@@ -547,7 +563,6 @@ hr {
     margin: 0;
 }
 
-/* 图片卡片 */
 .image-card {
     position: relative;
     height: 360px;
@@ -613,7 +628,6 @@ hr {
     color: rgba(246,251,255,0.55);
 }
 
-/* 烧制前后对比标题 */
 .pair-title {
     margin: 2.2rem 0 1rem;
     padding: 1.2rem 1.4rem;
@@ -642,7 +656,6 @@ hr {
     font-weight: 800;
 }
 
-/* 数据库区域 */
 .database-panel {
     padding: 1.4rem;
     border-radius: 32px;
@@ -674,7 +687,6 @@ hr {
     margin: 0.3rem 0 0;
 }
 
-/* 推荐结果 */
 .recommend-result {
     padding: 1.4rem;
     border-radius: 26px;
@@ -693,7 +705,6 @@ hr {
     line-height: 1.7;
 }
 
-/* 联系我们 */
 .contact-shell {
     padding: 2.8rem 2.2rem;
     border-radius: 34px;
@@ -756,7 +767,6 @@ hr {
     line-height: 1.55;
 }
 
-/* Streamlit 控件微调 */
 div[data-testid="stDataFrame"] {
     border-radius: 18px;
     overflow: hidden;
@@ -770,7 +780,6 @@ div[data-testid="stDataFrame"] {
     font-weight: 800 !important;
 }
 
-/* 手机适配 */
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
@@ -828,11 +837,12 @@ div[data-testid="stDataFrame"] {
 st.markdown(
     """
 <div class="navbar">
-    <div class="nav-logo">♻️ 青承焕艺 | 青汐造物</div>
+    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
     <div class="nav-links">
         <a href="#intro">项目简介</a>
         <a href="#database">工艺数据库</a>
         <a href="#gallery">烧制对比</a>
+        <a href="#industry">行业产品</a>
         <a href="#advantage">项目优势</a>
         <a href="#recommend">产品推荐</a>
         <a href="#future">后期展望</a>
@@ -853,7 +863,7 @@ st.markdown(
 <div class="hero">
     <div class="hero-content">
         <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
-        <h1>青承焕艺</h1>
+        <h1>青橙焕艺</h1>
         <h2>
             由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
             项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
@@ -1023,12 +1033,12 @@ section_title(
 )
 
 scroll_items = [
-    {"path": IMAGE_DIR / "760qian.png", "title": "760℃ · 烧制前", "desc": "760qian", "maker": "李雨豪、芦子晴、刘鑫悦等"},
-    {"path": IMAGE_DIR / "760hou.png", "title": "760℃ · 烧制后", "desc": "760hou", "maker": "李雨豪、芦子晴、刘鑫悦等"},
-    {"path": IMAGE_DIR / "780qian.png", "title": "780℃ · 烧制前", "desc": "780qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
-    {"path": IMAGE_DIR / "780hou.png", "title": "780℃ · 烧制后", "desc": "780hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
-    {"path": IMAGE_DIR / "800qian.png", "title": "800℃ · 烧制前", "desc": "800qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
-    {"path": IMAGE_DIR / "800hou.png", "title": "800℃ · 烧制后", "desc": "800hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": resolve_image("760qian"), "title": "760℃ · 烧制前", "desc": "760qian", "maker": "李雨豪、芦子晴、刘鑫悦等"},
+    {"path": resolve_image("760hou"), "title": "760℃ · 烧制后", "desc": "760hou", "maker": "李雨豪、芦子晴、刘鑫悦等"},
+    {"path": resolve_image("780qian"), "title": "780℃ · 烧制前", "desc": "780qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": resolve_image("780hou"), "title": "780℃ · 烧制后", "desc": "780hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": resolve_image("800qian"), "title": "800℃ · 烧制前", "desc": "800qian", "maker": "芦子晴、刘鑫悦、刘关伟等"},
+    {"path": resolve_image("800hou"), "title": "800℃ · 烧制后", "desc": "800hou", "maker": "芦子晴、刘鑫悦、刘关伟等"},
 ]
 
 slide_html = ""
@@ -1139,7 +1149,7 @@ if slide_html:
         height=350
     )
 else:
-    st.info("请确认 images 文件夹中存在 760qian.png、760hou.png、780qian.png、780hou.png、800qian.png、800hou.png。")
+    st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。")
 
 
 # =========================================================
@@ -1157,8 +1167,8 @@ tab760, tab780, tab800 = st.tabs(["760℃ 对比", "780℃ 对比", "800℃ 对�
 with tab760:
     before_after_pair(
         760,
-        "760qian.png",
-        "760hou.png",
+        "760qian",
+        "760hou",
         "李雨豪、芦子晴、刘鑫悦、刘关伟、闫续、高艺萌等",
         "760℃ 组整体表现较好，多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
     )
@@ -1166,8 +1176,8 @@ with tab760:
 with tab780:
     before_after_pair(
         780,
-        "780qian.png",
-        "780hou.png",
+        "780qian",
+        "780hou",
         "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹等",
         "780℃ 组仍表现出温度偏高问题，部分样品出现颗粒感和体积感不足，个别样品透光效果一般。"
     )
@@ -1175,47 +1185,72 @@ with tab780:
 with tab800:
     before_after_pair(
         800,
-        "800qian.png",
-        "800hou.png",
+        "800qian",
+        "800hou",
         "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹、李若冰等",
         "800℃ 组温度过高，多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
     )
 
 
 # =========================================================
-# 成品展示
+# 玻璃行业产品展示
 # =========================================================
 
+st.markdown('<div id="industry"></div>', unsafe_allow_html=True)
+
 section_title(
-    "PRODUCT SHOWCASE",
-    "青汐工坊作品展示",
-    "保留灯具、花瓶与装饰类成品展示，用于体现废旧玻璃热熔再生后的产品转化方向。"
+    "GLASS INDUSTRY PRODUCTS",
+    "玻璃行业产品展示",
+    "以下图片用于展示玻璃行业常见产品形态与市场应用方向，作为青汐造物后续产品设计参考；图片不代表青汐工坊原创实物。"
 )
 
 p1, p2, p3 = st.columns(3)
 
 with p1:
     image_card(
-        IMAGE_DIR / "lamp.png",
-        "灯具产品",
-        "适合突出透光度、空间氛围和材料再生的设计价值。",
-        "青汐工坊"
+        resolve_image("1"),
+        "家居器皿方向",
+        "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。",
+        "行业产品参考，非原创实物",
+        note_label="说明"
     )
 
 with p2:
     image_card(
-        IMAGE_DIR / "vase.png",
-        "花瓶产品",
-        "适合突出玻璃的体积感、成型感和装饰属性。",
-        "青汐工坊"
+        resolve_image("2"),
+        "透光灯具方向",
+        "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。",
+        "行业产品参考，非原创实物",
+        note_label="说明"
     )
 
 with p3:
     image_card(
-        IMAGE_DIR / "decoration.jpg",
-        "装饰艺术品",
-        "适合突出色彩组合、颗粒肌理和艺术展示效果。",
-        "青汐工坊"
+        resolve_image("3"),
+        "花器摆件方向",
+        "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。",
+        "行业产品参考，非原创实物",
+        note_label="说明"
+    )
+
+p4, p5 = st.columns(2)
+
+with p4:
+    image_card(
+        resolve_image("4"),
+        "文创饰品方向",
+        "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。",
+        "行业产品参考，非原创实物",
+        note_label="说明"
+    )
+
+with p5:
+    image_card(
+        resolve_image("5"),
+        "生活器物方向",
+        "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。",
+        "行业产品参考，非原创实物",
+        note_label="说明"
     )
 
 
@@ -1258,7 +1293,7 @@ with a4:
     advantage_card(
         "🛍️",
         "产品可转化",
-        "可延伸为灯具、花瓶、装饰画、摆件和校园文创，具有展示和销售空间。"
+        "结合玻璃行业产品形态，可延伸为灯具、花瓶、装饰画、摆件和校园文创。"
     )
 
 
@@ -1316,12 +1351,17 @@ with r1:
 
     st.progress(score / 100)
 
+recommend_img = resolve_image("22")
+if not recommend_img.exists():
+    recommend_img = resolve_image("11")
+
 with r2:
     image_card(
-        IMAGE_DIR / "vase.png",
-        "产品推荐展示",
-        "系统根据用户选择的产品类型、材料和目标效果，给出温度区间与工艺建议。",
-        "青汐工坊"
+        recommend_img,
+        "推荐效果参考",
+        "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。",
+        "行业视觉参考，非原创实物",
+        note_label="说明"
     )
 
 
@@ -1349,7 +1389,7 @@ with st.expander("02 从规则推荐升级为机器学习推荐"):
 
 with st.expander("03 扩展更多再生玻璃产品类型"):
     st.write(
-        "产品可从花瓶、灯具、装饰画扩展到校园纪念品、公共艺术装置、家居软装和文旅文创产品。"
+        "产品可参考玻璃行业现有器皿、灯具、花器、饰品和生活器物形态，进一步扩展到校园纪念品、公共艺术装置、家居软装和文旅文创产品。"
     )
 
 with st.expander("04 打造青汐工坊体验与商业闭环"):
@@ -1404,7 +1444,7 @@ with cc3:
     contact_card(
         "🤖",
         "平台方向",
-        "青承焕艺项目",
+        "青橙焕艺项目",
         "绿色材料再生",
         "AI 推荐系统展示"
     )
