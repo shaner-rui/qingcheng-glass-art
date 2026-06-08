@@ -51,6 +51,14 @@ DATA_PATH = find_data_path()
 # =========================================================
 
 def resolve_image(name: str) -> Path:
+    """
+    支持以下图片命名：
+    images/1
+    images/1.png
+    images/1.jpg
+    images/1.jpeg
+    images/1.webp
+    """
     raw = IMAGE_DIR / name
 
     if raw.exists():
@@ -70,6 +78,7 @@ def img_to_uri(path: Path) -> str:
         return ""
 
     suffix = path.suffix.lower()
+
     if suffix in [".jpg", ".jpeg"]:
         mime = "image/jpeg"
     elif suffix == ".webp":
@@ -160,10 +169,10 @@ def image_card(
     uri = img_to_uri(path)
 
     note_html = ""
-    if maker:
-        note_html = f'<div class="maker">{note_label}：{maker}</div>'
-    elif note_text:
+    if note_text:
         note_html = f'<div class="maker">{note_label}：{note_text}</div>'
+    elif maker:
+        note_html = f'<div class="maker">{note_label}：{maker}</div>'
 
     if uri:
         st.markdown(
@@ -213,7 +222,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(before_name),
             f"{temp}℃ · 烧制前",
             f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
-            maker
+            maker=maker
         )
 
     with col2:
@@ -221,7 +230,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(after_name),
             f"{temp}℃ · 烧制后",
             f"{temp}hou：经过热熔后的成型状态与视觉效果。",
-            maker
+            maker=maker
         )
 
 
@@ -1209,7 +1218,6 @@ st.markdown('<div id="industry"></div>', unsafe_allow_html=True)
 section_title(
     "GLASS INDUSTRY PRODUCTS",
     "玻璃行业产品展示",
-    "以下图片用于展示玻璃行业常见产品形态与市场应用方向，作为青汐造物后续产品设计参考；图片不代表青汐工坊原创实物。"
 )
 
 p1, p2, p3 = st.columns(3)
@@ -1219,8 +1227,6 @@ with p1:
         resolve_image("1"),
         "家居器皿方向",
         "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。",
-        note_label="说明",
-        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p2:
@@ -1228,8 +1234,6 @@ with p2:
         resolve_image("2"),
         "透光灯具方向",
         "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。",
-        note_label="说明",
-        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p3:
@@ -1237,8 +1241,6 @@ with p3:
         resolve_image("3"),
         "花器摆件方向",
         "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。",
-        note_label="说明",
-        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 p4, p5 = st.columns(2)
@@ -1248,8 +1250,6 @@ with p4:
         resolve_image("4"),
         "文创饰品方向",
         "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。",
-        note_label="说明",
-        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p5:
@@ -1257,8 +1257,6 @@ with p5:
         resolve_image("5"),
         "生活器物方向",
         "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。",
-        note_label="说明",
-        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 
@@ -1368,8 +1366,6 @@ with r2:
         recommend_img,
         "推荐效果参考",
         "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。",
-        note_label="说明",
-        note_text="行业视觉参考，非青汐工坊原创实物"
     )
 
 
