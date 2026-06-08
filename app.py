@@ -70,7 +70,12 @@ def img_to_uri(path: Path) -> str:
         return ""
 
     suffix = path.suffix.lower()
-    mime = "image/jpeg" if suffix in [".jpg", ".jpeg"] else "image/png"
+    if suffix in [".jpg", ".jpeg"]:
+        mime = "image/jpeg"
+    elif suffix == ".webp":
+        mime = "image/webp"
+    else:
+        mime = "image/png"
 
     data = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:{mime};base64,{data}"
@@ -149,13 +154,16 @@ def image_card(
     title: str,
     desc: str,
     maker: str = "",
-    note_label: str = "制作人员"
+    note_label: str = "制作人员",
+    note_text: str = ""
 ):
     uri = img_to_uri(path)
 
-    maker_html = ""
+    note_html = ""
     if maker:
-        maker_html = f'<div class="maker">{note_label}：{maker}</div>'
+        note_html = f'<div class="maker">{note_label}：{maker}</div>'
+    elif note_text:
+        note_html = f'<div class="maker">{note_label}：{note_text}</div>'
 
     if uri:
         st.markdown(
@@ -165,7 +173,7 @@ def image_card(
                 <div class="image-mask">
                     <h3>{title}</h3>
                     <p>{desc}</p>
-                    {maker_html}
+                    {note_html}
                 </div>
             </div>
             """,
@@ -1211,7 +1219,8 @@ with p1:
         resolve_image("1"),
         "家居器皿方向",
         "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p2:
@@ -1219,7 +1228,8 @@ with p2:
         resolve_image("2"),
         "透光灯具方向",
         "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p3:
@@ -1227,7 +1237,8 @@ with p3:
         resolve_image("3"),
         "花器摆件方向",
         "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 p4, p5 = st.columns(2)
@@ -1237,7 +1248,8 @@ with p4:
         resolve_image("4"),
         "文创饰品方向",
         "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 with p5:
@@ -1245,7 +1257,8 @@ with p5:
         resolve_image("5"),
         "生活器物方向",
         "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业产品参考，非青汐工坊原创实物"
     )
 
 
@@ -1355,7 +1368,8 @@ with r2:
         recommend_img,
         "推荐效果参考",
         "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。",
-        note_label="说明"
+        note_label="说明",
+        note_text="行业视觉参考，非青汐工坊原创实物"
     )
 
 
