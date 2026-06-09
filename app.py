@@ -1,6 +1,5 @@
 import base64
 from pathlib import Path
-from textwrap import dedent
 
 import pandas as pd
 import streamlit as st
@@ -96,106 +95,103 @@ def load_data(path: str):
 
 
 def safe_markdown(html: str):
-    st.markdown(dedent(html).strip(), unsafe_allow_html=True)
+    st.markdown(html.strip(), unsafe_allow_html=True)
 
 
 def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
     desc_html = f"<p>{desc}</p>" if desc else ""
 
-    safe_markdown(
-        f"""
-        <div class="section-head">
-            <div class="section-tag">{tag}</div>
-            <h2>{title}</h2>
-            {desc_html}
-        </div>
-        """
+    html = (
+        f'<div class="section-head">'
+        f'<div class="section-tag">{tag}</div>'
+        f'<h2>{title}</h2>'
+        f'{desc_html}'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def glass_card(icon: str, title: str, text: str):
-    safe_markdown(
-        f"""
-        <div class="glass-card">
-            <div class="icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-        </div>
-        """
+    html = (
+        f'<div class="glass-card">'
+        f'<div class="icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{text}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def advantage_card(icon: str, title: str, text: str):
-    safe_markdown(
-        f"""
-        <div class="advantage-card">
-            <div class="advantage-icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-        </div>
-        """
+    html = (
+        f'<div class="advantage-card">'
+        f'<div class="advantage-icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{text}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
-    safe_markdown(
-        f"""
-        <div class="contact-item-card">
-            <div class="contact-icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{line1}</p>
-            <p>{line2}</p>
-            <p>{line3}</p>
-        </div>
-        """
+    html = (
+        f'<div class="contact-item-card">'
+        f'<div class="contact-icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{line1}</p>'
+        f'<p>{line2}</p>'
+        f'<p>{line3}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
     if not uri:
-        safe_markdown(
-            f"""
-            <div class="image-card image-missing">
-                <div>
-                    <h3>{title}</h3>
-                    <p>缺少图片：{path.name}</p>
-                    <small>请确认图片已放入 images 文件夹</small>
-                </div>
-            </div>
-            """
+        html = (
+            f'<div class="image-card image-missing">'
+            f'<div>'
+            f'<h3>{title}</h3>'
+            f'<p>缺少图片：{path.name}</p>'
+            f'<small>请确认图片已放入 images 文件夹</small>'
+            f'</div>'
+            f'</div>'
         )
+        safe_markdown(html)
         return
 
     note_block = ""
     if note_label and note_text:
-        note_block = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
+        note_block = (
+            f'<div class="image-note">'
+            f'<span>{note_label}：</span>{note_text}'
+            f'</div>'
+        )
 
-    safe_markdown(
-        f"""
-        <div class="image-card">
-            <img src="{uri}" alt="{title}">
-            <div class="image-mask">
-                <h3>{title}</h3>
-                <p>{desc}</p>
-                {note_block}
-            </div>
-        </div>
-        """
+    html = (
+        f'<div class="image-card">'
+        f'<img src="{uri}" alt="{title}">'
+        f'<div class="image-mask">'
+        f'<h3>{title}</h3>'
+        f'<p>{desc}</p>'
+        f'{note_block}'
+        f'</div>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    safe_markdown(
-        f"""
-        <div class="pair-title">
-            <span>{temp}℃</span>
-            <p>{result_desc}</p>
-            <div>制作人员：{maker}</div>
-        </div>
-        """
+    html = (
+        f'<div class="pair-title">'
+        f'<span>{temp}℃</span>'
+        f'<p>{result_desc}</p>'
+        f'<div>制作人员：{maker}</div>'
+        f'</div>'
     )
+    safe_markdown(html)
 
     col1, col2 = st.columns(2)
 
@@ -276,433 +272,431 @@ df = load_data(str(DATA_PATH))
 # 全局 CSS
 # =========================================================
 
-safe_markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+safe_markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
 
-    :root {
-        --cyan: #25f4ee;
-        --orange: #ff9f43;
-        --white: #f6fbff;
-    }
+:root {
+    --cyan: #25f4ee;
+    --orange: #ff9f43;
+    --white: #f6fbff;
+}
 
-    html, body, .stApp {
-        font-family: 'Noto Sans SC', sans-serif;
-        scroll-behavior: smooth;
-    }
+html, body, .stApp {
+    font-family: 'Noto Sans SC', sans-serif;
+    scroll-behavior: smooth;
+}
 
-    .stApp {
-        background:
-            radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
-            radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
-            radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
-            linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
-        color: var(--white);
-    }
+.stApp {
+    background:
+        radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
+        radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
+        radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
+        linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
+    color: var(--white);
+}
 
+.block-container {
+    max-width: 1280px;
+    padding-top: 1rem;
+    padding-bottom: 5rem;
+}
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    margin-bottom: 1.2rem;
+    padding: 0.75rem 1.2rem;
+    border-radius: 999px;
+    background: rgba(6, 19, 31, 0.72);
+    border: 1px solid rgba(255,255,255,0.13);
+    backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 14px 42px rgba(0,0,0,0.25);
+}
+
+.nav-logo {
+    font-weight: 900;
+    font-size: 1.05rem;
+    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links a {
+    color: rgba(246,251,255,0.82) !important;
+    text-decoration: none;
+    margin-left: 1.2rem;
+    font-size: 0.92rem;
+    transition: 0.25s;
+}
+
+.nav-links a:hover {
+    color: var(--cyan) !important;
+    text-shadow: 0 0 14px rgba(37,244,238,0.6);
+}
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 620px;
+    border-radius: 36px;
+    padding: 5rem 3rem;
+    background:
+        linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
+        rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 28px 90px rgba(0,0,0,0.38);
+}
+
+.hero h1 {
+    font-size: clamp(3rem, 7vw, 5.8rem);
+    line-height: 1.02;
+    margin: 0;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--cyan), #ffffff 48%, var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero h2 {
+    margin-top: 1.2rem;
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    line-height: 1.85;
+    color: rgba(246,251,255,0.82);
+    font-weight: 500;
+}
+
+.hero-tag {
+    display: inline-block;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    color: var(--cyan);
+    background: rgba(37,244,238,0.1);
+    border: 1px solid rgba(37,244,238,0.32);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    margin-bottom: 1.5rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.hero-btn,
+.hero-btn-ghost {
+    padding: 0.9rem 1.3rem;
+    border-radius: 16px;
+    text-decoration: none !important;
+    font-weight: 900;
+    transition: 0.28s;
+}
+
+.hero-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--orange));
+    color: #04111f !important;
+}
+
+.hero-btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff !important;
+}
+
+.hero-btn:hover,
+.hero-btn-ghost:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 0 28px rgba(37,244,238,0.35);
+}
+
+.section-head {
+    text-align: center;
+    margin: 5rem auto 2rem;
+    max-width: 880px;
+}
+
+.section-tag {
+    color: var(--cyan);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+}
+
+.section-head h2 {
+    margin: 0.35rem 0;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-head p {
+    color: rgba(246,251,255,0.68);
+    line-height: 1.8;
+}
+
+.glass-card,
+.advantage-card,
+.contact-item-card {
+    height: 100%;
+    padding: 1.5rem;
+    border-radius: 28px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 18px 52px rgba(0,0,0,0.25);
+    transition: 0.28s ease;
+}
+
+.glass-card {
+    min-height: 260px;
+}
+
+.advantage-card {
+    min-height: 250px;
+}
+
+.glass-card:hover,
+.advantage-card:hover,
+.contact-item-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(37,244,238,0.48);
+    box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
+}
+
+.icon,
+.advantage-icon,
+.contact-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.glass-card h3,
+.advantage-card h3,
+.contact-item-card h3 {
+    color: #fff;
+    margin-bottom: 0.7rem;
+    font-size: 1.25rem;
+}
+
+.glass-card p,
+.advantage-card p,
+.contact-item-card p {
+    color: rgba(246,251,255,0.72);
+    line-height: 1.75;
+}
+
+.image-card {
+    position: relative;
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    transition: 0.3s;
+    margin-bottom: 1.2rem;
+}
+
+.image-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
+}
+
+.image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.6s;
+}
+
+.image-card:hover img {
+    transform: scale(1.08);
+}
+
+.image-mask {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 1.35rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
+}
+
+.image-mask h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 900;
+}
+
+.image-mask p {
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+    font-weight: 700;
+}
+
+.image-note {
+    margin-top: 0.65rem;
+    color: #ffcf9a;
+    font-weight: 900;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.image-note span {
+    color: #ffe2bd;
+}
+
+.image-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(246,251,255,0.82);
+}
+
+.pair-title {
+    margin: 2.2rem 0 1rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.pair-title span {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--cyan);
+}
+
+.pair-title p {
+    margin: 0.35rem 0;
+    color: rgba(246,251,255,0.78);
+    line-height: 1.7;
+}
+
+.pair-title div {
+    color: #ffcf9a;
+    font-weight: 800;
+}
+
+.metric-box {
+    padding: 1.2rem;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.13);
+    text-align: center;
+}
+
+.metric-box h3 {
+    color: var(--cyan);
+    margin: 0;
+    font-size: 2rem;
+}
+
+.metric-box p {
+    color: rgba(246,251,255,0.68);
+    margin: 0.3rem 0 0;
+}
+
+.recommend-result {
+    padding: 1.4rem;
+    border-radius: 26px;
+    background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
+    border: 1px solid rgba(255,255,255,0.16);
+    margin-top: 1rem;
+}
+
+.recommend-result h3 {
+    margin-top: 0;
+    color: var(--cyan);
+}
+
+.recommend-result p {
+    color: rgba(246,251,255,0.78);
+    line-height: 1.7;
+}
+
+.contact-shell {
+    padding: 2.8rem 2.2rem;
+    border-radius: 34px;
+    background: rgba(255,255,255,0.065);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(20px);
+    text-align: center;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+    margin-top: 1rem;
+}
+
+.contact-shell h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0;
+    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.contact-shell p {
+    color: rgba(246,251,255,0.72);
+    margin-top: 0.6rem;
+}
+
+.stSlider label,
+.stSelectbox label,
+.stMultiSelect label {
+    color: rgba(246,251,255,0.82) !important;
+    font-weight: 800 !important;
+}
+
+@media (max-width: 768px) {
     .block-container {
-        max-width: 1280px;
-        padding-top: 1rem;
-        padding-bottom: 5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 999;
-        margin-bottom: 1.2rem;
-        padding: 0.75rem 1.2rem;
-        border-radius: 999px;
-        background: rgba(6, 19, 31, 0.72);
-        border: 1px solid rgba(255,255,255,0.13);
-        backdrop-filter: blur(20px);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 14px 42px rgba(0,0,0,0.25);
+        border-radius: 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.6rem;
     }
 
-    .nav-logo {
-        font-weight: 900;
-        font-size: 1.05rem;
-        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
     }
 
     .nav-links a {
-        color: rgba(246,251,255,0.82) !important;
-        text-decoration: none;
-        margin-left: 1.2rem;
-        font-size: 0.92rem;
-        transition: 0.25s;
-    }
-
-    .nav-links a:hover {
-        color: var(--cyan) !important;
-        text-shadow: 0 0 14px rgba(37,244,238,0.6);
+        margin-left: 0;
+        margin-right: 0.4rem;
+        font-size: 0.82rem;
     }
 
     .hero {
-        position: relative;
-        overflow: hidden;
-        min-height: 620px;
-        border-radius: 36px;
-        padding: 5rem 3rem;
-        background:
-            linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
-            rgba(255,255,255,0.045);
-        border: 1px solid rgba(255,255,255,0.16);
-        backdrop-filter: blur(18px);
-        box-shadow: 0 28px 90px rgba(0,0,0,0.38);
+        min-height: auto;
+        padding: 3rem 1.3rem;
+        border-radius: 26px;
     }
 
     .hero h1 {
-        font-size: clamp(3rem, 7vw, 5.8rem);
-        line-height: 1.02;
-        margin: 0;
-        font-weight: 900;
-        background: linear-gradient(90deg, var(--cyan), #ffffff 48%, var(--orange));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .hero h2 {
-        margin-top: 1.2rem;
-        font-size: clamp(1.05rem, 2vw, 1.45rem);
-        line-height: 1.85;
-        color: rgba(246,251,255,0.82);
-        font-weight: 500;
-    }
-
-    .hero-tag {
-        display: inline-block;
-        padding: 0.55rem 1rem;
-        border-radius: 999px;
-        color: var(--cyan);
-        background: rgba(37,244,238,0.1);
-        border: 1px solid rgba(37,244,238,0.32);
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        margin-bottom: 1.5rem;
-    }
-
-    .hero-buttons {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-top: 2rem;
-    }
-
-    .hero-btn,
-    .hero-btn-ghost {
-        padding: 0.9rem 1.3rem;
-        border-radius: 16px;
-        text-decoration: none !important;
-        font-weight: 900;
-        transition: 0.28s;
-    }
-
-    .hero-btn {
-        background: linear-gradient(135deg, var(--cyan), var(--orange));
-        color: #04111f !important;
-    }
-
-    .hero-btn-ghost {
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.18);
-        color: #fff !important;
-    }
-
-    .hero-btn:hover,
-    .hero-btn-ghost:hover {
-        transform: translateY(-5px) scale(1.03);
-        box-shadow: 0 0 28px rgba(37,244,238,0.35);
-    }
-
-    .section-head {
-        text-align: center;
-        margin: 5rem auto 2rem;
-        max-width: 880px;
-    }
-
-    .section-tag {
-        color: var(--cyan);
-        font-weight: 900;
-        letter-spacing: 0.2em;
-        font-size: 0.8rem;
-    }
-
-    .section-head h2 {
-        margin: 0.35rem 0;
-        font-size: clamp(2rem, 4vw, 2.8rem);
-        font-weight: 900;
-        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .section-head p {
-        color: rgba(246,251,255,0.68);
-        line-height: 1.8;
-    }
-
-    .glass-card,
-    .advantage-card,
-    .contact-item-card {
-        height: 100%;
-        padding: 1.5rem;
-        border-radius: 28px;
-        background: rgba(255,255,255,0.075);
-        border: 1px solid rgba(255,255,255,0.14);
-        backdrop-filter: blur(20px);
-        box-shadow: 0 18px 52px rgba(0,0,0,0.25);
-        transition: 0.28s ease;
-    }
-
-    .glass-card {
-        min-height: 260px;
-    }
-
-    .advantage-card {
-        min-height: 250px;
-    }
-
-    .glass-card:hover,
-    .advantage-card:hover,
-    .contact-item-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        border-color: rgba(37,244,238,0.48);
-        box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
-    }
-
-    .icon,
-    .advantage-icon,
-    .contact-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.8rem;
-    }
-
-    .glass-card h3,
-    .advantage-card h3,
-    .contact-item-card h3 {
-        color: #fff;
-        margin-bottom: 0.7rem;
-        font-size: 1.25rem;
-    }
-
-    .glass-card p,
-    .advantage-card p,
-    .contact-item-card p {
-        color: rgba(246,251,255,0.72);
-        line-height: 1.75;
+        font-size: 3rem;
     }
 
     .image-card {
-        position: relative;
-        height: 360px;
-        border-radius: 30px;
-        overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.15);
-        box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-        background: rgba(255,255,255,0.07);
-        transition: 0.3s;
-        margin-bottom: 1.2rem;
+        height: 270px;
     }
-
-    .image-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
-    }
-
-    .image-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: 0.6s;
-    }
-
-    .image-card:hover img {
-        transform: scale(1.08);
-    }
-
-    .image-mask {
-        position: absolute;
-        inset: auto 0 0 0;
-        padding: 1.35rem;
-        background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-    }
-
-    .image-mask h3 {
-        margin: 0;
-        color: #ffffff;
-        font-size: 1.45rem;
-        font-weight: 900;
-    }
-
-    .image-mask p {
-        color: rgba(255,255,255,0.86);
-        margin: 0.45rem 0 0;
-        line-height: 1.55;
-        font-weight: 700;
-    }
-
-    .image-note {
-        margin-top: 0.65rem;
-        color: #ffcf9a;
-        font-weight: 900;
-        font-size: 0.92rem;
-        line-height: 1.45;
-    }
-
-    .image-note span {
-        color: #ffe2bd;
-    }
-
-    .image-missing {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: rgba(246,251,255,0.82);
-    }
-
-    .pair-title {
-        margin: 2.2rem 0 1rem;
-        padding: 1.2rem 1.4rem;
-        border-radius: 24px;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.14);
-    }
-
-    .pair-title span {
-        font-size: 1.75rem;
-        font-weight: 900;
-        color: var(--cyan);
-    }
-
-    .pair-title p {
-        margin: 0.35rem 0;
-        color: rgba(246,251,255,0.78);
-        line-height: 1.7;
-    }
-
-    .pair-title div {
-        color: #ffcf9a;
-        font-weight: 800;
-    }
-
-    .metric-box {
-        padding: 1.2rem;
-        border-radius: 22px;
-        background: rgba(255,255,255,0.075);
-        border: 1px solid rgba(255,255,255,0.13);
-        text-align: center;
-    }
-
-    .metric-box h3 {
-        color: var(--cyan);
-        margin: 0;
-        font-size: 2rem;
-    }
-
-    .metric-box p {
-        color: rgba(246,251,255,0.68);
-        margin: 0.3rem 0 0;
-    }
-
-    .recommend-result {
-        padding: 1.4rem;
-        border-radius: 26px;
-        background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
-        border: 1px solid rgba(255,255,255,0.16);
-        margin-top: 1rem;
-    }
-
-    .recommend-result h3 {
-        margin-top: 0;
-        color: var(--cyan);
-    }
-
-    .recommend-result p {
-        color: rgba(246,251,255,0.78);
-        line-height: 1.7;
-    }
-
-    .contact-shell {
-        padding: 2.8rem 2.2rem;
-        border-radius: 34px;
-        background: rgba(255,255,255,0.065);
-        border: 1px solid rgba(255,255,255,0.16);
-        backdrop-filter: blur(20px);
-        text-align: center;
-        box-shadow: 0 24px 70px rgba(0,0,0,0.30);
-        margin-top: 1rem;
-    }
-
-    .contact-shell h2 {
-        font-size: clamp(2rem, 5vw, 3rem);
-        margin: 0;
-        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .contact-shell p {
-        color: rgba(246,251,255,0.72);
-        margin-top: 0.6rem;
-    }
-
-    .stSlider label,
-    .stSelectbox label,
-    .stMultiSelect label {
-        color: rgba(246,251,255,0.82) !important;
-        font-weight: 800 !important;
-    }
-
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .navbar {
-            border-radius: 20px;
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 0.6rem;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.55rem;
-        }
-
-        .nav-links a {
-            margin-left: 0;
-            margin-right: 0.4rem;
-            font-size: 0.82rem;
-        }
-
-        .hero {
-            min-height: auto;
-            padding: 3rem 1.3rem;
-            border-radius: 26px;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-        }
-
-        .image-card {
-            height: 270px;
-        }
-    }
-    </style>
-    """
-)
+}
+</style>
+""")
 
 
 # =========================================================
@@ -710,21 +704,19 @@ safe_markdown(
 # =========================================================
 
 safe_markdown(
-    """
-    <div class="navbar">
-        <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
-        <div class="nav-links">
-            <a href="#intro">项目简介</a>
-            <a href="#database">工艺数据库</a>
-            <a href="#gallery">烧制对比</a>
-            <a href="#industry">行业产品</a>
-            <a href="#advantage">项目优势</a>
-            <a href="#recommend">产品推荐</a>
-            <a href="#future">后期展望</a>
-            <a href="#contact">联系我们</a>
-        </div>
-    </div>
-    """
+    '<div class="navbar">'
+    '<div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>'
+    '<div class="nav-links">'
+    '<a href="#intro">项目简介</a>'
+    '<a href="#database">工艺数据库</a>'
+    '<a href="#gallery">烧制对比</a>'
+    '<a href="#industry">行业产品</a>'
+    '<a href="#advantage">项目优势</a>'
+    '<a href="#recommend">产品推荐</a>'
+    '<a href="#future">后期展望</a>'
+    '<a href="#contact">联系我们</a>'
+    '</div>'
+    '</div>'
 )
 
 
@@ -733,25 +725,23 @@ safe_markdown(
 # =========================================================
 
 safe_markdown(
-    """
-    <div class="hero">
-        <div class="hero-content">
-            <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
-            <h1>青橙焕艺</h1>
-            <h2>
-                由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
-                项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
-                数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
-                科技感和商业展示力的数字化平台。
-            </h2>
-            <div class="hero-buttons">
-                <a class="hero-btn" href="#database">预览工艺数据库</a>
-                <a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>
-                <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
-            </div>
-        </div>
-    </div>
-    """
+    '<div class="hero">'
+    '<div class="hero-content">'
+    '<div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>'
+    '<h1>青橙焕艺</h1>'
+    '<h2>'
+    '由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。'
+    '项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、'
+    '数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、'
+    '科技感和商业展示力的数字化平台。'
+    '</h2>'
+    '<div class="hero-buttons">'
+    '<a class="hero-btn" href="#database">预览工艺数据库</a>'
+    '<a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>'
+    '<a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>'
+    '</div>'
+    '</div>'
+    '</div>'
 )
 
 
@@ -879,93 +869,93 @@ slide_html = ""
 for item in scroll_items:
     uri = img_to_uri(item["path"])
     if uri:
-        slide_html += f"""
-        <div class="slide">
-            <img src="{uri}">
-            <div class="slide-caption">
-                <strong>{item["title"]}</strong>
-                <span>{item["desc"]}</span>
-                <em>制作人员：{item["maker"]}</em>
-            </div>
-        </div>
-        """
+        slide_html += (
+            f'<div class="slide">'
+            f'<img src="{uri}">'
+            f'<div class="slide-caption">'
+            f'<strong>{item["title"]}</strong>'
+            f'<span>{item["desc"]}</span>'
+            f'<em>制作人员：{item["maker"]}</em>'
+            f'</div>'
+            f'</div>'
+        )
 
 if slide_html:
     components.html(
         f"""
-        <style>
-        .scroll-wrapper {{
-            width: 100%;
-            overflow: hidden;
-            border-radius: 32px;
-            border: 1px solid rgba(255,255,255,0.16);
-            background: rgba(255,255,255,0.06);
-            box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-        }}
-        .scroll-track {{
-            display: flex;
-            gap: 24px;
-            width: max-content;
-            padding: 24px;
-            animation: scrollX 30s linear infinite;
-        }}
-        .scroll-wrapper:hover .scroll-track {{
-            animation-play-state: paused;
-        }}
-        .slide {{
-            position: relative;
-            width: 420px;
-            height: 280px;
-            flex: 0 0 auto;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 18px 50px rgba(0,0,0,0.35);
-            background: rgba(255,255,255,0.08);
-        }}
-        .slide img {{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }}
-        .slide-caption {{
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding: 18px;
-            background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
-            color: white;
-        }}
-        .slide-caption strong {{
-            display: block;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }}
-        .slide-caption span {{
-            display: block;
-            color: rgba(255,255,255,0.78);
-            font-size: 14px;
-        }}
-        .slide-caption em {{
-            display: block;
-            color: #ffcf9a;
-            font-style: normal;
-            font-size: 13px;
-            margin-top: 5px;
-            font-weight: 700;
-        }}
-        @keyframes scrollX {{
-            from {{ transform: translateX(0); }}
-            to {{ transform: translateX(-50%); }}
-        }}
-        </style>
-        <div class="scroll-wrapper">
-            <div class="scroll-track">
-                {slide_html}
-                {slide_html}
-            </div>
-        </div>
-        """,
+<style>
+.scroll-wrapper {{
+    width: 100%;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+}}
+.scroll-track {{
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    padding: 24px;
+    animation: scrollX 30s linear infinite;
+}}
+.scroll-wrapper:hover .scroll-track {{
+    animation-play-state: paused;
+}}
+.slide {{
+    position: relative;
+    width: 420px;
+    height: 280px;
+    flex: 0 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
+}}
+.slide img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}}
+.slide-caption {{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
+    color: white;
+}}
+.slide-caption strong {{
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+}}
+.slide-caption span {{
+    display: block;
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+}}
+.slide-caption em {{
+    display: block;
+    color: #ffcf9a;
+    font-style: normal;
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: 700;
+}}
+@keyframes scrollX {{
+    from {{ transform: translateX(0); }}
+    to {{ transform: translateX(-50%); }}
+}}
+</style>
+<div class="scroll-wrapper">
+    <div class="scroll-track">
+        {slide_html}
+        {slide_html}
+    </div>
+</div>
+""",
         height=350
     )
 else:
@@ -1108,18 +1098,16 @@ with r1:
     )
 
     safe_markdown(
-        f"""
-        <div class="recommend-result">
-            <h3>AI 推荐结果</h3>
-            <p><b>用户选择产品：</b>{product_type}</p>
-            <p><b>推荐工艺温度区间：</b>{temp_range}</p>
-            <p><b>温度风险提示：</b>{risk}</p>
-            <p><b>产品设计建议：</b>{product_tip}</p>
-            <p><b>目标效果建议：</b>{effect_tip}</p>
-            <p><b>材料建议：</b>{material_tip}</p>
-            <p><b>综合推荐分：</b>{score} / 100</p>
-        </div>
-        """
+        f'<div class="recommend-result">'
+        f'<h3>AI 推荐结果</h3>'
+        f'<p><b>用户选择产品：</b>{product_type}</p>'
+        f'<p><b>推荐工艺温度区间：</b>{temp_range}</p>'
+        f'<p><b>温度风险提示：</b>{risk}</p>'
+        f'<p><b>产品设计建议：</b>{product_tip}</p>'
+        f'<p><b>目标效果建议：</b>{effect_tip}</p>'
+        f'<p><b>材料建议：</b>{material_tip}</p>'
+        f'<p><b>综合推荐分：</b>{score} / 100</p>'
+        f'</div>'
     )
 
     st.progress(score / 100)
@@ -1182,12 +1170,10 @@ section_title(
 )
 
 safe_markdown(
-    """
-    <div class="contact-shell">
-        <h2>青汐造物</h2>
-        <p>青汐工坊 · Glass Recycling AI Platform</p>
-    </div>
-    """
+    '<div class="contact-shell">'
+    '<h2>青汐造物</h2>'
+    '<p>青汐工坊 · Glass Recycling AI Platform</p>'
+    '</div>'
 )
 
 cc1, cc2, cc3 = st.columns(3)
