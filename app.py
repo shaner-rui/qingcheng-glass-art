@@ -1,7 +1,6 @@
 import base64
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
@@ -27,7 +26,6 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = APP_DIR.parent if APP_DIR.name.lower() == "src" else APP_DIR
 
 IMAGE_DIR = PROJECT_DIR / "images"
-FIGURE_DIR = PROJECT_DIR / "figures"
 
 DATA_CANDIDATES = [
     PROJECT_DIR / "glass_experiment_numeric_only.csv",
@@ -51,21 +49,12 @@ DATA_PATH = find_data_path()
 # =========================================================
 
 def resolve_image(name: str) -> Path:
-    """
-    支持以下图片命名：
-    images/1
-    images/1.png
-    images/1.jpg
-    images/1.jpeg
-    images/1.webp
-    """
     raw = IMAGE_DIR / name
 
     if raw.exists():
         return raw
 
-    suffixes = [".png", ".jpg", ".jpeg", ".webp"]
-    for suffix in suffixes:
+    for suffix in [".png", ".jpg", ".jpeg", ".webp"]:
         candidate = IMAGE_DIR / f"{name}{suffix}"
         if candidate.exists():
             return candidate
@@ -105,22 +94,15 @@ def load_data(path: str):
 
 
 def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
-    """
-    通用标题函数。
-    支持：
-    section_title("TAG", "标题")
-    section_title("TAG", "标题", "描述")
-    section_title("TAG", "标题", "描述", 其他参数)
-    """
     desc_html = f"<p>{desc}</p>" if desc else ""
 
     st.markdown(
         f"""
-        <div class="section-head">
-            <div class="section-tag">{tag}</div>
-            <h2>{title}</h2>
-            {desc_html}
-        </div>
+<div class="section-head">
+    <div class="section-tag">{tag}</div>
+    <h2>{title}</h2>
+    {desc_html}
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -129,11 +111,11 @@ def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwarg
 def glass_card(icon: str, title: str, text: str):
     st.markdown(
         f"""
-        <div class="glass-card">
-            <div class="icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-        </div>
+<div class="glass-card">
+    <div class="icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -142,11 +124,11 @@ def glass_card(icon: str, title: str, text: str):
 def advantage_card(icon: str, title: str, text: str):
     st.markdown(
         f"""
-        <div class="advantage-card">
-            <div class="advantage-icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{text}</p>
-        </div>
+<div class="advantage-card">
+    <div class="advantage-icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -155,71 +137,58 @@ def advantage_card(icon: str, title: str, text: str):
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
     st.markdown(
         f"""
-        <div class="contact-item-card">
-            <div class="contact-icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{line1}</p>
-            <p>{line2}</p>
-            <p>{line3}</p>
-        </div>
+<div class="contact-item-card">
+    <div class="contact-icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{line1}</p>
+    <p>{line2}</p>
+    <p>{line3}</p>
+</div>
         """,
         unsafe_allow_html=True
     )
 
 
-def image_card(
-    path: Path,
-    title: str,
-    desc: str,
-    maker: str = "",
-    note_label: str = "制作人员",
-    note_text: str = ""
-):
+def image_card(path: Path, title: str, desc: str, maker: str = ""):
     uri = img_to_uri(path)
 
-    note_html = ""
-    if note_text:
-        note_html = f'<div class="maker">{note_label}：{note_text}</div>'
-    elif maker:
-        note_html = f'<div class="maker">{note_label}：{maker}</div>'
+    maker_html = ""
+    if maker:
+        maker_html = f'<div class="maker">制作人员：{maker}</div>'
 
     if uri:
-        st.markdown(
-            f"""
-            <div class="image-card">
-                <img src="{uri}" alt="{title}" />
-                <div class="image-mask">
-                    <h3>{title}</h3>
-                    <p>{desc}</p>
-                    {note_html}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        html = f"""
+<div class="image-card">
+    <img src="{uri}" alt="{title}">
+    <div class="image-mask">
+        <h3>{title}</h3>
+        <p>{desc}</p>
+        {maker_html}
+    </div>
+</div>
+        """
     else:
-        st.markdown(
-            f"""
-            <div class="image-card image-missing">
-                <div>
-                    <h3>{title}</h3>
-                    <p>缺少图片：{path.name}</p>
-                    <small>请确认该图片已放入 images 文件夹</small>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        html = f"""
+<div class="image-card image-missing">
+    <div>
+        <h3>{title}</h3>
+        <p>缺少图片：{path.name}</p>
+        <small>请确认该图片已放入 images 文件夹</small>
+    </div>
+</div>
+        """
+
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
     st.markdown(
         f"""
-        <div class="pair-title">
-            <span>{temp}℃</span>
-            <p>{result_desc}</p>
-            <div>制作人员：{maker}</div>
-        </div>
+<div class="pair-title">
+    <span>{temp}℃</span>
+    <p>{result_desc}</p>
+    <div>制作人员：{maker}</div>
+</div>
         """,
         unsafe_allow_html=True
     )
@@ -231,7 +200,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(before_name),
             f"{temp}℃ · 烧制前",
             f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
-            maker=maker
+            maker
         )
 
     with col2:
@@ -239,7 +208,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(after_name),
             f"{temp}℃ · 烧制后",
             f"{temp}hou：经过热熔后的成型状态与视觉效果。",
-            maker=maker
+            maker
         )
 
 
@@ -330,13 +299,6 @@ html, body, .stApp {
     max-width: 1280px;
     padding-top: 1rem;
     padding-bottom: 5rem;
-}
-
-hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(37,244,238,0.22), rgba(255,159,67,0.22), transparent);
-    margin: 3rem 0;
 }
 
 .navbar {
@@ -463,28 +425,28 @@ hr {
     margin-top: 2rem;
 }
 
-.hero-btn {
-    padding: 0.9rem 1.3rem;
-    border-radius: 16px;
-    text-decoration: none !important;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--cyan), var(--orange));
-    color: #04111f !important;
-    transition: 0.28s;
-}
-
+.hero-btn,
 .hero-btn-ghost {
     padding: 0.9rem 1.3rem;
     border-radius: 16px;
     text-decoration: none !important;
     font-weight: 900;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #fff !important;
     transition: 0.28s;
 }
 
-.hero-btn:hover, .hero-btn-ghost:hover {
+.hero-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--orange));
+    color: #04111f !important;
+}
+
+.hero-btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff !important;
+}
+
+.hero-btn:hover,
+.hero-btn-ghost:hover {
     transform: translateY(-5px) scale(1.03);
     box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
@@ -534,18 +496,21 @@ hr {
     box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
 }
 
-.icon {
+.icon,
+.advantage-icon {
     font-size: 2.5rem;
     margin-bottom: 0.8rem;
 }
 
-.glass-card h3 {
+.glass-card h3,
+.advantage-card h3 {
     color: #fff;
     margin-bottom: 0.7rem;
     font-size: 1.25rem;
 }
 
-.glass-card p {
+.glass-card p,
+.advantage-card p {
     color: rgba(246,251,255,0.72);
     line-height: 1.75;
 }
@@ -561,32 +526,12 @@ hr {
     backdrop-filter: blur(20px);
     box-shadow: 0 18px 52px rgba(0,0,0,0.25);
     transition: 0.28s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
 }
 
 .advantage-card:hover {
     transform: translateY(-8px) scale(1.02);
     border-color: rgba(255,159,67,0.48);
     box-shadow: 0 0 32px rgba(255,159,67,0.20), 0 18px 52px rgba(0,0,0,0.35);
-}
-
-.advantage-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.8rem;
-}
-
-.advantage-card h3 {
-    color: #fff;
-    margin: 0 0 0.8rem 0;
-    font-size: 1.22rem;
-}
-
-.advantage-card p {
-    color: rgba(246,251,255,0.72);
-    line-height: 1.7;
-    margin: 0;
 }
 
 .image-card {
@@ -598,6 +543,7 @@ hr {
     box-shadow: 0 24px 70px rgba(0,0,0,0.32);
     background: rgba(255,255,255,0.07);
     transition: 0.3s;
+    margin-bottom: 1.2rem;
 }
 
 .image-card:hover {
@@ -626,12 +572,15 @@ hr {
 .image-mask h3 {
     margin: 0;
     color: white;
+    font-size: 1.7rem;
+    font-weight: 900;
 }
 
 .image-mask p {
-    color: rgba(255,255,255,0.78);
+    color: rgba(255,255,255,0.82);
     margin: 0.35rem 0 0;
     line-height: 1.55;
+    font-weight: 700;
 }
 
 .maker {
@@ -646,12 +595,7 @@ hr {
     align-items: center;
     justify-content: center;
     text-align: center;
-    border-style: solid;
     color: rgba(246,251,255,0.82);
-}
-
-.image-missing small {
-    color: rgba(246,251,255,0.55);
 }
 
 .pair-title {
@@ -680,18 +624,6 @@ hr {
 .pair-title div {
     color: #ffcf9a;
     font-weight: 800;
-}
-
-.database-panel {
-    padding: 1.4rem;
-    border-radius: 32px;
-    background:
-        radial-gradient(circle at 10% 20%, rgba(37,244,238,0.20), transparent 28%),
-        radial-gradient(circle at 88% 10%, rgba(255,159,67,0.20), transparent 25%),
-        rgba(255,255,255,0.065);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
 }
 
 .metric-box {
@@ -851,7 +783,7 @@ div[data-testid="stDataFrame"] {
     }
 }
 </style>
-""",
+    """,
     unsafe_allow_html=True
 )
 
@@ -875,7 +807,7 @@ st.markdown(
         <a href="#contact">联系我们</a>
     </div>
 </div>
-""",
+    """,
     unsafe_allow_html=True
 )
 
@@ -903,7 +835,7 @@ st.markdown(
         </div>
     </div>
 </div>
-""",
+    """,
     unsafe_allow_html=True
 )
 
@@ -979,8 +911,6 @@ section_title(
     "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
 )
 
-st.markdown('<div class="database-panel">', unsafe_allow_html=True)
-
 if df.empty:
     st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
 else:
@@ -1043,8 +973,6 @@ else:
         st.dataframe(mean_df, use_container_width=True)
         st.line_chart(mean_df.set_index("temperature_c"))
 
-st.markdown("</div>", unsafe_allow_html=True)
-
 
 # =========================================================
 # 烧制前后动态滚动照片
@@ -1073,14 +1001,14 @@ for item in scroll_items:
     uri = img_to_uri(item["path"])
     if uri:
         slide_html += f"""
-        <div class="slide">
-            <img src="{uri}">
-            <div class="slide-caption">
-                <strong>{item["title"]}</strong>
-                <span>{item["desc"]}</span>
-                <em>制作人员：{item["maker"]}</em>
-            </div>
-        </div>
+<div class="slide">
+    <img src="{uri}">
+    <div class="slide-caption">
+        <strong>{item["title"]}</strong>
+        <span>{item["desc"]}</span>
+        <em>制作人员：{item["maker"]}</em>
+    </div>
+</div>
         """
 
 if slide_html:
@@ -1171,7 +1099,7 @@ if slide_html:
         {slide_html}
     </div>
 </div>
-""",
+        """,
         height=350
     )
 else:
@@ -1236,21 +1164,21 @@ with p1:
     image_card(
         resolve_image("1"),
         "家居器皿方向",
-        "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。",
+        "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。"
     )
 
 with p2:
     image_card(
         resolve_image("2"),
         "透光灯具方向",
-        "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。",
+        "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。"
     )
 
 with p3:
     image_card(
         resolve_image("3"),
         "花器摆件方向",
-        "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。",
+        "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。"
     )
 
 p4, p5 = st.columns(2)
@@ -1259,14 +1187,14 @@ with p4:
     image_card(
         resolve_image("4"),
         "文创饰品方向",
-        "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。",
+        "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。"
     )
 
 with p5:
     image_card(
         resolve_image("5"),
         "生活器物方向",
-        "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。",
+        "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。"
     )
 
 
@@ -1361,7 +1289,7 @@ with r1:
     <p><b>材料建议：</b>{material_tip}</p>
     <p><b>综合推荐分：</b>{score} / 100</p>
 </div>
-""",
+        """,
         unsafe_allow_html=True
     )
 
@@ -1375,7 +1303,7 @@ with r2:
     image_card(
         recommend_img,
         "推荐效果参考",
-        "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。",
+        "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
     )
 
 
@@ -1426,10 +1354,10 @@ section_title(
 
 st.markdown(
     """
-    <div class="contact-shell">
-        <h2>青汐造物</h2>
-        <p>青汐工坊 · Glass Recycling AI Platform</p>
-    </div>
+<div class="contact-shell">
+    <h2>青汐造物</h2>
+    <p>青汐工坊 · Glass Recycling AI Platform</p>
+</div>
     """,
     unsafe_allow_html=True
 )
