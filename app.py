@@ -95,7 +95,7 @@ def load_data(path: str):
 
 
 def safe_markdown(html: str):
-    st.markdown(html.strip(), unsafe_allow_html=True)
+    st.markdown(str(html).strip(), unsafe_allow_html=True)
 
 
 def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
@@ -150,37 +150,154 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
     uri = img_to_uri(path)
 
     if not uri:
-        html = (
-            f'<div class="image-card image-missing">'
-            f'<div>'
-            f'<h3>{title}</h3>'
-            f'<p>缺少图片：{path.name}</p>'
-            f'<small>请确认图片已放入 images 文件夹</small>'
-            f'</div>'
-            f'</div>'
-        )
-        safe_markdown(html)
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {{
+    margin: 0;
+    background: transparent;
+    font-family: "Noto Sans SC", Arial, sans-serif;
+}}
+.image-card {{
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(246,251,255,0.82);
+    box-sizing: border-box;
+}}
+.image-card h3 {{
+    color: white;
+    margin: 0 0 10px 0;
+}}
+.image-card p {{
+    margin: 0 0 6px 0;
+}}
+small {{
+    color: rgba(246,251,255,0.65);
+}}
+</style>
+</head>
+<body>
+<div class="image-card">
+    <div>
+        <h3>{title}</h3>
+        <p>缺少图片：{path.name}</p>
+        <small>请确认图片已放入 images 文件夹</small>
+    </div>
+</div>
+</body>
+</html>
+"""
+        components.html(html, height=390)
         return
 
-    note_block = ""
+    note_html = ""
     if note_label and note_text:
-        note_block = (
-            f'<div class="image-note">'
-            f'<span>{note_label}：</span>{note_text}'
-            f'</div>'
-        )
+        note_html = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
 
-    html = (
-        f'<div class="image-card">'
-        f'<img src="{uri}" alt="{title}">'
-        f'<div class="image-mask">'
-        f'<h3>{title}</h3>'
-        f'<p>{desc}</p>'
-        f'{note_block}'
-        f'</div>'
-        f'</div>'
-    )
-    safe_markdown(html)
+    html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {{
+    margin: 0;
+    background: transparent;
+    font-family: "Noto Sans SC", Arial, sans-serif;
+}}
+
+.image-card {{
+    position: relative;
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    transition: 0.3s ease;
+    box-sizing: border-box;
+}}
+
+.image-card:hover {{
+    transform: translateY(-8px);
+    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
+}}
+
+.image-card img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: 0.6s ease;
+}}
+
+.image-card:hover img {{
+    transform: scale(1.08);
+}}
+
+.image-mask {{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.35rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
+    box-sizing: border-box;
+}}
+
+.image-mask h3 {{
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1.25;
+}}
+
+.image-mask p {{
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+    font-weight: 700;
+    font-size: 1rem;
+}}
+
+.image-note {{
+    margin-top: 0.65rem;
+    color: #ffcf9a;
+    font-weight: 900;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}}
+
+.image-note span {{
+    color: #ffe2bd;
+}}
+</style>
+</head>
+<body>
+<div class="image-card">
+    <img src="{uri}" alt="{title}">
+    <div class="image-mask">
+        <h3>{title}</h3>
+        <p>{desc}</p>
+        {note_html}
+    </div>
+</div>
+</body>
+</html>
+"""
+    components.html(html, height=390)
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
@@ -494,75 +611,6 @@ html, body, .stApp {
     line-height: 1.75;
 }
 
-.image-card {
-    position: relative;
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    transition: 0.3s;
-    margin-bottom: 1.2rem;
-}
-
-.image-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
-}
-
-.image-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: 0.6s;
-}
-
-.image-card:hover img {
-    transform: scale(1.08);
-}
-
-.image-mask {
-    position: absolute;
-    inset: auto 0 0 0;
-    padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-}
-
-.image-mask h3 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.45rem;
-    font-weight: 900;
-}
-
-.image-mask p {
-    color: rgba(255,255,255,0.86);
-    margin: 0.45rem 0 0;
-    line-height: 1.55;
-    font-weight: 700;
-}
-
-.image-note {
-    margin-top: 0.65rem;
-    color: #ffcf9a;
-    font-weight: 900;
-    font-size: 0.92rem;
-    line-height: 1.45;
-}
-
-.image-note span {
-    color: #ffe2bd;
-}
-
-.image-missing {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: rgba(246,251,255,0.82);
-}
-
 .pair-title {
     margin: 2.2rem 0 1rem;
     padding: 1.2rem 1.4rem;
@@ -690,10 +738,6 @@ html, body, .stApp {
     .hero h1 {
         font-size: 3rem;
     }
-
-    .image-card {
-        height: 270px;
-    }
 }
 </style>
 """)
@@ -760,24 +804,48 @@ section_title(
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    glass_card("♻️", "废旧玻璃再生", "以废弃玻璃、边角料玻璃、透明和彩色玻璃为基础材料，通过清洗、筛选、组合和热熔烧制，重新赋予废弃材料可展示、可销售、可设计的价值。")
+    glass_card(
+        "♻️",
+        "废旧玻璃再生",
+        "以废弃玻璃、边角料玻璃、透明和彩色玻璃为基础材料，通过清洗、筛选、组合和热熔烧制，重新赋予废弃材料可展示、可销售、可设计的价值。"
+    )
 
 with c2:
-    glass_card("🔥", "青汐工坊实验", "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。")
+    glass_card(
+        "🔥",
+        "青汐工坊实验",
+        "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
+    )
 
 with c3:
-    glass_card("📷", "烧制前后对比", "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。")
+    glass_card(
+        "📷",
+        "烧制前后对比",
+        "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
+    )
 
 c4, c5, c6 = st.columns(3)
 
 with c4:
-    glass_card("🎨", "艺术产品转化", "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。")
+    glass_card(
+        "🎨",
+        "艺术产品转化",
+        "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。"
+    )
 
 with c5:
-    glass_card("📊", "数据可视化分析", "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。")
+    glass_card(
+        "📊",
+        "数据可视化分析",
+        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
+    )
 
 with c6:
-    glass_card("🤖", "AI工艺推荐", "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。")
+    glass_card(
+        "🤖",
+        "AI工艺推荐",
+        "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
+    )
 
 
 # =========================================================
