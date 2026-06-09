@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
 
 
 # =========================================================
@@ -98,210 +97,81 @@ def safe_markdown(html: str):
     st.markdown(str(html).strip(), unsafe_allow_html=True)
 
 
-def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
+def section_title(tag: str = "", title: str = "", desc: str = ""):
     desc_html = f"<p>{desc}</p>" if desc else ""
 
-    html = (
-        f'<div class="section-head">'
-        f'<div class="section-tag">{tag}</div>'
-        f'<h2>{title}</h2>'
-        f'{desc_html}'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="section-head">
+    <div class="section-tag">{tag}</div>
+    <h2>{title}</h2>
+    {desc_html}
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def glass_card(icon: str, title: str, text: str):
-    html = (
-        f'<div class="glass-card">'
-        f'<div class="icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{text}</p>'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="glass-card">
+    <div class="icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def advantage_card(icon: str, title: str, text: str):
-    html = (
-        f'<div class="advantage-card">'
-        f'<div class="advantage-icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{text}</p>'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="advantage-card">
+    <div class="advantage-icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
-    html = (
-        f'<div class="contact-item-card">'
-        f'<div class="contact-icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{line1}</p>'
-        f'<p>{line2}</p>'
-        f'<p>{line3}</p>'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="contact-item-card">
+    <div class="contact-icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{line1}</p>
+    <p>{line2}</p>
+    <p>{line3}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
     if not uri:
-        html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-body {{
-    margin: 0;
-    background: transparent;
-    font-family: "Noto Sans SC", Arial, sans-serif;
-}}
-.image-card {{
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: rgba(246,251,255,0.82);
-    box-sizing: border-box;
-}}
-.image-card h3 {{
-    color: white;
-    margin: 0 0 10px 0;
-}}
-.image-card p {{
-    margin: 0 0 6px 0;
-}}
-small {{
-    color: rgba(246,251,255,0.65);
-}}
-</style>
-</head>
-<body>
-<div class="image-card">
+        safe_markdown(
+            f"""
+<div class="image-card missing-image-card">
     <div>
         <h3>{title}</h3>
         <p>缺少图片：{path.name}</p>
         <small>请确认图片已放入 images 文件夹</small>
     </div>
 </div>
-</body>
-</html>
 """
-        components.html(html, height=390)
+        )
         return
 
     note_html = ""
     if note_label and note_text:
         note_html = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
 
-    html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-body {{
-    margin: 0;
-    background: transparent;
-    font-family: "Noto Sans SC", Arial, sans-serif;
-}}
-
-.image-card {{
-    position: relative;
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    transition: 0.3s ease;
-    box-sizing: border-box;
-}}
-
-.image-card:hover {{
-    transform: translateY(-8px);
-    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
-}}
-
-.image-card img {{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: 0.6s ease;
-}}
-
-.image-card:hover img {{
-    transform: scale(1.08);
-}}
-
-.image-mask {{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-    box-sizing: border-box;
-}}
-
-.image-mask h3 {{
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.45rem;
-    font-weight: 900;
-    line-height: 1.25;
-}}
-
-.image-mask p {{
-    color: rgba(255,255,255,0.86);
-    margin: 0.45rem 0 0;
-    line-height: 1.55;
-    font-weight: 700;
-    font-size: 1rem;
-}}
-
-.image-note {{
-    margin-top: 0.65rem;
-    color: #ffcf9a;
-    font-weight: 900;
-    font-size: 0.92rem;
-    line-height: 1.45;
-}}
-
-.image-note span {{
-    color: #ffe2bd;
-}}
-
-@media (max-width: 768px) {{
-    .image-card {{
-        height: 300px;
-        border-radius: 24px;
-    }}
-    .image-mask {{
-        padding: 1rem;
-    }}
-    .image-mask h3 {{
-        font-size: 1.2rem;
-    }}
-    .image-mask p {{
-        font-size: 0.9rem;
-    }}
-}}
-</style>
-</head>
-<body>
+    safe_markdown(
+        f"""
 <div class="image-card">
     <img src="{uri}" alt="{title}">
     <div class="image-mask">
@@ -310,21 +180,20 @@ body {{
         {note_html}
     </div>
 </div>
-</body>
-</html>
 """
-    components.html(html, height=390)
+    )
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    html = (
-        f'<div class="pair-title">'
-        f'<span>{temp}℃</span>'
-        f'<p>{result_desc}</p>'
-        f'<div>制作人员：{maker}</div>'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="pair-title">
+    <span>{temp}℃</span>
+    <p>{result_desc}</p>
+    <div>制作人员：{maker}</div>
+</div>
+"""
     )
-    safe_markdown(html)
 
     col1, col2 = st.columns(2)
 
@@ -543,12 +412,6 @@ html, body, .stApp {
     color: #fff !important;
 }
 
-.hero-btn:hover,
-.hero-btn-ghost:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 0 28px rgba(37,244,238,0.35);
-}
-
 .mobile-guide {
     margin: 2rem 0 3rem;
     padding: 1.6rem 1.3rem;
@@ -592,11 +455,6 @@ html, body, .stApp {
     text-decoration: none !important;
     font-weight: 800;
     font-size: 0.9rem;
-}
-
-.mobile-guide-grid a:hover {
-    background: rgba(255,159,67,0.18);
-    border-color: rgba(255,159,67,0.35);
 }
 
 .mobile-scroll-tip {
@@ -653,14 +511,6 @@ html, body, .stApp {
     min-height: 250px;
 }
 
-.glass-card:hover,
-.advantage-card:hover,
-.contact-item-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(37,244,238,0.48);
-    box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
-}
-
 .icon,
 .advantage-icon,
 .contact-icon {
@@ -681,6 +531,80 @@ html, body, .stApp {
 .contact-item-card p {
     color: rgba(246,251,255,0.72);
     line-height: 1.75;
+}
+
+.image-card {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 1.4rem;
+}
+
+.image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.image-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.35rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
+    box-sizing: border-box;
+}
+
+.image-mask h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.image-mask p {
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.image-note {
+    margin-top: 0.65rem;
+    color: #ffcf9a;
+    font-weight: 900;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.image-note span {
+    color: #ffe2bd;
+}
+
+.missing-image-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.missing-image-card h3 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.missing-image-card p,
+.missing-image-card small {
+    color: rgba(246,251,255,0.72);
 }
 
 .pair-title {
@@ -781,6 +705,81 @@ html, body, .stApp {
     overflow: hidden;
 }
 
+.scroll-wrapper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+    margin-bottom: 1.5rem;
+}
+
+.scroll-track {
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    padding: 24px;
+    animation: scrollX 30s linear infinite;
+}
+
+.scroll-wrapper:hover .scroll-track {
+    animation-play-state: paused;
+}
+
+.slide {
+    position: relative;
+    width: 420px;
+    height: 280px;
+    flex: 0 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slide-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
+    color: white;
+}
+
+.slide-caption strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.slide-caption span {
+    display: block;
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+}
+
+.slide-caption em {
+    display: block;
+    color: #ffcf9a;
+    font-style: normal;
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: 700;
+}
+
+@keyframes scrollX {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
@@ -858,6 +857,35 @@ html, body, .stApp {
     .section-head h2 {
         font-size: 2rem;
     }
+
+    .image-card {
+        height: 300px;
+        border-radius: 24px;
+        margin-bottom: 1.2rem;
+    }
+
+    .image-mask {
+        padding: 1rem;
+    }
+
+    .image-mask h3 {
+        font-size: 1.2rem;
+    }
+
+    .image-mask p {
+        font-size: 0.9rem;
+    }
+
+    .scroll-track {
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .slide {
+        width: 300px;
+        height: 220px;
+        border-radius: 20px;
+    }
 }
 </style>
 """)
@@ -868,19 +896,21 @@ html, body, .stApp {
 # =========================================================
 
 safe_markdown(
-    '<div class="navbar">'
-    '<div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>'
-    '<div class="nav-links">'
-    '<a href="#intro">项目简介</a>'
-    '<a href="#gallery">烧制对比</a>'
-    '<a href="#industry">行业产品</a>'
-    '<a href="#advantage">项目优势</a>'
-    '<a href="#recommend">产品推荐</a>'
-    '<a href="#database">工艺数据库</a>'
-    '<a href="#future">后期展望</a>'
-    '<a href="#contact">联系我们</a>'
-    '</div>'
-    '</div>'
+    """
+<div class="navbar">
+    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
+    <div class="nav-links">
+        <a href="#intro">项目简介</a>
+        <a href="#gallery">烧制对比</a>
+        <a href="#industry">行业产品</a>
+        <a href="#advantage">项目优势</a>
+        <a href="#recommend">产品推荐</a>
+        <a href="#database">工艺数据库</a>
+        <a href="#future">后期展望</a>
+        <a href="#contact">联系我们</a>
+    </div>
+</div>
+"""
 )
 
 
@@ -889,23 +919,25 @@ safe_markdown(
 # =========================================================
 
 safe_markdown(
-    '<div class="hero">'
-    '<div class="hero-content">'
-    '<div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>'
-    '<h1>青橙焕艺</h1>'
-    '<h2>'
-    '由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。'
-    '项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、'
-    '数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、'
-    '科技感和商业展示力的数字化平台。'
-    '</h2>'
-    '<div class="hero-buttons">'
-    '<a class="hero-btn" href="#gallery">查看烧制对比</a>'
-    '<a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>'
-    '<a class="hero-btn-ghost" href="#database">预览工艺数据库</a>'
-    '</div>'
-    '</div>'
-    '</div>'
+    """
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
+        <h1>青橙焕艺</h1>
+        <h2>
+        由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
+        项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
+        数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
+        科技感和商业展示力的数字化平台。
+        </h2>
+        <div class="hero-buttons">
+            <a class="hero-btn" href="#gallery">查看烧制对比</a>
+            <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
+            <a class="hero-btn-ghost" href="#database">预览工艺数据库</a>
+        </div>
+    </div>
+</div>
+"""
 )
 
 
@@ -1032,93 +1064,15 @@ for item in scroll_items:
         )
 
 if slide_html:
-    components.html(
+    safe_markdown(
         f"""
-<style>
-.scroll-wrapper {{
-    width: 100%;
-    overflow: hidden;
-    border-radius: 32px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-}}
-.scroll-track {{
-    display: flex;
-    gap: 24px;
-    width: max-content;
-    padding: 24px;
-    animation: scrollX 30s linear infinite;
-}}
-.scroll-wrapper:hover .scroll-track {{
-    animation-play-state: paused;
-}}
-.slide {{
-    position: relative;
-    width: 420px;
-    height: 280px;
-    flex: 0 0 auto;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
-    background: rgba(255,255,255,0.08);
-}}
-.slide img {{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}}
-.slide-caption {{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 18px;
-    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
-    color: white;
-}}
-.slide-caption strong {{
-    display: block;
-    font-size: 18px;
-    margin-bottom: 4px;
-}}
-.slide-caption span {{
-    display: block;
-    color: rgba(255,255,255,0.78);
-    font-size: 14px;
-}}
-.slide-caption em {{
-    display: block;
-    color: #ffcf9a;
-    font-style: normal;
-    font-size: 13px;
-    margin-top: 5px;
-    font-weight: 700;
-}}
-@keyframes scrollX {{
-    from {{ transform: translateX(0); }}
-    to {{ transform: translateX(-50%); }}
-}}
-@media (max-width: 768px) {{
-    .scroll-track {{
-        gap: 16px;
-        padding: 16px;
-    }}
-    .slide {{
-        width: 300px;
-        height: 220px;
-        border-radius: 20px;
-    }}
-}}
-</style>
 <div class="scroll-wrapper">
     <div class="scroll-track">
         {slide_html}
         {slide_html}
     </div>
 </div>
-""",
-        height=350
+"""
     )
 else:
     st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。")
@@ -1260,16 +1214,18 @@ with r1:
     )
 
     safe_markdown(
-        f'<div class="recommend-result">'
-        f'<h3>AI 推荐结果</h3>'
-        f'<p><b>用户选择产品：</b>{product_type}</p>'
-        f'<p><b>推荐工艺温度区间：</b>{temp_range}</p>'
-        f'<p><b>温度风险提示：</b>{risk}</p>'
-        f'<p><b>产品设计建议：</b>{product_tip}</p>'
-        f'<p><b>目标效果建议：</b>{effect_tip}</p>'
-        f'<p><b>材料建议：</b>{material_tip}</p>'
-        f'<p><b>综合推荐分：</b>{score} / 100</p>'
-        f'</div>'
+        f"""
+<div class="recommend-result">
+    <h3>AI 推荐结果</h3>
+    <p><b>用户选择产品：</b>{product_type}</p>
+    <p><b>推荐工艺温度区间：</b>{temp_range}</p>
+    <p><b>温度风险提示：</b>{risk}</p>
+    <p><b>产品设计建议：</b>{product_tip}</p>
+    <p><b>目标效果建议：</b>{effect_tip}</p>
+    <p><b>材料建议：</b>{material_tip}</p>
+    <p><b>综合推荐分：</b>{score} / 100</p>
+</div>
+"""
     )
 
     st.progress(score / 100)
@@ -1395,10 +1351,12 @@ section_title(
 )
 
 safe_markdown(
-    '<div class="contact-shell">'
-    '<h2>青汐造物</h2>'
-    '<p>青汐工坊 · Glass Recycling AI Platform</p>'
-    '</div>'
+    """
+<div class="contact-shell">
+    <h2>青汐造物</h2>
+    <p>青汐工坊 · Glass Recycling AI Platform</p>
+</div>
+"""
 )
 
 cc1, cc2, cc3 = st.columns(3)
