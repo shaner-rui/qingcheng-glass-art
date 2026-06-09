@@ -79,7 +79,7 @@ def img_to_uri(path: Path) -> str:
     return f"data:{mime};base64,{data}"
 
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def load_data(path: str):
     csv_path = Path(path)
 
@@ -282,6 +282,22 @@ body {{
 
 .image-note span {{
     color: #ffe2bd;
+}}
+
+@media (max-width: 768px) {{
+    .image-card {{
+        height: 300px;
+        border-radius: 24px;
+    }}
+    .image-mask {{
+        padding: 1rem;
+    }}
+    .image-mask h3 {{
+        font-size: 1.2rem;
+    }}
+    .image-mask p {{
+        font-size: 0.9rem;
+    }}
 }}
 </style>
 </head>
@@ -533,6 +549,62 @@ html, body, .stApp {
     box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
 
+.mobile-guide {
+    margin: 2rem 0 3rem;
+    padding: 1.6rem 1.3rem;
+    border-radius: 28px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 48px rgba(0,0,0,0.28);
+    text-align: center;
+}
+
+.mobile-guide-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    background: linear-gradient(90deg, #25f4ee, #ffffff, #ff9f43);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.7rem;
+}
+
+.mobile-guide-desc {
+    color: rgba(246,251,255,0.78);
+    line-height: 1.8;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.mobile-guide-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+}
+
+.mobile-guide-grid a {
+    display: block;
+    padding: 0.8rem 0.4rem;
+    border-radius: 16px;
+    background: rgba(37,244,238,0.10);
+    border: 1px solid rgba(37,244,238,0.25);
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.mobile-guide-grid a:hover {
+    background: rgba(255,159,67,0.18);
+    border-color: rgba(255,159,67,0.35);
+}
+
+.mobile-scroll-tip {
+    margin-top: 1rem;
+    color: rgba(255,255,255,0.62);
+    font-size: 0.9rem;
+}
+
 .section-head {
     text-align: center;
     margin: 5rem auto 2rem;
@@ -704,10 +776,16 @@ html, body, .stApp {
     font-weight: 800 !important;
 }
 
+[data-testid="stDataFrame"] {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
         padding-right: 1rem;
+        padding-top: 0.6rem;
     }
 
     .navbar {
@@ -715,6 +793,7 @@ html, body, .stApp {
         align-items: flex-start;
         flex-direction: column;
         gap: 0.6rem;
+        position: relative;
     }
 
     .nav-links {
@@ -731,12 +810,53 @@ html, body, .stApp {
 
     .hero {
         min-height: auto;
-        padding: 3rem 1.3rem;
+        padding: 2.4rem 1.25rem;
         border-radius: 26px;
     }
 
     .hero h1 {
         font-size: 3rem;
+    }
+
+    .hero h2 {
+        font-size: 0.98rem;
+        line-height: 1.75;
+    }
+
+    .hero-buttons a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .mobile-guide {
+        margin-top: 1.5rem;
+        padding: 1.3rem 1rem;
+    }
+
+    .mobile-guide-title {
+        font-size: 1.35rem;
+    }
+
+    .mobile-guide-desc {
+        font-size: 0.92rem;
+    }
+
+    .mobile-guide-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+    }
+
+    .mobile-guide-grid a {
+        font-size: 0.85rem;
+        padding: 0.75rem 0.3rem;
+    }
+
+    .section-head {
+        margin: 3.2rem auto 1.4rem;
+    }
+
+    .section-head h2 {
+        font-size: 2rem;
     }
 }
 </style>
@@ -752,11 +872,11 @@ safe_markdown(
     '<div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>'
     '<div class="nav-links">'
     '<a href="#intro">项目简介</a>'
-    '<a href="#database">工艺数据库</a>'
     '<a href="#gallery">烧制对比</a>'
     '<a href="#industry">行业产品</a>'
     '<a href="#advantage">项目优势</a>'
     '<a href="#recommend">产品推荐</a>'
+    '<a href="#database">工艺数据库</a>'
     '<a href="#future">后期展望</a>'
     '<a href="#contact">联系我们</a>'
     '</div>'
@@ -780,12 +900,38 @@ safe_markdown(
     '科技感和商业展示力的数字化平台。'
     '</h2>'
     '<div class="hero-buttons">'
-    '<a class="hero-btn" href="#database">预览工艺数据库</a>'
-    '<a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>'
+    '<a class="hero-btn" href="#gallery">查看烧制对比</a>'
     '<a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>'
+    '<a class="hero-btn-ghost" href="#database">预览工艺数据库</a>'
     '</div>'
     '</div>'
     '</div>'
+)
+
+
+# =========================================================
+# 手机端扫码入口提示
+# =========================================================
+
+safe_markdown(
+    """
+<div class="mobile-guide">
+    <div class="mobile-guide-title">📱 青橙焕艺线上展示平台</div>
+    <div class="mobile-guide-desc">
+        扫码进入后，可查看项目简介、烧制前后对比、玻璃行业产品展示、AI产品推荐与工艺数据库。
+        本页面适合手机端下滑浏览，也可在电脑端作为项目展示平台使用。
+    </div>
+    <div class="mobile-guide-grid">
+        <a href="#intro">项目简介</a>
+        <a href="#gallery">烧制对比</a>
+        <a href="#industry">行业产品</a>
+        <a href="#recommend">AI推荐</a>
+        <a href="#database">工艺数据库</a>
+        <a href="#contact">联系我们</a>
+    </div>
+    <div class="mobile-scroll-tip">⬇ 手机端请继续下滑查看完整平台内容</div>
+</div>
+"""
 )
 
 
@@ -837,7 +983,7 @@ with c5:
     glass_card(
         "📊",
         "数据可视化分析",
-        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
+        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量变化、多指标对比和后续机器学习建模。"
     )
 
 with c6:
@@ -846,69 +992,6 @@ with c6:
         "AI工艺推荐",
         "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
     )
-
-
-# =========================================================
-# 工艺数据库
-# =========================================================
-
-safe_markdown('<div id="database"></div>')
-
-section_title(
-    "SPACE DATABASE PREVIEW",
-    "预览玻璃热熔工艺数据库",
-    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
-)
-
-if df.empty:
-    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
-else:
-    temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
-    selected_temp = st.multiselect("选择温度", temps, default=temps)
-
-    show_df = df.copy()
-
-    if selected_temp and "temperature_c" in show_df.columns:
-        show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
-
-    m1, m2, m3, m4 = st.columns(4)
-
-    with m1:
-        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
-
-    with m2:
-        avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
-
-    with m3:
-        avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
-
-    with m4:
-        best_temp = "暂无"
-        if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
-            best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
-        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
-
-    st.markdown("### 表格形式内容")
-    st.dataframe(show_df, use_container_width=True, height=360)
-
-    numeric_cols = [
-        col for col in [
-            "success_score",
-            "particle_score",
-            "volume_score",
-            "transparency_score",
-            "overheat_score",
-            "overall_quality_score_100"
-        ] if col in show_df.columns
-    ]
-
-    if "temperature_c" in show_df.columns and numeric_cols:
-        st.markdown("### 按温度均值分析")
-        mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
-        st.dataframe(mean_df, use_container_width=True)
-        st.line_chart(mean_df.set_index("temperature_c"))
 
 
 # =========================================================
@@ -1015,6 +1098,17 @@ if slide_html:
 @keyframes scrollX {{
     from {{ transform: translateX(0); }}
     to {{ transform: translateX(-50%); }}
+}}
+@media (max-width: 768px) {{
+    .scroll-track {{
+        gap: 16px;
+        padding: 16px;
+    }}
+    .slide {{
+        width: 300px;
+        height: 220px;
+        border-radius: 20px;
+    }}
 }}
 </style>
 <div class="scroll-wrapper">
@@ -1190,6 +1284,69 @@ with r2:
         "推荐效果参考",
         "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
     )
+
+
+# =========================================================
+# 工艺数据库
+# =========================================================
+
+safe_markdown('<div id="database"></div>')
+
+section_title(
+    "DATABASE PREVIEW",
+    "预览玻璃热熔工艺数据库",
+    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
+)
+
+if df.empty:
+    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
+else:
+    temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
+    selected_temp = st.multiselect("选择温度", temps, default=temps)
+
+    show_df = df.copy()
+
+    if selected_temp and "temperature_c" in show_df.columns:
+        show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
+
+    m1, m2, m3, m4 = st.columns(4)
+
+    with m1:
+        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
+
+    with m2:
+        avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
+        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
+
+    with m3:
+        avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
+        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
+
+    with m4:
+        best_temp = "暂无"
+        if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
+            best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
+        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
+
+    st.markdown("### 表格形式内容")
+    st.dataframe(show_df, use_container_width=True, height=300)
+
+    numeric_cols = [
+        col for col in [
+            "success_score",
+            "particle_score",
+            "volume_score",
+            "transparency_score",
+            "overheat_score",
+            "overall_quality_score_100"
+        ] if col in show_df.columns
+    ]
+
+    if "temperature_c" in show_df.columns and numeric_cols:
+        st.markdown("### 按温度均值分析")
+        mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
+        st.dataframe(mean_df, use_container_width=True, height=180)
+        st.line_chart(mean_df.set_index("temperature_c"), height=260)
 
 
 # =========================================================
