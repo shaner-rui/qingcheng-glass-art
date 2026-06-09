@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 # =========================================================
@@ -78,7 +79,7 @@ def img_to_uri(path: Path) -> str:
     return f"data:{mime};base64,{data}"
 
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_data(path: str):
     csv_path = Path(path)
 
@@ -97,81 +98,194 @@ def safe_markdown(html: str):
     st.markdown(str(html).strip(), unsafe_allow_html=True)
 
 
-def section_title(tag: str = "", title: str = "", desc: str = ""):
+def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
     desc_html = f"<p>{desc}</p>" if desc else ""
 
-    safe_markdown(
-        f"""
-<div class="section-head">
-    <div class="section-tag">{tag}</div>
-    <h2>{title}</h2>
-    {desc_html}
-</div>
-"""
+    html = (
+        f'<div class="section-head">'
+        f'<div class="section-tag">{tag}</div>'
+        f'<h2>{title}</h2>'
+        f'{desc_html}'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def glass_card(icon: str, title: str, text: str):
-    safe_markdown(
-        f"""
-<div class="glass-card">
-    <div class="icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{text}</p>
-</div>
-"""
+    html = (
+        f'<div class="glass-card">'
+        f'<div class="icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{text}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def advantage_card(icon: str, title: str, text: str):
-    safe_markdown(
-        f"""
-<div class="advantage-card">
-    <div class="advantage-icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{text}</p>
-</div>
-"""
+    html = (
+        f'<div class="advantage-card">'
+        f'<div class="advantage-icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{text}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
-    safe_markdown(
-        f"""
-<div class="contact-item-card">
-    <div class="contact-icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{line1}</p>
-    <p>{line2}</p>
-    <p>{line3}</p>
-</div>
-"""
+    html = (
+        f'<div class="contact-item-card">'
+        f'<div class="contact-icon">{icon}</div>'
+        f'<h3>{title}</h3>'
+        f'<p>{line1}</p>'
+        f'<p>{line2}</p>'
+        f'<p>{line3}</p>'
+        f'</div>'
     )
+    safe_markdown(html)
 
 
 def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
     if not uri:
-        safe_markdown(
-            f"""
-<div class="image-card missing-image-card">
+        html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {{
+    margin: 0;
+    background: transparent;
+    font-family: "Noto Sans SC", Arial, sans-serif;
+}}
+.image-card {{
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(246,251,255,0.82);
+    box-sizing: border-box;
+}}
+.image-card h3 {{
+    color: white;
+    margin: 0 0 10px 0;
+}}
+.image-card p {{
+    margin: 0 0 6px 0;
+}}
+small {{
+    color: rgba(246,251,255,0.65);
+}}
+</style>
+</head>
+<body>
+<div class="image-card">
     <div>
         <h3>{title}</h3>
         <p>缺少图片：{path.name}</p>
         <small>请确认图片已放入 images 文件夹</small>
     </div>
 </div>
+</body>
+</html>
 """
-        )
+        components.html(html, height=390)
         return
 
     note_html = ""
     if note_label and note_text:
         note_html = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
 
-    safe_markdown(
-        f"""
+    html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {{
+    margin: 0;
+    background: transparent;
+    font-family: "Noto Sans SC", Arial, sans-serif;
+}}
+
+.image-card {{
+    position: relative;
+    height: 360px;
+    border-radius: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+    background: rgba(255,255,255,0.07);
+    transition: 0.3s ease;
+    box-sizing: border-box;
+}}
+
+.image-card:hover {{
+    transform: translateY(-8px);
+    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
+}}
+
+.image-card img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: 0.6s ease;
+}}
+
+.image-card:hover img {{
+    transform: scale(1.08);
+}}
+
+.image-mask {{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.35rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
+    box-sizing: border-box;
+}}
+
+.image-mask h3 {{
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1.25;
+}}
+
+.image-mask p {{
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+    font-weight: 700;
+    font-size: 1rem;
+}}
+
+.image-note {{
+    margin-top: 0.65rem;
+    color: #ffcf9a;
+    font-weight: 900;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}}
+
+.image-note span {{
+    color: #ffe2bd;
+}}
+</style>
+</head>
+<body>
 <div class="image-card">
     <img src="{uri}" alt="{title}">
     <div class="image-mask">
@@ -180,20 +294,21 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
         {note_html}
     </div>
 </div>
+</body>
+</html>
 """
-    )
+    components.html(html, height=390)
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    safe_markdown(
-        f"""
-<div class="pair-title">
-    <span>{temp}℃</span>
-    <p>{result_desc}</p>
-    <div>制作人员：{maker}</div>
-</div>
-"""
+    html = (
+        f'<div class="pair-title">'
+        f'<span>{temp}℃</span>'
+        f'<p>{result_desc}</p>'
+        f'<div>制作人员：{maker}</div>'
+        f'</div>'
     )
+    safe_markdown(html)
 
     col1, col2 = st.columns(2)
 
@@ -412,55 +527,10 @@ html, body, .stApp {
     color: #fff !important;
 }
 
-.mobile-guide {
-    margin: 2rem 0 3rem;
-    padding: 1.6rem 1.3rem;
-    border-radius: 28px;
-    background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.16);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 18px 48px rgba(0,0,0,0.28);
-    text-align: center;
-}
-
-.mobile-guide-title {
-    font-size: 1.6rem;
-    font-weight: 900;
-    background: linear-gradient(90deg, #25f4ee, #ffffff, #ff9f43);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.7rem;
-}
-
-.mobile-guide-desc {
-    color: rgba(246,251,255,0.78);
-    line-height: 1.8;
-    font-size: 1rem;
-    margin-bottom: 1.2rem;
-}
-
-.mobile-guide-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.75rem;
-}
-
-.mobile-guide-grid a {
-    display: block;
-    padding: 0.8rem 0.4rem;
-    border-radius: 16px;
-    background: rgba(37,244,238,0.10);
-    border: 1px solid rgba(37,244,238,0.25);
-    color: #ffffff !important;
-    text-decoration: none !important;
-    font-weight: 800;
-    font-size: 0.9rem;
-}
-
-.mobile-scroll-tip {
-    margin-top: 1rem;
-    color: rgba(255,255,255,0.62);
-    font-size: 0.9rem;
+.hero-btn:hover,
+.hero-btn-ghost:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
 
 .section-head {
@@ -511,6 +581,14 @@ html, body, .stApp {
     min-height: 250px;
 }
 
+.glass-card:hover,
+.advantage-card:hover,
+.contact-item-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(37,244,238,0.48);
+    box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
+}
+
 .icon,
 .advantage-icon,
 .contact-icon {
@@ -531,80 +609,6 @@ html, body, .stApp {
 .contact-item-card p {
     color: rgba(246,251,255,0.72);
     line-height: 1.75;
-}
-
-.image-card {
-    position: relative;
-    width: 100%;
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    margin-bottom: 1.4rem;
-}
-
-.image-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.image-mask {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-    box-sizing: border-box;
-}
-
-.image-mask h3 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.45rem;
-    font-weight: 900;
-    line-height: 1.25;
-}
-
-.image-mask p {
-    color: rgba(255,255,255,0.86);
-    margin: 0.45rem 0 0;
-    line-height: 1.55;
-    font-weight: 700;
-    font-size: 1rem;
-}
-
-.image-note {
-    margin-top: 0.65rem;
-    color: #ffcf9a;
-    font-weight: 900;
-    font-size: 0.92rem;
-    line-height: 1.45;
-}
-
-.image-note span {
-    color: #ffe2bd;
-}
-
-.missing-image-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.missing-image-card h3 {
-    color: white;
-    margin-bottom: 0.5rem;
-}
-
-.missing-image-card p,
-.missing-image-card small {
-    color: rgba(246,251,255,0.72);
 }
 
 .pair-title {
@@ -700,91 +704,10 @@ html, body, .stApp {
     font-weight: 800 !important;
 }
 
-[data-testid="stDataFrame"] {
-    border-radius: 18px;
-    overflow: hidden;
-}
-
-.scroll-wrapper {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 32px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-    margin-bottom: 1.5rem;
-}
-
-.scroll-track {
-    display: flex;
-    gap: 24px;
-    width: max-content;
-    padding: 24px;
-    animation: scrollX 30s linear infinite;
-}
-
-.scroll-wrapper:hover .scroll-track {
-    animation-play-state: paused;
-}
-
-.slide {
-    position: relative;
-    width: 420px;
-    height: 280px;
-    flex: 0 0 auto;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
-    background: rgba(255,255,255,0.08);
-}
-
-.slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.slide-caption {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 18px;
-    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
-    color: white;
-}
-
-.slide-caption strong {
-    display: block;
-    font-size: 18px;
-    margin-bottom: 4px;
-}
-
-.slide-caption span {
-    display: block;
-    color: rgba(255,255,255,0.78);
-    font-size: 14px;
-}
-
-.slide-caption em {
-    display: block;
-    color: #ffcf9a;
-    font-style: normal;
-    font-size: 13px;
-    margin-top: 5px;
-    font-weight: 700;
-}
-
-@keyframes scrollX {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-}
-
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
         padding-right: 1rem;
-        padding-top: 0.6rem;
     }
 
     .navbar {
@@ -792,7 +715,6 @@ html, body, .stApp {
         align-items: flex-start;
         flex-direction: column;
         gap: 0.6rem;
-        position: relative;
     }
 
     .nav-links {
@@ -809,82 +731,12 @@ html, body, .stApp {
 
     .hero {
         min-height: auto;
-        padding: 2.4rem 1.25rem;
+        padding: 3rem 1.3rem;
         border-radius: 26px;
     }
 
     .hero h1 {
         font-size: 3rem;
-    }
-
-    .hero h2 {
-        font-size: 0.98rem;
-        line-height: 1.75;
-    }
-
-    .hero-buttons a {
-        width: 100%;
-        text-align: center;
-    }
-
-    .mobile-guide {
-        margin-top: 1.5rem;
-        padding: 1.3rem 1rem;
-    }
-
-    .mobile-guide-title {
-        font-size: 1.35rem;
-    }
-
-    .mobile-guide-desc {
-        font-size: 0.92rem;
-    }
-
-    .mobile-guide-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.65rem;
-    }
-
-    .mobile-guide-grid a {
-        font-size: 0.85rem;
-        padding: 0.75rem 0.3rem;
-    }
-
-    .section-head {
-        margin: 3.2rem auto 1.4rem;
-    }
-
-    .section-head h2 {
-        font-size: 2rem;
-    }
-
-    .image-card {
-        height: 300px;
-        border-radius: 24px;
-        margin-bottom: 1.2rem;
-    }
-
-    .image-mask {
-        padding: 1rem;
-    }
-
-    .image-mask h3 {
-        font-size: 1.2rem;
-    }
-
-    .image-mask p {
-        font-size: 0.9rem;
-    }
-
-    .scroll-track {
-        gap: 16px;
-        padding: 16px;
-    }
-
-    .slide {
-        width: 300px;
-        height: 220px;
-        border-radius: 20px;
     }
 }
 </style>
@@ -896,21 +748,19 @@ html, body, .stApp {
 # =========================================================
 
 safe_markdown(
-    """
-<div class="navbar">
-    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
-    <div class="nav-links">
-        <a href="#intro">项目简介</a>
-        <a href="#gallery">烧制对比</a>
-        <a href="#industry">行业产品</a>
-        <a href="#advantage">项目优势</a>
-        <a href="#recommend">产品推荐</a>
-        <a href="#database">工艺数据库</a>
-        <a href="#future">后期展望</a>
-        <a href="#contact">联系我们</a>
-    </div>
-</div>
-"""
+    '<div class="navbar">'
+    '<div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>'
+    '<div class="nav-links">'
+    '<a href="#intro">项目简介</a>'
+    '<a href="#database">工艺数据库</a>'
+    '<a href="#gallery">烧制对比</a>'
+    '<a href="#industry">行业产品</a>'
+    '<a href="#advantage">项目优势</a>'
+    '<a href="#recommend">产品推荐</a>'
+    '<a href="#future">后期展望</a>'
+    '<a href="#contact">联系我们</a>'
+    '</div>'
+    '</div>'
 )
 
 
@@ -919,51 +769,23 @@ safe_markdown(
 # =========================================================
 
 safe_markdown(
-    """
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
-        <h1>青橙焕艺</h1>
-        <h2>
-        由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
-        项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
-        数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
-        科技感和商业展示力的数字化平台。
-        </h2>
-        <div class="hero-buttons">
-            <a class="hero-btn" href="#gallery">查看烧制对比</a>
-            <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
-            <a class="hero-btn-ghost" href="#database">预览工艺数据库</a>
-        </div>
-    </div>
-</div>
-"""
-)
-
-
-# =========================================================
-# 手机端扫码入口提示
-# =========================================================
-
-safe_markdown(
-    """
-<div class="mobile-guide">
-    <div class="mobile-guide-title">📱 青橙焕艺线上展示平台</div>
-    <div class="mobile-guide-desc">
-        扫码进入后，可查看项目简介、烧制前后对比、玻璃行业产品展示、AI产品推荐与工艺数据库。
-        本页面适合手机端下滑浏览，也可在电脑端作为项目展示平台使用。
-    </div>
-    <div class="mobile-guide-grid">
-        <a href="#intro">项目简介</a>
-        <a href="#gallery">烧制对比</a>
-        <a href="#industry">行业产品</a>
-        <a href="#recommend">AI推荐</a>
-        <a href="#database">工艺数据库</a>
-        <a href="#contact">联系我们</a>
-    </div>
-    <div class="mobile-scroll-tip">⬇ 手机端请继续下滑查看完整平台内容</div>
-</div>
-"""
+    '<div class="hero">'
+    '<div class="hero-content">'
+    '<div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>'
+    '<h1>青橙焕艺</h1>'
+    '<h2>'
+    '由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。'
+    '项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、'
+    '数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、'
+    '科技感和商业展示力的数字化平台。'
+    '</h2>'
+    '<div class="hero-buttons">'
+    '<a class="hero-btn" href="#database">预览工艺数据库</a>'
+    '<a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>'
+    '<a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>'
+    '</div>'
+    '</div>'
+    '</div>'
 )
 
 
@@ -1015,7 +837,7 @@ with c5:
     glass_card(
         "📊",
         "数据可视化分析",
-        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量变化、多指标对比和后续机器学习建模。"
+        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
     )
 
 with c6:
@@ -1024,6 +846,69 @@ with c6:
         "AI工艺推荐",
         "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
     )
+
+
+# =========================================================
+# 工艺数据库
+# =========================================================
+
+safe_markdown('<div id="database"></div>')
+
+section_title(
+    "SPACE DATABASE PREVIEW",
+    "预览玻璃热熔工艺数据库",
+    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
+)
+
+if df.empty:
+    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
+else:
+    temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
+    selected_temp = st.multiselect("选择温度", temps, default=temps)
+
+    show_df = df.copy()
+
+    if selected_temp and "temperature_c" in show_df.columns:
+        show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
+
+    m1, m2, m3, m4 = st.columns(4)
+
+    with m1:
+        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
+
+    with m2:
+        avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
+        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
+
+    with m3:
+        avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
+        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
+
+    with m4:
+        best_temp = "暂无"
+        if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
+            best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
+        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
+
+    st.markdown("### 表格形式内容")
+    st.dataframe(show_df, use_container_width=True, height=360)
+
+    numeric_cols = [
+        col for col in [
+            "success_score",
+            "particle_score",
+            "volume_score",
+            "transparency_score",
+            "overheat_score",
+            "overall_quality_score_100"
+        ] if col in show_df.columns
+    ]
+
+    if "temperature_c" in show_df.columns and numeric_cols:
+        st.markdown("### 按温度均值分析")
+        mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
+        st.dataframe(mean_df, use_container_width=True)
+        st.line_chart(mean_df.set_index("temperature_c"))
 
 
 # =========================================================
@@ -1064,15 +949,82 @@ for item in scroll_items:
         )
 
 if slide_html:
-    safe_markdown(
+    components.html(
         f"""
+<style>
+.scroll-wrapper {{
+    width: 100%;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+}}
+.scroll-track {{
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    padding: 24px;
+    animation: scrollX 30s linear infinite;
+}}
+.scroll-wrapper:hover .scroll-track {{
+    animation-play-state: paused;
+}}
+.slide {{
+    position: relative;
+    width: 420px;
+    height: 280px;
+    flex: 0 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
+}}
+.slide img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}}
+.slide-caption {{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
+    color: white;
+}}
+.slide-caption strong {{
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+}}
+.slide-caption span {{
+    display: block;
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+}}
+.slide-caption em {{
+    display: block;
+    color: #ffcf9a;
+    font-style: normal;
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: 700;
+}}
+@keyframes scrollX {{
+    from {{ transform: translateX(0); }}
+    to {{ transform: translateX(-50%); }}
+}}
+</style>
 <div class="scroll-wrapper">
     <div class="scroll-track">
         {slide_html}
         {slide_html}
     </div>
 </div>
-"""
+""",
+        height=350
     )
 else:
     st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。")
@@ -1214,18 +1166,16 @@ with r1:
     )
 
     safe_markdown(
-        f"""
-<div class="recommend-result">
-    <h3>AI 推荐结果</h3>
-    <p><b>用户选择产品：</b>{product_type}</p>
-    <p><b>推荐工艺温度区间：</b>{temp_range}</p>
-    <p><b>温度风险提示：</b>{risk}</p>
-    <p><b>产品设计建议：</b>{product_tip}</p>
-    <p><b>目标效果建议：</b>{effect_tip}</p>
-    <p><b>材料建议：</b>{material_tip}</p>
-    <p><b>综合推荐分：</b>{score} / 100</p>
-</div>
-"""
+        f'<div class="recommend-result">'
+        f'<h3>AI 推荐结果</h3>'
+        f'<p><b>用户选择产品：</b>{product_type}</p>'
+        f'<p><b>推荐工艺温度区间：</b>{temp_range}</p>'
+        f'<p><b>温度风险提示：</b>{risk}</p>'
+        f'<p><b>产品设计建议：</b>{product_tip}</p>'
+        f'<p><b>目标效果建议：</b>{effect_tip}</p>'
+        f'<p><b>材料建议：</b>{material_tip}</p>'
+        f'<p><b>综合推荐分：</b>{score} / 100</p>'
+        f'</div>'
     )
 
     st.progress(score / 100)
@@ -1240,69 +1190,6 @@ with r2:
         "推荐效果参考",
         "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
     )
-
-
-# =========================================================
-# 工艺数据库
-# =========================================================
-
-safe_markdown('<div id="database"></div>')
-
-section_title(
-    "DATABASE PREVIEW",
-    "预览玻璃热熔工艺数据库",
-    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
-)
-
-if df.empty:
-    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
-else:
-    temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
-    selected_temp = st.multiselect("选择温度", temps, default=temps)
-
-    show_df = df.copy()
-
-    if selected_temp and "temperature_c" in show_df.columns:
-        show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
-
-    m1, m2, m3, m4 = st.columns(4)
-
-    with m1:
-        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
-
-    with m2:
-        avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
-
-    with m3:
-        avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
-
-    with m4:
-        best_temp = "暂无"
-        if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
-            best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
-        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
-
-    st.markdown("### 表格形式内容")
-    st.dataframe(show_df, use_container_width=True, height=300)
-
-    numeric_cols = [
-        col for col in [
-            "success_score",
-            "particle_score",
-            "volume_score",
-            "transparency_score",
-            "overheat_score",
-            "overall_quality_score_100"
-        ] if col in show_df.columns
-    ]
-
-    if "temperature_c" in show_df.columns and numeric_cols:
-        st.markdown("### 按温度均值分析")
-        mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
-        st.dataframe(mean_df, use_container_width=True, height=180)
-        st.line_chart(mean_df.set_index("temperature_c"), height=260)
 
 
 # =========================================================
@@ -1351,12 +1238,10 @@ section_title(
 )
 
 safe_markdown(
-    """
-<div class="contact-shell">
-    <h2>青汐造物</h2>
-    <p>青汐工坊 · Glass Recycling AI Platform</p>
-</div>
-"""
+    '<div class="contact-shell">'
+    '<h2>青汐造物</h2>'
+    '<p>青汐工坊 · Glass Recycling AI Platform</p>'
+    '</div>'
 )
 
 cc1, cc2, cc3 = st.columns(3)
