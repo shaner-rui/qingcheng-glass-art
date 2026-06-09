@@ -79,7 +79,7 @@ def img_to_uri(path: Path) -> str:
     return f"data:{mime};base64,{data}"
 
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def load_data(path: str):
     csv_path = Path(path)
 
@@ -907,8 +907,23 @@ else:
     if "temperature_c" in show_df.columns and numeric_cols:
         st.markdown("### 按温度均值分析")
         mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
-        st.dataframe(mean_df, use_container_width=True)
-        st.line_chart(mean_df.set_index("temperature_c"))
+        st.dataframe(mean_df, use_container_width=True, height=220)
+
+        if "overall_quality_score_100" in mean_df.columns and len(mean_df):
+            best_row = mean_df.loc[mean_df["overall_quality_score_100"].idxmax()]
+            best_temp = int(best_row["temperature_c"])
+            best_score = round(best_row["overall_quality_score_100"], 1)
+
+            safe_markdown(
+                f"""
+<div class="recommend-result">
+    <h3>温度趋势结论</h3>
+    <p><b>较优温度：</b>{best_temp}℃</p>
+    <p><b>平均综合质量分：</b>{best_score}</p>
+    <p>手机端已关闭交互折线图展示，避免微信内置浏览器加载卡顿；电脑端可继续扩展完整趋势图展示。</p>
+</div>
+"""
+            )
 
 
 # =========================================================
