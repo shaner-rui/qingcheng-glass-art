@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from textwrap import dedent
 
 import pandas as pd
 import streamlit as st
@@ -26,7 +27,6 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = APP_DIR.parent if APP_DIR.name.lower() == "src" else APP_DIR
 
 IMAGE_DIR = PROJECT_DIR / "images"
-FIGURE_DIR = PROJECT_DIR / "figures"
 
 DATA_CANDIDATES = [
     PROJECT_DIR / "glass_experiment_numeric_only.csv",
@@ -95,47 +95,50 @@ def load_data(path: str):
     return df
 
 
-def section_title(tag: str, title: str, desc: str):
-    st.markdown(
+def safe_markdown(html: str):
+    st.markdown(dedent(html).strip(), unsafe_allow_html=True)
+
+
+def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
+    desc_html = f"<p>{desc}</p>" if desc else ""
+
+    safe_markdown(
         f"""
         <div class="section-head">
             <div class="section-tag">{tag}</div>
             <h2>{title}</h2>
-            <p>{desc}</p>
+            {desc_html}
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
 def glass_card(icon: str, title: str, text: str):
-    st.markdown(
+    safe_markdown(
         f"""
         <div class="glass-card">
             <div class="icon">{icon}</div>
             <h3>{title}</h3>
             <p>{text}</p>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
 def advantage_card(icon: str, title: str, text: str):
-    st.markdown(
+    safe_markdown(
         f"""
         <div class="advantage-card">
             <div class="advantage-icon">{icon}</div>
             <h3>{title}</h3>
             <p>{text}</p>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
-    st.markdown(
+    safe_markdown(
         f"""
         <div class="contact-item-card">
             <div class="contact-icon">{icon}</div>
@@ -144,8 +147,7 @@ def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
             <p>{line2}</p>
             <p>{line3}</p>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -153,7 +155,7 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
     uri = img_to_uri(path)
 
     if not uri:
-        st.markdown(
+        safe_markdown(
             f"""
             <div class="image-card image-missing">
                 <div>
@@ -162,43 +164,37 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
                     <small>请确认图片已放入 images 文件夹</small>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True
+            """
         )
         return
 
     note_block = ""
     if note_label and note_text:
-        note_block = f"""
-        <div class="image-note">
-            <span>{note_label}：</span>{note_text}
+        note_block = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
+
+    safe_markdown(
+        f"""
+        <div class="image-card">
+            <img src="{uri}" alt="{title}">
+            <div class="image-mask">
+                <h3>{title}</h3>
+                <p>{desc}</p>
+                {note_block}
+            </div>
         </div>
         """
-
-    html = f"""
-    <div class="image-card">
-        <img src="{uri}" alt="{title}">
-        <div class="image-mask">
-            <h3>{title}</h3>
-            <p>{desc}</p>
-            {note_block}
-        </div>
-    </div>
-    """
-
-    st.markdown(html, unsafe_allow_html=True)
+    )
 
 
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    st.markdown(
+    safe_markdown(
         f"""
         <div class="pair-title">
             <span>{temp}℃</span>
             <p>{result_desc}</p>
             <div>制作人员：{maker}</div>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
     col1, col2 = st.columns(2)
@@ -280,434 +276,432 @@ df = load_data(str(DATA_PATH))
 # 全局 CSS
 # =========================================================
 
-st.markdown(
+safe_markdown(
     """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
 
-:root {
-    --cyan: #25f4ee;
-    --orange: #ff9f43;
-    --white: #f6fbff;
-}
+    :root {
+        --cyan: #25f4ee;
+        --orange: #ff9f43;
+        --white: #f6fbff;
+    }
 
-html, body, .stApp {
-    font-family: 'Noto Sans SC', sans-serif;
-    scroll-behavior: smooth;
-}
+    html, body, .stApp {
+        font-family: 'Noto Sans SC', sans-serif;
+        scroll-behavior: smooth;
+    }
 
-.stApp {
-    background:
-        radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
-        radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
-        radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
-        linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
-    color: var(--white);
-}
+    .stApp {
+        background:
+            radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
+            radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
+            radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
+            linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
+        color: var(--white);
+    }
 
-.block-container {
-    max-width: 1280px;
-    padding-top: 1rem;
-    padding-bottom: 5rem;
-}
-
-.navbar {
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    margin-bottom: 1.2rem;
-    padding: 0.75rem 1.2rem;
-    border-radius: 999px;
-    background: rgba(6, 19, 31, 0.72);
-    border: 1px solid rgba(255,255,255,0.13);
-    backdrop-filter: blur(20px);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 14px 42px rgba(0,0,0,0.25);
-}
-
-.nav-logo {
-    font-weight: 900;
-    font-size: 1.05rem;
-    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.nav-links a {
-    color: rgba(246,251,255,0.82) !important;
-    text-decoration: none;
-    margin-left: 1.2rem;
-    font-size: 0.92rem;
-    transition: 0.25s;
-}
-
-.nav-links a:hover {
-    color: var(--cyan) !important;
-    text-shadow: 0 0 14px rgba(37,244,238,0.6);
-}
-
-.hero {
-    position: relative;
-    overflow: hidden;
-    min-height: 620px;
-    border-radius: 36px;
-    padding: 5rem 3rem;
-    background:
-        linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
-        rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.16);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 28px 90px rgba(0,0,0,0.38);
-}
-
-.hero h1 {
-    font-size: clamp(3rem, 7vw, 5.8rem);
-    line-height: 1.02;
-    margin: 0;
-    font-weight: 900;
-    background: linear-gradient(90deg, var(--cyan), #ffffff 48%, var(--orange));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.hero h2 {
-    margin-top: 1.2rem;
-    font-size: clamp(1.05rem, 2vw, 1.45rem);
-    line-height: 1.85;
-    color: rgba(246,251,255,0.82);
-    font-weight: 500;
-}
-
-.hero-tag {
-    display: inline-block;
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
-    color: var(--cyan);
-    background: rgba(37,244,238,0.1);
-    border: 1px solid rgba(37,244,238,0.32);
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    margin-bottom: 1.5rem;
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-top: 2rem;
-}
-
-.hero-btn,
-.hero-btn-ghost {
-    padding: 0.9rem 1.3rem;
-    border-radius: 16px;
-    text-decoration: none !important;
-    font-weight: 900;
-    transition: 0.28s;
-}
-
-.hero-btn {
-    background: linear-gradient(135deg, var(--cyan), var(--orange));
-    color: #04111f !important;
-}
-
-.hero-btn-ghost {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #fff !important;
-}
-
-.hero-btn:hover,
-.hero-btn-ghost:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 0 28px rgba(37,244,238,0.35);
-}
-
-.section-head {
-    text-align: center;
-    margin: 5rem auto 2rem;
-    max-width: 880px;
-}
-
-.section-tag {
-    color: var(--cyan);
-    font-weight: 900;
-    letter-spacing: 0.2em;
-    font-size: 0.8rem;
-}
-
-.section-head h2 {
-    margin: 0.35rem 0;
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 900;
-    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.section-head p {
-    color: rgba(246,251,255,0.68);
-    line-height: 1.8;
-}
-
-.glass-card,
-.advantage-card,
-.contact-item-card {
-    height: 100%;
-    padding: 1.5rem;
-    border-radius: 28px;
-    background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 18px 52px rgba(0,0,0,0.25);
-    transition: 0.28s ease;
-}
-
-.glass-card {
-    min-height: 260px;
-}
-
-.advantage-card {
-    min-height: 250px;
-}
-
-.glass-card:hover,
-.advantage-card:hover,
-.contact-item-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(37,244,238,0.48);
-    box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
-}
-
-.icon,
-.advantage-icon,
-.contact-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.8rem;
-}
-
-.glass-card h3,
-.advantage-card h3,
-.contact-item-card h3 {
-    color: #fff;
-    margin-bottom: 0.7rem;
-    font-size: 1.25rem;
-}
-
-.glass-card p,
-.advantage-card p,
-.contact-item-card p {
-    color: rgba(246,251,255,0.72);
-    line-height: 1.75;
-}
-
-.image-card {
-    position: relative;
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    transition: 0.3s;
-}
-
-.image-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
-}
-
-.image-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: 0.6s;
-}
-
-.image-card:hover img {
-    transform: scale(1.08);
-}
-
-.image-mask {
-    position: absolute;
-    inset: auto 0 0 0;
-    padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-}
-
-.image-mask h3 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.45rem;
-    font-weight: 900;
-}
-
-.image-mask p {
-    color: rgba(255,255,255,0.86);
-    margin: 0.45rem 0 0;
-    line-height: 1.55;
-    font-weight: 700;
-}
-
-.image-note {
-    margin-top: 0.65rem;
-    color: #ffcf9a;
-    font-weight: 900;
-    font-size: 0.92rem;
-    line-height: 1.45;
-}
-
-.image-note span {
-    color: #ffe2bd;
-}
-
-.image-missing {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: rgba(246,251,255,0.82);
-}
-
-.pair-title {
-    margin: 2.2rem 0 1rem;
-    padding: 1.2rem 1.4rem;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.14);
-}
-
-.pair-title span {
-    font-size: 1.75rem;
-    font-weight: 900;
-    color: var(--cyan);
-}
-
-.pair-title p {
-    margin: 0.35rem 0;
-    color: rgba(246,251,255,0.78);
-    line-height: 1.7;
-}
-
-.pair-title div {
-    color: #ffcf9a;
-    font-weight: 800;
-}
-
-.database-panel {
-    padding: 1.4rem;
-    border-radius: 32px;
-    background: rgba(255,255,255,0.065);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
-}
-
-.metric-box {
-    padding: 1.2rem;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.13);
-    text-align: center;
-}
-
-.metric-box h3 {
-    color: var(--cyan);
-    margin: 0;
-    font-size: 2rem;
-}
-
-.metric-box p {
-    color: rgba(246,251,255,0.68);
-    margin: 0.3rem 0 0;
-}
-
-.recommend-result {
-    padding: 1.4rem;
-    border-radius: 26px;
-    background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
-    border: 1px solid rgba(255,255,255,0.16);
-    margin-top: 1rem;
-}
-
-.recommend-result h3 {
-    margin-top: 0;
-    color: var(--cyan);
-}
-
-.recommend-result p {
-    color: rgba(246,251,255,0.78);
-    line-height: 1.7;
-}
-
-.contact-shell {
-    padding: 2.8rem 2.2rem;
-    border-radius: 34px;
-    background: rgba(255,255,255,0.065);
-    border: 1px solid rgba(255,255,255,0.16);
-    backdrop-filter: blur(20px);
-    text-align: center;
-    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
-    margin-top: 1rem;
-}
-
-.contact-shell h2 {
-    font-size: clamp(2rem, 5vw, 3rem);
-    margin: 0;
-    background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.contact-shell p {
-    color: rgba(246,251,255,0.72);
-    margin-top: 0.6rem;
-}
-
-@media (max-width: 768px) {
     .block-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        max-width: 1280px;
+        padding-top: 1rem;
+        padding-bottom: 5rem;
     }
 
     .navbar {
-        border-radius: 20px;
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.6rem;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        margin-bottom: 1.2rem;
+        padding: 0.75rem 1.2rem;
+        border-radius: 999px;
+        background: rgba(6, 19, 31, 0.72);
+        border: 1px solid rgba(255,255,255,0.13);
+        backdrop-filter: blur(20px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 14px 42px rgba(0,0,0,0.25);
     }
 
-    .nav-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.55rem;
+    .nav-logo {
+        font-weight: 900;
+        font-size: 1.05rem;
+        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .nav-links a {
-        margin-left: 0;
-        margin-right: 0.4rem;
-        font-size: 0.82rem;
+        color: rgba(246,251,255,0.82) !important;
+        text-decoration: none;
+        margin-left: 1.2rem;
+        font-size: 0.92rem;
+        transition: 0.25s;
+    }
+
+    .nav-links a:hover {
+        color: var(--cyan) !important;
+        text-shadow: 0 0 14px rgba(37,244,238,0.6);
     }
 
     .hero {
-        min-height: auto;
-        padding: 3rem 1.3rem;
-        border-radius: 26px;
+        position: relative;
+        overflow: hidden;
+        min-height: 620px;
+        border-radius: 36px;
+        padding: 5rem 3rem;
+        background:
+            linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
+            rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.16);
+        backdrop-filter: blur(18px);
+        box-shadow: 0 28px 90px rgba(0,0,0,0.38);
     }
 
     .hero h1 {
-        font-size: 3rem;
+        font-size: clamp(3rem, 7vw, 5.8rem);
+        line-height: 1.02;
+        margin: 0;
+        font-weight: 900;
+        background: linear-gradient(90deg, var(--cyan), #ffffff 48%, var(--orange));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero h2 {
+        margin-top: 1.2rem;
+        font-size: clamp(1.05rem, 2vw, 1.45rem);
+        line-height: 1.85;
+        color: rgba(246,251,255,0.82);
+        font-weight: 500;
+    }
+
+    .hero-tag {
+        display: inline-block;
+        padding: 0.55rem 1rem;
+        border-radius: 999px;
+        color: var(--cyan);
+        background: rgba(37,244,238,0.1);
+        border: 1px solid rgba(37,244,238,0.32);
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .hero-btn,
+    .hero-btn-ghost {
+        padding: 0.9rem 1.3rem;
+        border-radius: 16px;
+        text-decoration: none !important;
+        font-weight: 900;
+        transition: 0.28s;
+    }
+
+    .hero-btn {
+        background: linear-gradient(135deg, var(--cyan), var(--orange));
+        color: #04111f !important;
+    }
+
+    .hero-btn-ghost {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: #fff !important;
+    }
+
+    .hero-btn:hover,
+    .hero-btn-ghost:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 0 28px rgba(37,244,238,0.35);
+    }
+
+    .section-head {
+        text-align: center;
+        margin: 5rem auto 2rem;
+        max-width: 880px;
+    }
+
+    .section-tag {
+        color: var(--cyan);
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        font-size: 0.8rem;
+    }
+
+    .section-head h2 {
+        margin: 0.35rem 0;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        font-weight: 900;
+        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .section-head p {
+        color: rgba(246,251,255,0.68);
+        line-height: 1.8;
+    }
+
+    .glass-card,
+    .advantage-card,
+    .contact-item-card {
+        height: 100%;
+        padding: 1.5rem;
+        border-radius: 28px;
+        background: rgba(255,255,255,0.075);
+        border: 1px solid rgba(255,255,255,0.14);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 18px 52px rgba(0,0,0,0.25);
+        transition: 0.28s ease;
+    }
+
+    .glass-card {
+        min-height: 260px;
+    }
+
+    .advantage-card {
+        min-height: 250px;
+    }
+
+    .glass-card:hover,
+    .advantage-card:hover,
+    .contact-item-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(37,244,238,0.48);
+        box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
+    }
+
+    .icon,
+    .advantage-icon,
+    .contact-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .glass-card h3,
+    .advantage-card h3,
+    .contact-item-card h3 {
+        color: #fff;
+        margin-bottom: 0.7rem;
+        font-size: 1.25rem;
+    }
+
+    .glass-card p,
+    .advantage-card p,
+    .contact-item-card p {
+        color: rgba(246,251,255,0.72);
+        line-height: 1.75;
     }
 
     .image-card {
-        height: 270px;
+        position: relative;
+        height: 360px;
+        border-radius: 30px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 24px 70px rgba(0,0,0,0.32);
+        background: rgba(255,255,255,0.07);
+        transition: 0.3s;
+        margin-bottom: 1.2rem;
     }
-}
-</style>
-""",
-    unsafe_allow_html=True
+
+    .image-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
+    }
+
+    .image-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.6s;
+    }
+
+    .image-card:hover img {
+        transform: scale(1.08);
+    }
+
+    .image-mask {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 1.35rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
+    }
+
+    .image-mask h3 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 1.45rem;
+        font-weight: 900;
+    }
+
+    .image-mask p {
+        color: rgba(255,255,255,0.86);
+        margin: 0.45rem 0 0;
+        line-height: 1.55;
+        font-weight: 700;
+    }
+
+    .image-note {
+        margin-top: 0.65rem;
+        color: #ffcf9a;
+        font-weight: 900;
+        font-size: 0.92rem;
+        line-height: 1.45;
+    }
+
+    .image-note span {
+        color: #ffe2bd;
+    }
+
+    .image-missing {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: rgba(246,251,255,0.82);
+    }
+
+    .pair-title {
+        margin: 2.2rem 0 1rem;
+        padding: 1.2rem 1.4rem;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .pair-title span {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: var(--cyan);
+    }
+
+    .pair-title p {
+        margin: 0.35rem 0;
+        color: rgba(246,251,255,0.78);
+        line-height: 1.7;
+    }
+
+    .pair-title div {
+        color: #ffcf9a;
+        font-weight: 800;
+    }
+
+    .metric-box {
+        padding: 1.2rem;
+        border-radius: 22px;
+        background: rgba(255,255,255,0.075);
+        border: 1px solid rgba(255,255,255,0.13);
+        text-align: center;
+    }
+
+    .metric-box h3 {
+        color: var(--cyan);
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .metric-box p {
+        color: rgba(246,251,255,0.68);
+        margin: 0.3rem 0 0;
+    }
+
+    .recommend-result {
+        padding: 1.4rem;
+        border-radius: 26px;
+        background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
+        border: 1px solid rgba(255,255,255,0.16);
+        margin-top: 1rem;
+    }
+
+    .recommend-result h3 {
+        margin-top: 0;
+        color: var(--cyan);
+    }
+
+    .recommend-result p {
+        color: rgba(246,251,255,0.78);
+        line-height: 1.7;
+    }
+
+    .contact-shell {
+        padding: 2.8rem 2.2rem;
+        border-radius: 34px;
+        background: rgba(255,255,255,0.065);
+        border: 1px solid rgba(255,255,255,0.16);
+        backdrop-filter: blur(20px);
+        text-align: center;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+        margin-top: 1rem;
+    }
+
+    .contact-shell h2 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin: 0;
+        background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .contact-shell p {
+        color: rgba(246,251,255,0.72);
+        margin-top: 0.6rem;
+    }
+
+    .stSlider label,
+    .stSelectbox label,
+    .stMultiSelect label {
+        color: rgba(246,251,255,0.82) !important;
+        font-weight: 800 !important;
+    }
+
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .navbar {
+            border-radius: 20px;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .nav-links a {
+            margin-left: 0;
+            margin-right: 0.4rem;
+            font-size: 0.82rem;
+        }
+
+        .hero {
+            min-height: auto;
+            padding: 3rem 1.3rem;
+            border-radius: 26px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+        }
+
+        .image-card {
+            height: 270px;
+        }
+    }
+    </style>
+    """
 )
 
 
@@ -715,23 +709,22 @@ html, body, .stApp {
 # 顶部导航
 # =========================================================
 
-st.markdown(
+safe_markdown(
     """
-<div class="navbar">
-    <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
-    <div class="nav-links">
-        <a href="#intro">项目简介</a>
-        <a href="#database">工艺数据库</a>
-        <a href="#gallery">烧制对比</a>
-        <a href="#industry">行业产品</a>
-        <a href="#advantage">项目优势</a>
-        <a href="#recommend">产品推荐</a>
-        <a href="#future">后期展望</a>
-        <a href="#contact">联系我们</a>
+    <div class="navbar">
+        <div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>
+        <div class="nav-links">
+            <a href="#intro">项目简介</a>
+            <a href="#database">工艺数据库</a>
+            <a href="#gallery">烧制对比</a>
+            <a href="#industry">行业产品</a>
+            <a href="#advantage">项目优势</a>
+            <a href="#recommend">产品推荐</a>
+            <a href="#future">后期展望</a>
+            <a href="#contact">联系我们</a>
+        </div>
     </div>
-</div>
-""",
-    unsafe_allow_html=True
+    """
 )
 
 
@@ -739,27 +732,26 @@ st.markdown(
 # Hero
 # =========================================================
 
-st.markdown(
+safe_markdown(
     """
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
-        <h1>青橙焕艺</h1>
-        <h2>
-            由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
-            项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
-            数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
-            科技感和商业展示力的数字化平台。
-        </h2>
-        <div class="hero-buttons">
-            <a class="hero-btn" href="#database">预览工艺数据库</a>
-            <a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>
-            <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
+    <div class="hero">
+        <div class="hero-content">
+            <div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>
+            <h1>青橙焕艺</h1>
+            <h2>
+                由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。
+                项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、
+                数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、
+                科技感和商业展示力的数字化平台。
+            </h2>
+            <div class="hero-buttons">
+                <a class="hero-btn" href="#database">预览工艺数据库</a>
+                <a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>
+                <a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>
+            </div>
         </div>
     </div>
-</div>
-""",
-    unsafe_allow_html=True
+    """
 )
 
 
@@ -767,7 +759,7 @@ st.markdown(
 # 项目简介
 # =========================================================
 
-st.markdown('<div id="intro"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="intro"></div>')
 
 section_title(
     "PROJECT INTRODUCTION",
@@ -778,63 +770,37 @@ section_title(
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    glass_card(
-        "♻️",
-        "废旧玻璃再生",
-        "以废弃玻璃、边角料玻璃、透明和彩色玻璃为基础材料，通过清洗、筛选、组合和热熔烧制，重新赋予废弃材料可展示、可销售、可设计的价值。"
-    )
+    glass_card("♻️", "废旧玻璃再生", "以废弃玻璃、边角料玻璃、透明和彩色玻璃为基础材料，通过清洗、筛选、组合和热熔烧制，重新赋予废弃材料可展示、可销售、可设计的价值。")
 
 with c2:
-    glass_card(
-        "🔥",
-        "青汐工坊实验",
-        "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
-    )
+    glass_card("🔥", "青汐工坊实验", "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。")
 
 with c3:
-    glass_card(
-        "📷",
-        "烧制前后对比",
-        "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
-    )
+    glass_card("📷", "烧制前后对比", "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。")
 
 c4, c5, c6 = st.columns(3)
 
 with c4:
-    glass_card(
-        "🎨",
-        "艺术产品转化",
-        "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。"
-    )
+    glass_card("🎨", "艺术产品转化", "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。")
 
 with c5:
-    glass_card(
-        "📊",
-        "数据可视化分析",
-        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
-    )
+    glass_card("📊", "数据可视化分析", "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。")
 
 with c6:
-    glass_card(
-        "🤖",
-        "AI工艺推荐",
-        "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
-    )
+    glass_card("🤖", "AI工艺推荐", "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。")
 
 
 # =========================================================
 # 工艺数据库
 # =========================================================
 
-st.markdown('<div id="database"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="database"></div>')
 
 section_title(
     "SPACE DATABASE PREVIEW",
     "预览玻璃热熔工艺数据库",
     "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
 )
-
-st.markdown('<div class="database-panel">', unsafe_allow_html=True)
 
 if df.empty:
     st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
@@ -850,33 +816,21 @@ else:
     m1, m2, m3, m4 = st.columns(4)
 
     with m1:
-        st.markdown(
-            f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>',
-            unsafe_allow_html=True
-        )
+        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
 
     with m2:
         avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
-        st.markdown(
-            f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>',
-            unsafe_allow_html=True
-        )
+        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
 
     with m3:
         avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
-        st.markdown(
-            f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>',
-            unsafe_allow_html=True
-        )
+        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
 
     with m4:
         best_temp = "暂无"
         if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
             best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
-        st.markdown(
-            f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>',
-            unsafe_allow_html=True
-        )
+        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
 
     st.markdown("### 表格形式内容")
     st.dataframe(show_df, use_container_width=True, height=360)
@@ -898,14 +852,12 @@ else:
         st.dataframe(mean_df, use_container_width=True)
         st.line_chart(mean_df.set_index("temperature_c"))
 
-st.markdown("</div>", unsafe_allow_html=True)
-
 
 # =========================================================
 # 烧制前后动态滚动照片
 # =========================================================
 
-st.markdown('<div id="gallery"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="gallery"></div>')
 
 section_title(
     "FIRING COMPARISON",
@@ -941,85 +893,79 @@ for item in scroll_items:
 if slide_html:
     components.html(
         f"""
-<style>
-.scroll-wrapper {{
-    width: 100%;
-    overflow: hidden;
-    border-radius: 32px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
-}}
-.scroll-track {{
-    display: flex;
-    gap: 24px;
-    width: max-content;
-    padding: 24px;
-    animation: scrollX 30s linear infinite;
-}}
-.scroll-wrapper:hover .scroll-track {{
-    animation-play-state: paused;
-}}
-.slide {{
-    position: relative;
-    width: 420px;
-    height: 280px;
-    flex: 0 0 auto;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
-    background: rgba(255,255,255,0.08);
-}}
-.slide img {{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}}
-.slide-caption {{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 18px;
-    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
-    color: white;
-}}
-.slide-caption strong {{
-    display: block;
-    font-size: 18px;
-    margin-bottom: 4px;
-}}
-.slide-caption span {{
-    display: block;
-    color: rgba(255,255,255,0.78);
-    font-size: 14px;
-}}
-.slide-caption em {{
-    display: block;
-    color: #ffcf9a;
-    font-style: normal;
-    font-size: 13px;
-    margin-top: 5px;
-    font-weight: 700;
-}}
-@keyframes scrollX {{
-    from {{ transform: translateX(0); }}
-    to {{ transform: translateX(-50%); }}
-}}
-@media(max-width: 768px) {{
-    .slide {{
-        width: 280px;
-        height: 210px;
-    }}
-}}
-</style>
-<div class="scroll-wrapper">
-    <div class="scroll-track">
-        {slide_html}
-        {slide_html}
-    </div>
-</div>
-""",
+        <style>
+        .scroll-wrapper {{
+            width: 100%;
+            overflow: hidden;
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+        }}
+        .scroll-track {{
+            display: flex;
+            gap: 24px;
+            width: max-content;
+            padding: 24px;
+            animation: scrollX 30s linear infinite;
+        }}
+        .scroll-wrapper:hover .scroll-track {{
+            animation-play-state: paused;
+        }}
+        .slide {{
+            position: relative;
+            width: 420px;
+            height: 280px;
+            flex: 0 0 auto;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+            background: rgba(255,255,255,0.08);
+        }}
+        .slide img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+        .slide-caption {{
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 18px;
+            background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
+            color: white;
+        }}
+        .slide-caption strong {{
+            display: block;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }}
+        .slide-caption span {{
+            display: block;
+            color: rgba(255,255,255,0.78);
+            font-size: 14px;
+        }}
+        .slide-caption em {{
+            display: block;
+            color: #ffcf9a;
+            font-style: normal;
+            font-size: 13px;
+            margin-top: 5px;
+            font-weight: 700;
+        }}
+        @keyframes scrollX {{
+            from {{ transform: translateX(0); }}
+            to {{ transform: translateX(-50%); }}
+        }}
+        </style>
+        <div class="scroll-wrapper">
+            <div class="scroll-track">
+                {slide_html}
+                {slide_html}
+            </div>
+        </div>
+        """,
         height=350
     )
 else:
@@ -1070,7 +1016,7 @@ with tab800:
 # 玻璃行业产品展示
 # =========================================================
 
-st.markdown('<div id="industry"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="industry"></div>')
 
 section_title(
     "GLASS INDUSTRY PRODUCTS",
@@ -1081,48 +1027,28 @@ section_title(
 p1, p2, p3 = st.columns(3)
 
 with p1:
-    image_card(
-        resolve_image("1"),
-        "家居器皿方向",
-        "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。"
-    )
+    image_card(resolve_image("1"), "家居器皿方向", "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。")
 
 with p2:
-    image_card(
-        resolve_image("2"),
-        "透光灯具方向",
-        "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。"
-    )
+    image_card(resolve_image("2"), "透光灯具方向", "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。")
 
 with p3:
-    image_card(
-        resolve_image("3"),
-        "花器摆件方向",
-        "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。"
-    )
+    image_card(resolve_image("3"), "花器摆件方向", "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。")
 
 p4, p5 = st.columns(2)
 
 with p4:
-    image_card(
-        resolve_image("4"),
-        "文创饰品方向",
-        "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。"
-    )
+    image_card(resolve_image("4"), "文创饰品方向", "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。")
 
 with p5:
-    image_card(
-        resolve_image("5"),
-        "生活器物方向",
-        "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。"
-    )
+    image_card(resolve_image("5"), "生活器物方向", "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。")
 
 
 # =========================================================
 # 项目优势
 # =========================================================
 
-st.markdown('<div id="advantage"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="advantage"></div>')
 
 section_title(
     "PROJECT ADVANTAGES",
@@ -1133,39 +1059,23 @@ section_title(
 a1, a2, a3, a4 = st.columns(4)
 
 with a1:
-    advantage_card(
-        "🌱",
-        "绿色低碳",
-        "减少废旧玻璃浪费，体现循环经济、环保教育和可持续设计理念。"
-    )
+    advantage_card("🌱", "绿色低碳", "减少废旧玻璃浪费，体现循环经济、环保教育和可持续设计理念。")
 
 with a2:
-    advantage_card(
-        "🧪",
-        "工坊实验可复现",
-        "依托青汐工坊记录温度、实验轮次和效果评分，便于后续复盘、优化和扩展。"
-    )
+    advantage_card("🧪", "工坊实验可复现", "依托青汐工坊记录温度、实验轮次和效果评分，便于后续复盘、优化和扩展。")
 
 with a3:
-    advantage_card(
-        "📷",
-        "对比展示直观",
-        "烧制前后照片能够直观展示温度变化对玻璃形态、颗粒感和体积感的影响。"
-    )
+    advantage_card("📷", "对比展示直观", "烧制前后照片能够直观展示温度变化对玻璃形态、颗粒感和体积感的影响。")
 
 with a4:
-    advantage_card(
-        "🛍️",
-        "产品可转化",
-        "结合玻璃行业产品形态，可延伸为灯具、花瓶、装饰画、摆件和校园文创。"
-    )
+    advantage_card("🛍️", "产品可转化", "结合玻璃行业产品形态，可延伸为灯具、花瓶、装饰画、摆件和校园文创。")
 
 
 # =========================================================
 # 产品推荐系统
 # =========================================================
 
-st.markdown('<div id="recommend"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="recommend"></div>')
 
 section_title(
     "PRODUCT RECOMMENDATION",
@@ -1197,20 +1107,19 @@ with r1:
         product_type, material, target_effect, temp
     )
 
-    st.markdown(
+    safe_markdown(
         f"""
-<div class="recommend-result">
-    <h3>AI 推荐结果</h3>
-    <p><b>用户选择产品：</b>{product_type}</p>
-    <p><b>推荐工艺温度区间：</b>{temp_range}</p>
-    <p><b>温度风险提示：</b>{risk}</p>
-    <p><b>产品设计建议：</b>{product_tip}</p>
-    <p><b>目标效果建议：</b>{effect_tip}</p>
-    <p><b>材料建议：</b>{material_tip}</p>
-    <p><b>综合推荐分：</b>{score} / 100</p>
-</div>
-""",
-        unsafe_allow_html=True
+        <div class="recommend-result">
+            <h3>AI 推荐结果</h3>
+            <p><b>用户选择产品：</b>{product_type}</p>
+            <p><b>推荐工艺温度区间：</b>{temp_range}</p>
+            <p><b>温度风险提示：</b>{risk}</p>
+            <p><b>产品设计建议：</b>{product_tip}</p>
+            <p><b>目标效果建议：</b>{effect_tip}</p>
+            <p><b>材料建议：</b>{material_tip}</p>
+            <p><b>综合推荐分：</b>{score} / 100</p>
+        </div>
+        """
     )
 
     st.progress(score / 100)
@@ -1231,7 +1140,7 @@ with r2:
 # 后期展望
 # =========================================================
 
-st.markdown('<div id="future"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="future"></div>')
 
 section_title(
     "FUTURE VISION",
@@ -1264,7 +1173,7 @@ with st.expander("04 打造青汐工坊体验与商业闭环"):
 # 联系我们
 # =========================================================
 
-st.markdown('<div id="contact"></div>', unsafe_allow_html=True)
+safe_markdown('<div id="contact"></div>')
 
 section_title(
     "CONTACT US",
@@ -1272,41 +1181,22 @@ section_title(
     "让废旧玻璃重新发光，让绿色材料进入艺术生活。"
 )
 
-st.markdown(
+safe_markdown(
     """
     <div class="contact-shell">
         <h2>青汐造物</h2>
         <p>青汐工坊 · Glass Recycling AI Platform</p>
     </div>
-    """,
-    unsafe_allow_html=True
+    """
 )
 
 cc1, cc2, cc3 = st.columns(3)
 
 with cc1:
-    contact_card(
-        "♻️",
-        "公司定位",
-        "青汐造物",
-        "废旧玻璃热熔再生",
-        "艺术产品设计"
-    )
+    contact_card("♻️", "公司定位", "青汐造物", "废旧玻璃热熔再生", "艺术产品设计")
 
 with cc2:
-    contact_card(
-        "🏛️",
-        "艺术中心",
-        "青汐工坊",
-        "校园环保项目",
-        "艺术工坊展示"
-    )
+    contact_card("🏛️", "艺术中心", "青汐工坊", "校园环保项目", "艺术工坊展示")
 
 with cc3:
-    contact_card(
-        "🤖",
-        "平台方向",
-        "青橙焕艺项目",
-        "绿色材料再生",
-        "AI推荐系统展示"
-    )
+    contact_card("🤖", "平台方向", "青橙焕艺项目", "绿色材料再生", "AI推荐系统展示")
