@@ -104,13 +104,22 @@ def load_data(path: str):
     return df
 
 
-def section_title(tag: str, title: str, desc: str):
+def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
+    """
+    通用标题函数。
+    支持：
+    section_title("TAG", "标题")
+    section_title("TAG", "标题", "描述")
+    section_title("TAG", "标题", "描述", 其他参数)
+    """
+    desc_html = f"<p>{desc}</p>" if desc else ""
+
     st.markdown(
         f"""
         <div class="section-head">
             <div class="section-tag">{tag}</div>
             <h2>{title}</h2>
-            <p>{desc}</p>
+            {desc_html}
         </div>
         """,
         unsafe_allow_html=True
@@ -1218,6 +1227,7 @@ st.markdown('<div id="industry"></div>', unsafe_allow_html=True)
 section_title(
     "GLASS INDUSTRY PRODUCTS",
     "玻璃行业产品展示",
+    "展示玻璃材料在家居器皿、灯具、花器摆件、文创饰品和生活器物等方向的行业化应用场景。"
 )
 
 p1, p2, p3 = st.columns(3)
