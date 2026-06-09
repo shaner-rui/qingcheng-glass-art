@@ -19,13 +19,14 @@ st.set_page_config(
 
 
 # =========================================================
-# 路径兼容
+# 路径配置
 # =========================================================
 
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = APP_DIR.parent if APP_DIR.name.lower() == "src" else APP_DIR
 
 IMAGE_DIR = PROJECT_DIR / "images"
+FIGURE_DIR = PROJECT_DIR / "figures"
 
 DATA_CANDIDATES = [
     PROJECT_DIR / "glass_experiment_numeric_only.csv",
@@ -82,6 +83,7 @@ def img_to_uri(path: Path) -> str:
 @st.cache_data
 def load_data(path: str):
     csv_path = Path(path)
+
     if not csv_path.exists():
         return pd.DataFrame()
 
@@ -93,16 +95,14 @@ def load_data(path: str):
     return df
 
 
-def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
-    desc_html = f"<p>{desc}</p>" if desc else ""
-
+def section_title(tag: str, title: str, desc: str):
     st.markdown(
         f"""
-<div class="section-head">
-    <div class="section-tag">{tag}</div>
-    <h2>{title}</h2>
-    {desc_html}
-</div>
+        <div class="section-head">
+            <div class="section-tag">{tag}</div>
+            <h2>{title}</h2>
+            <p>{desc}</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -111,11 +111,11 @@ def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwarg
 def glass_card(icon: str, title: str, text: str):
     st.markdown(
         f"""
-<div class="glass-card">
-    <div class="icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{text}</p>
-</div>
+        <div class="glass-card">
+            <div class="icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{text}</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -124,11 +124,11 @@ def glass_card(icon: str, title: str, text: str):
 def advantage_card(icon: str, title: str, text: str):
     st.markdown(
         f"""
-<div class="advantage-card">
-    <div class="advantage-icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{text}</p>
-</div>
+        <div class="advantage-card">
+            <div class="advantage-icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{text}</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -137,46 +137,54 @@ def advantage_card(icon: str, title: str, text: str):
 def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
     st.markdown(
         f"""
-<div class="contact-item-card">
-    <div class="contact-icon">{icon}</div>
-    <h3>{title}</h3>
-    <p>{line1}</p>
-    <p>{line2}</p>
-    <p>{line3}</p>
-</div>
+        <div class="contact-item-card">
+            <div class="contact-icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{line1}</p>
+            <p>{line2}</p>
+            <p>{line3}</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
 
 
-def image_card(path: Path, title: str, desc: str, maker: str = ""):
+def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
-    maker_html = ""
-    if maker:
-        maker_html = f'<div class="maker">制作人员：{maker}</div>'
+    if not uri:
+        st.markdown(
+            f"""
+            <div class="image-card image-missing">
+                <div>
+                    <h3>{title}</h3>
+                    <p>缺少图片：{path.name}</p>
+                    <small>请确认图片已放入 images 文件夹</small>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        return
 
-    if uri:
-        html = f"""
-<div class="image-card">
-    <img src="{uri}" alt="{title}">
-    <div class="image-mask">
-        <h3>{title}</h3>
-        <p>{desc}</p>
-        {maker_html}
-    </div>
-</div>
+    note_block = ""
+    if note_label and note_text:
+        note_block = f"""
+        <div class="image-note">
+            <span>{note_label}：</span>{note_text}
+        </div>
         """
-    else:
-        html = f"""
-<div class="image-card image-missing">
-    <div>
-        <h3>{title}</h3>
-        <p>缺少图片：{path.name}</p>
-        <small>请确认该图片已放入 images 文件夹</small>
+
+    html = f"""
+    <div class="image-card">
+        <img src="{uri}" alt="{title}">
+        <div class="image-mask">
+            <h3>{title}</h3>
+            <p>{desc}</p>
+            {note_block}
+        </div>
     </div>
-</div>
-        """
+    """
 
     st.markdown(html, unsafe_allow_html=True)
 
@@ -184,11 +192,11 @@ def image_card(path: Path, title: str, desc: str, maker: str = ""):
 def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
     st.markdown(
         f"""
-<div class="pair-title">
-    <span>{temp}℃</span>
-    <p>{result_desc}</p>
-    <div>制作人员：{maker}</div>
-</div>
+        <div class="pair-title">
+            <span>{temp}℃</span>
+            <p>{result_desc}</p>
+            <div>制作人员：{maker}</div>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -200,6 +208,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(before_name),
             f"{temp}℃ · 烧制前",
             f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
+            "制作人员",
             maker
         )
 
@@ -208,6 +217,7 @@ def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, 
             resolve_image(after_name),
             f"{temp}℃ · 烧制后",
             f"{temp}hou：经过热熔后的成型状态与视觉效果。",
+            "制作人员",
             maker
         )
 
@@ -341,7 +351,7 @@ html, body, .stApp {
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 650px;
+    min-height: 620px;
     border-radius: 36px;
     padding: 5rem 3rem;
     background:
@@ -350,54 +360,6 @@ html, body, .stApp {
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(18px);
     box-shadow: 0 28px 90px rgba(0,0,0,0.38);
-}
-
-.hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
-    background-size: 44px 44px;
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-}
-
-.hero::after {
-    content: "";
-    position: absolute;
-    right: -130px;
-    top: 55px;
-    width: 520px;
-    height: 520px;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, rgba(37,244,238,0.34), rgba(255,159,67,0.16), transparent 68%);
-    filter: blur(5px);
-    animation: floatPlanet 7s ease-in-out infinite;
-}
-
-@keyframes floatPlanet {
-    0%,100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(26px) scale(1.05); }
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 850px;
-}
-
-.hero-tag {
-    display: inline-block;
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
-    color: var(--cyan);
-    background: rgba(37,244,238,0.1);
-    border: 1px solid rgba(37,244,238,0.32);
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    margin-bottom: 1.5rem;
 }
 
 .hero h1 {
@@ -416,6 +378,18 @@ html, body, .stApp {
     line-height: 1.85;
     color: rgba(246,251,255,0.82);
     font-weight: 500;
+}
+
+.hero-tag {
+    display: inline-block;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    color: var(--cyan);
+    background: rgba(37,244,238,0.1);
+    border: 1px solid rgba(37,244,238,0.32);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    margin-bottom: 1.5rem;
 }
 
 .hero-buttons {
@@ -478,9 +452,10 @@ html, body, .stApp {
     line-height: 1.8;
 }
 
-.glass-card {
+.glass-card,
+.advantage-card,
+.contact-item-card {
     height: 100%;
-    min-height: 260px;
     padding: 1.5rem;
     border-radius: 28px;
     background: rgba(255,255,255,0.075);
@@ -490,48 +465,42 @@ html, body, .stApp {
     transition: 0.28s ease;
 }
 
-.glass-card:hover {
+.glass-card {
+    min-height: 260px;
+}
+
+.advantage-card {
+    min-height: 250px;
+}
+
+.glass-card:hover,
+.advantage-card:hover,
+.contact-item-card:hover {
     transform: translateY(-8px) scale(1.02);
     border-color: rgba(37,244,238,0.48);
     box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
 }
 
 .icon,
-.advantage-icon {
+.advantage-icon,
+.contact-icon {
     font-size: 2.5rem;
     margin-bottom: 0.8rem;
 }
 
 .glass-card h3,
-.advantage-card h3 {
+.advantage-card h3,
+.contact-item-card h3 {
     color: #fff;
     margin-bottom: 0.7rem;
     font-size: 1.25rem;
 }
 
 .glass-card p,
-.advantage-card p {
+.advantage-card p,
+.contact-item-card p {
     color: rgba(246,251,255,0.72);
     line-height: 1.75;
-}
-
-.advantage-card {
-    height: 280px;
-    padding: 1.45rem;
-    border-radius: 28px;
-    background:
-        linear-gradient(135deg, rgba(37,244,238,0.09), rgba(255,159,67,0.08)),
-        rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 18px 52px rgba(0,0,0,0.25);
-    transition: 0.28s ease;
-}
-
-.advantage-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(255,159,67,0.48);
-    box-shadow: 0 0 32px rgba(255,159,67,0.20), 0 18px 52px rgba(0,0,0,0.35);
 }
 
 .image-card {
@@ -543,7 +512,6 @@ html, body, .stApp {
     box-shadow: 0 24px 70px rgba(0,0,0,0.32);
     background: rgba(255,255,255,0.07);
     transition: 0.3s;
-    margin-bottom: 1.2rem;
 }
 
 .image-card:hover {
@@ -566,28 +534,33 @@ html, body, .stApp {
     position: absolute;
     inset: auto 0 0 0;
     padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.20), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
 }
 
 .image-mask h3 {
     margin: 0;
-    color: white;
-    font-size: 1.7rem;
+    color: #ffffff;
+    font-size: 1.45rem;
     font-weight: 900;
 }
 
 .image-mask p {
-    color: rgba(255,255,255,0.82);
-    margin: 0.35rem 0 0;
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
     line-height: 1.55;
     font-weight: 700;
 }
 
-.maker {
-    margin-top: 0.5rem;
+.image-note {
+    margin-top: 0.65rem;
     color: #ffcf9a;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.image-note span {
+    color: #ffe2bd;
 }
 
 .image-missing {
@@ -602,11 +575,8 @@ html, body, .stApp {
     margin: 2.2rem 0 1rem;
     padding: 1.2rem 1.4rem;
     border-radius: 24px;
-    background:
-        linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10)),
-        rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(16px);
 }
 
 .pair-title span {
@@ -624,6 +594,15 @@ html, body, .stApp {
 .pair-title div {
     color: #ffcf9a;
     font-weight: 800;
+}
+
+.database-panel {
+    padding: 1.4rem;
+    border-radius: 32px;
+    background: rgba(255,255,255,0.065);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
 }
 
 .metric-box {
@@ -666,11 +645,7 @@ html, body, .stApp {
 .contact-shell {
     padding: 2.8rem 2.2rem;
     border-radius: 34px;
-    background:
-        radial-gradient(circle at 15% 10%, rgba(37,244,238,0.20), transparent 28%),
-        radial-gradient(circle at 86% 20%, rgba(255,159,67,0.18), transparent 28%),
-        linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.12)),
-        rgba(255,255,255,0.065);
+    background: rgba(255,255,255,0.065);
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(20px);
     text-align: center;
@@ -689,53 +664,6 @@ html, body, .stApp {
 .contact-shell p {
     color: rgba(246,251,255,0.72);
     margin-top: 0.6rem;
-}
-
-.contact-item-card {
-    min-height: 190px;
-    padding: 1.4rem;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 16px 42px rgba(0,0,0,0.22);
-    transition: 0.25s ease;
-    text-align: center;
-}
-
-.contact-item-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(37,244,238,0.48);
-    box-shadow: 0 0 28px rgba(37,244,238,0.18);
-}
-
-.contact-icon {
-    font-size: 2rem;
-    margin-bottom: 0.6rem;
-}
-
-.contact-item-card h3 {
-    margin: 0 0 0.6rem 0;
-    color: var(--cyan);
-    font-size: 1.15rem;
-}
-
-.contact-item-card p {
-    margin: 0.25rem 0;
-    color: rgba(246,251,255,0.72);
-    line-height: 1.55;
-}
-
-div[data-testid="stDataFrame"] {
-    border-radius: 18px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.14);
-}
-
-.stSlider label,
-.stSelectbox label,
-.stMultiSelect label {
-    color: rgba(246,251,255,0.82) !important;
-    font-weight: 800 !important;
 }
 
 @media (max-width: 768px) {
@@ -776,14 +704,9 @@ div[data-testid="stDataFrame"] {
     .image-card {
         height: 270px;
     }
-
-    .advantage-card {
-        height: auto;
-        min-height: 230px;
-    }
 }
 </style>
-    """,
+""",
     unsafe_allow_html=True
 )
 
@@ -807,13 +730,13 @@ st.markdown(
         <a href="#contact">联系我们</a>
     </div>
 </div>
-    """,
+""",
     unsafe_allow_html=True
 )
 
 
 # =========================================================
-# Hero 首页
+# Hero
 # =========================================================
 
 st.markdown(
@@ -835,7 +758,7 @@ st.markdown(
         </div>
     </div>
 </div>
-    """,
+""",
     unsafe_allow_html=True
 )
 
@@ -865,14 +788,14 @@ with c2:
     glass_card(
         "🔥",
         "青汐工坊实验",
-        "依托青汐工坊开展热熔工艺实验，对 800℃、780℃、760℃ 等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
+        "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
     )
 
 with c3:
     glass_card(
         "📷",
         "烧制前后对比",
-        "通过 760℃、780℃、800℃ 三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
+        "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
     )
 
 c4, c5, c6 = st.columns(3)
@@ -888,13 +811,13 @@ with c5:
     glass_card(
         "📊",
         "数据可视化分析",
-        "将实验结果转化为可筛选、可统计、可分析的 CSV 数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
+        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
     )
 
 with c6:
     glass_card(
         "🤖",
-        "AI 工艺推荐",
+        "AI工艺推荐",
         "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
     )
 
@@ -910,6 +833,8 @@ section_title(
     "预览玻璃热熔工艺数据库",
     "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
 )
+
+st.markdown('<div class="database-panel">', unsafe_allow_html=True)
 
 if df.empty:
     st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
@@ -973,6 +898,8 @@ else:
         st.dataframe(mean_df, use_container_width=True)
         st.line_chart(mean_df.set_index("temperature_c"))
 
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 # =========================================================
 # 烧制前后动态滚动照片
@@ -983,7 +910,7 @@ st.markdown('<div id="gallery"></div>', unsafe_allow_html=True)
 section_title(
     "FIRING COMPARISON",
     "烧制前后照片展示",
-    "围绕 760℃、780℃、800℃ 三组温度，将烧制前 qian 与烧制后 hou 进行动态展示，突出不同温度下玻璃状态的变化。"
+    "围绕760℃、780℃、800℃三组温度，将烧制前 qian 与烧制后 hou 进行动态展示，突出不同温度下玻璃状态的变化。"
 )
 
 scroll_items = [
@@ -1001,14 +928,14 @@ for item in scroll_items:
     uri = img_to_uri(item["path"])
     if uri:
         slide_html += f"""
-<div class="slide">
-    <img src="{uri}">
-    <div class="slide-caption">
-        <strong>{item["title"]}</strong>
-        <span>{item["desc"]}</span>
-        <em>制作人员：{item["maker"]}</em>
-    </div>
-</div>
+        <div class="slide">
+            <img src="{uri}">
+            <div class="slide-caption">
+                <strong>{item["title"]}</strong>
+                <span>{item["desc"]}</span>
+                <em>制作人员：{item["maker"]}</em>
+            </div>
+        </div>
         """
 
 if slide_html:
@@ -1020,10 +947,7 @@ if slide_html:
     overflow: hidden;
     border-radius: 32px;
     border: 1px solid rgba(255,255,255,0.16);
-    background:
-        radial-gradient(circle at 10% 20%, rgba(37,244,238,0.18), transparent 30%),
-        radial-gradient(circle at 90% 15%, rgba(255,159,67,0.16), transparent 28%),
-        rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.06);
     box-shadow: 0 24px 70px rgba(0,0,0,0.35);
 }}
 .scroll-track {{
@@ -1050,10 +974,6 @@ if slide_html:
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: 0.4s;
-}}
-.slide:hover img {{
-    transform: scale(1.08);
 }}
 .slide-caption {{
     position: absolute;
@@ -1099,7 +1019,7 @@ if slide_html:
         {slide_html}
     </div>
 </div>
-        """,
+""",
         height=350
     )
 else:
@@ -1113,7 +1033,7 @@ else:
 section_title(
     "BEFORE & AFTER",
     "烧制前后的对比",
-    "根据图片文件名中的数字识别温度，qian 表示烧制前，hou 表示烧制后。用户可以直观看到不同温度对玻璃热熔状态的影响。"
+    "根据图片文件名中的数字识别温度，qian表示烧制前，hou表示烧制后。"
 )
 
 tab760, tab780, tab800 = st.tabs(["760℃ 对比", "780℃ 对比", "800℃ 对比"])
@@ -1124,7 +1044,7 @@ with tab760:
         "760qian",
         "760hou",
         "李雨豪、芦子晴、刘鑫悦、刘关伟、闫续、高艺萌等",
-        "760℃ 组整体表现较好，多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
+        "760℃组整体表现较好，多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
     )
 
 with tab780:
@@ -1133,7 +1053,7 @@ with tab780:
         "780qian",
         "780hou",
         "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹等",
-        "780℃ 组仍表现出温度偏高问题，部分样品出现颗粒感和体积感不足，个别样品透光效果一般。"
+        "780℃组仍表现出温度偏高问题，部分样品出现颗粒感和体积感不足，个别样品透光效果一般。"
     )
 
 with tab800:
@@ -1142,7 +1062,7 @@ with tab800:
         "800qian",
         "800hou",
         "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹、李若冰等",
-        "800℃ 组温度过高，多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
+        "800℃组温度过高，多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
     )
 
 
@@ -1155,7 +1075,7 @@ st.markdown('<div id="industry"></div>', unsafe_allow_html=True)
 section_title(
     "GLASS INDUSTRY PRODUCTS",
     "玻璃行业产品展示",
-    "展示玻璃材料在家居器皿、灯具、花器摆件、文创饰品和生活器物等方向的行业化应用场景。"
+    "以下图片用于展示玻璃行业常见产品形态与市场应用方向，作为青汐造物后续产品设计参考。"
 )
 
 p1, p2, p3 = st.columns(3)
@@ -1289,7 +1209,7 @@ with r1:
     <p><b>材料建议：</b>{material_tip}</p>
     <p><b>综合推荐分：</b>{score} / 100</p>
 </div>
-        """,
+""",
         unsafe_allow_html=True
     )
 
@@ -1354,10 +1274,10 @@ section_title(
 
 st.markdown(
     """
-<div class="contact-shell">
-    <h2>青汐造物</h2>
-    <p>青汐工坊 · Glass Recycling AI Platform</p>
-</div>
+    <div class="contact-shell">
+        <h2>青汐造物</h2>
+        <p>青汐工坊 · Glass Recycling AI Platform</p>
+    </div>
     """,
     unsafe_allow_html=True
 )
@@ -1388,5 +1308,5 @@ with cc3:
         "平台方向",
         "青橙焕艺项目",
         "绿色材料再生",
-        "AI 推荐系统展示"
+        "AI推荐系统展示"
     )
