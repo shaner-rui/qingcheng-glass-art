@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 # =========================================================
 
 st.set_page_config(
-    page_title="青橙焕艺再生玻璃技术服务平台",
+    page_title="青承焕艺再生玻璃技术服务平台",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -926,7 +926,7 @@ hr {
 safe_markdown(
     """
 <div class="navbar">
-    <div class="nav-logo">♻️青橙焕艺技术服务平台</div>
+    <div class="nav-logo">♻️青承焕艺技术服务平台</div>
     <div class="nav-links">
         <a href="#intro">项目简介</a>
         <a href="#pain">行业痛点</a>
@@ -952,7 +952,7 @@ safe_markdown(
 <div class="hero">
     <div class="hero-content">
         <div class="hero-tag">LOW-TEMPERATURE FUSION · AI DESIGN · B2B2C PLATFORM · GREEN MATERIAL</div>
-        <h1>青橙焕艺</h1>
+        <h1>青承焕艺</h1>
         <h2>
             面向玻璃产业绿色转型的再生玻璃低温热熔技术服务平台。系统围绕工业玻璃废料回收、
             低温热熔工艺、AI智能设计、再生玻璃艺术板材、公共空间装置、文创销售与技术服务，
@@ -1090,7 +1090,7 @@ with p6:
     glass_card(
         "✅",
         "平台化破局",
-        "青橙焕艺以工艺数据库、AI匹配、产品展示、原料对接和会员服务串联全链路，降低协作与试错成本。"
+        "青承焕艺以工艺数据库、AI匹配、产品展示、原料对接和会员服务串联全链路，降低协作与试错成本。"
     )
 
 
@@ -2090,7 +2090,7 @@ section_title(
 safe_markdown(
     """
 <div class="contact-shell">
-    <h2>青橙焕艺</h2>
+    <h2>青承焕艺</h2>
     <p>青汐工坊 · Glass Recycling AI Platform · 绿色低碳艺术创业项目</p>
 </div>
 """
