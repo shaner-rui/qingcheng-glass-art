@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 # =========================================================
 
 st.set_page_config(
-    page_title="倾城幻艺 | 青橙焕艺玻璃再生AI平台",
+    page_title="倾城幻艺 | 青橙焕艺再生玻璃技术服务平台",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -44,6 +44,9 @@ if "vip_level" not in st.session_state:
 
 if "factory_orders" not in st.session_state:
     st.session_state.factory_orders = []
+
+if "service_orders" not in st.session_state:
+    st.session_state.service_orders = []
 
 
 # =========================================================
@@ -108,12 +111,30 @@ def load_data(path: str) -> pd.DataFrame:
 
     demo_data = [
         {
+            "temperature_c": 700,
+            "success_score": 78,
+            "particle_score": 82,
+            "volume_score": 79,
+            "transparency_score": 74,
+            "overheat_score": 10,
+            "overall_quality_score_100": 78
+        },
+        {
+            "temperature_c": 720,
+            "success_score": 82,
+            "particle_score": 86,
+            "volume_score": 82,
+            "transparency_score": 78,
+            "overheat_score": 14,
+            "overall_quality_score_100": 82
+        },
+        {
             "temperature_c": 760,
             "success_score": 88,
             "particle_score": 90,
             "volume_score": 86,
             "transparency_score": 82,
-            "overheat_score": 12,
+            "overheat_score": 18,
             "overall_quality_score_100": 88
         },
         {
@@ -122,7 +143,7 @@ def load_data(path: str) -> pd.DataFrame:
             "particle_score": 88,
             "volume_score": 84,
             "transparency_score": 85,
-            "overheat_score": 15,
+            "overheat_score": 20,
             "overall_quality_score_100": 86
         },
         {
@@ -131,17 +152,8 @@ def load_data(path: str) -> pd.DataFrame:
             "particle_score": 68,
             "volume_score": 70,
             "transparency_score": 76,
-            "overheat_score": 35,
-            "overall_quality_score_100": 73
-        },
-        {
-            "temperature_c": 780,
-            "success_score": 70,
-            "particle_score": 64,
-            "volume_score": 67,
-            "transparency_score": 73,
             "overheat_score": 42,
-            "overall_quality_score_100": 69
+            "overall_quality_score_100": 73
         },
         {
             "temperature_c": 800,
@@ -151,15 +163,6 @@ def load_data(path: str) -> pd.DataFrame:
             "transparency_score": 78,
             "overheat_score": 72,
             "overall_quality_score_100": 54
-        },
-        {
-            "temperature_c": 800,
-            "success_score": 52,
-            "particle_score": 36,
-            "volume_score": 39,
-            "transparency_score": 75,
-            "overheat_score": 78,
-            "overall_quality_score_100": 51
         },
     ]
 
@@ -209,12 +212,14 @@ def glass_card(icon: str, title: str, text: str):
     )
 
 
-def metric_box(value: str, label: str):
+def metric_box(value: str, label: str, sub: str = ""):
+    sub_html = f"<small>{sub}</small>" if sub else ""
     safe_markdown(
         f"""
 <div class="metric-box">
     <h3>{value}</h3>
     <p>{label}</p>
+    {sub_html}
 </div>
 """
     )
@@ -231,6 +236,18 @@ def info_panel(title: str, body: str):
     )
 
 
+def chain_step(num: str, title: str, text: str):
+    safe_markdown(
+        f"""
+<div class="chain-step">
+    <div class="chain-num">{num}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
+"""
+    )
+
+
 def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
@@ -240,7 +257,7 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
 <div class="missing-img">
     <h3>{title}</h3>
     <p>缺少图片：{path.name}</p>
-    <small>请将图片放入项目 images 文件夹；没有该图片也不会影响系统运行。</small>
+    <small>请将图片放入项目 images 文件夹；该图片不存在时系统仍可运行。</small>
 </div>
 """
         )
@@ -260,7 +277,7 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
 body {{
     margin: 0;
     background: transparent;
-    font-family: "Noto Sans SC", Arial, sans-serif;
+    font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
 }}
 
 .image-card {{
@@ -342,38 +359,42 @@ body {{
     )
 
 
-def recommend(product_type: str, material: str, target_effect: str, temp: int):
-    if product_type == "花瓶":
-        base_temp = "760℃ - 770℃"
-        product_tip = "花瓶需要保留局部体积感，建议玻璃融合但不要完全摊平。"
+def recommend(product_type: str, material: str, target_effect: str, temp: int, thickness: str, particle: str):
+    if product_type == "再生玻璃艺术板材":
+        base_temp = "720℃ - 760℃"
+        product_tip = "艺术板材需要稳定平整度与肌理层次，方案小样确定颜色分布后再放大生产。"
     elif product_type == "灯具":
-        base_temp = "755℃ - 765℃"
-        product_tip = "灯具更重视透光度，建议使用透明玻璃或浅色玻璃组合。"
+        base_temp = "735℃ - 765℃"
+        product_tip = "灯具更重视透光度，方案使用透明玻璃或浅色玻璃组合，避免颜色堆叠过厚。"
     elif product_type == "装饰画":
-        base_temp = "750℃ - 765℃"
+        base_temp = "720℃ - 760℃"
         product_tip = "装饰画适合保留颗粒边界和色彩层次，温度不宜过高。"
     elif product_type == "公共艺术装置":
-        base_temp = "760℃ - 775℃"
-        product_tip = "公共艺术装置需要兼顾强度、造型和视觉冲击力，建议先小样验证再放大制作。"
+        base_temp = "740℃ - 775℃"
+        product_tip = "公共艺术装置需要兼顾强度、造型和视觉冲击力，方案先小样验证再放大制作。"
     elif product_type == "艺术摆件":
-        base_temp = "760℃ - 775℃"
+        base_temp = "745℃ - 775℃"
         product_tip = "艺术摆件可适当增强体积感，但要避免温度过高造成形态塌陷。"
     else:
-        base_temp = "755℃ - 770℃"
-        product_tip = "综合文创产品建议先做小样测试，再根据成品效果扩大尺寸。"
+        base_temp = "730℃ - 765℃"
+        product_tip = "综合文创产品方案先做小样测试，再根据成品效果扩大尺寸。"
 
-    if temp >= 790:
-        risk = "当前温度偏高，容易导致玻璃过度熔融，颗粒感和体积感下降。建议明显降温。"
+    if temp >= 795:
+        risk = "当前温度偏高，容易导致玻璃过度熔融，颗粒感和体积感下降。方案明显降温。"
         score = 45
-    elif 775 <= temp < 790:
-        risk = "当前温度仍偏高，颗粒边界可能变弱，建议向760℃附近调整。"
-        score = 62
-    elif 755 <= temp < 775:
-        risk = "当前温度较适中，适合形成颗粒感、体积感和较好的透光表现。"
+        risk_level = "高风险"
+    elif 775 <= temp < 795:
+        risk = "当前温度仍偏高，颗粒边界可能变弱，方案向760℃附近调整。"
+        score = 64
+        risk_level = "中高风险"
+    elif 720 <= temp < 775:
+        risk = "当前温度处于低温热熔较适宜区间，适合形成颗粒感、体积感和较好的透光表现。"
         score = 88
+        risk_level = "较低风险"
     else:
         risk = "当前温度可能偏低，玻璃融合度不足，成品牢固性可能下降。"
         score = 58
+        risk_level = "中风险"
 
     if target_effect == "颗粒感明显":
         effect_tip = "应减少过度熔融，重点保留玻璃颗粒边界。"
@@ -382,7 +403,7 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
     elif target_effect == "体积感强":
         effect_tip = "应控制局部堆叠厚度，让玻璃融合但不完全摊平。"
     else:
-        effect_tip = "建议平衡颗粒感、透光度和体积感，适合商业样品。"
+        effect_tip = "方案平衡颗粒感、透光度和体积感，适合商业样品。"
 
     if material == "透明玻璃":
         material_tip = "透明玻璃适合灯具、窗饰和透光艺术板。"
@@ -390,10 +411,41 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
         material_tip = "彩色玻璃视觉表现强，适合装饰画和艺术摆件。"
     elif material == "混合玻璃":
         material_tip = "混合玻璃层次丰富，但需要注意颜色过杂。"
+    elif material == "建筑平板玻璃":
+        material_tip = "建筑平板玻璃适合再生板材和空间材料，但需要重视边角预处理。"
     else:
-        material_tip = "建议先做小样实验，记录温度和最终效果。"
+        material_tip = "方案先做小样实验，记录温度和最终效果。"
 
-    return base_temp, risk, score, product_tip, effect_tip, material_tip
+    if thickness == "薄层 3-5mm":
+        thickness_tip = "薄层适合装饰画、饰品和灯罩类产品，升温和降温应更平缓。"
+    elif thickness == "中层 6-10mm":
+        thickness_tip = "中层适合板材、摆件和桌面产品，兼顾结构稳定与肌理表现。"
+    else:
+        thickness_tip = "厚层适合公共艺术装置，但方案分层烧制，降低开裂风险。"
+
+    if particle == "细颗粒":
+        particle_tip = "细颗粒更容易融合，适合追求细腻质感。"
+    elif particle == "中颗粒":
+        particle_tip = "中颗粒综合表现较稳定，适合多数产品。"
+    else:
+        particle_tip = "粗颗粒视觉冲击力强，但需要更谨慎控制温度与保温时间。"
+
+    hold_time = "28-35分钟" if score >= 80 else "20-28分钟" if temp < 720 else "方案重新调整温度后再设定"
+    energy_compare = "相较传统高温工艺，展示模型按低温热熔路径估算，可显著降低能耗与试错损耗。"
+
+    return {
+        "base_temp": base_temp,
+        "risk": risk,
+        "score": score,
+        "risk_level": risk_level,
+        "product_tip": product_tip,
+        "effect_tip": effect_tip,
+        "material_tip": material_tip,
+        "thickness_tip": thickness_tip,
+        "particle_tip": particle_tip,
+        "hold_time": hold_time,
+        "energy_compare": energy_compare,
+    }
 
 
 df = load_data(str(DATA_PATH))
@@ -405,17 +457,16 @@ df = load_data(str(DATA_PATH))
 
 safe_markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
-
 :root {
     --cyan: #25f4ee;
     --orange: #ff9f43;
     --green: #80ff72;
+    --blue: #6aa8ff;
     --white: #f6fbff;
 }
 
 html, body, .stApp {
-    font-family: 'Noto Sans SC', sans-serif;
+    font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
     scroll-behavior: smooth;
 }
 
@@ -429,7 +480,7 @@ html, body, .stApp {
 }
 
 .block-container {
-    max-width: 1320px;
+    max-width: 1360px;
     padding-top: 1rem;
     padding-bottom: 5rem;
 }
@@ -439,9 +490,9 @@ html, body, .stApp {
     top: 0;
     z-index: 999;
     margin-bottom: 1.25rem;
-    padding: 0.75rem 1.2rem;
+    padding: 0.78rem 1.2rem;
     border-radius: 999px;
-    background: rgba(6, 19, 31, 0.76);
+    background: rgba(6, 19, 31, 0.78);
     border: 1px solid rgba(255,255,255,0.13);
     backdrop-filter: blur(20px);
     display: flex;
@@ -474,7 +525,7 @@ html, body, .stApp {
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 640px;
+    min-height: 660px;
     border-radius: 38px;
     padding: 5.2rem 3rem;
     background:
@@ -490,8 +541,8 @@ html, body, .stApp {
     position: absolute;
     right: -120px;
     top: -120px;
-    width: 360px;
-    height: 360px;
+    width: 380px;
+    height: 380px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,159,67,0.42), transparent 70%);
     filter: blur(4px);
@@ -509,10 +560,10 @@ html, body, .stApp {
 
 .hero h2 {
     margin-top: 1.2rem;
-    max-width: 980px;
+    max-width: 1020px;
     font-size: clamp(1.05rem, 2vw, 1.42rem);
     line-height: 1.9;
-    color: rgba(246,251,255,0.83);
+    color: rgba(246,251,255,0.84);
     font-weight: 500;
 }
 
@@ -561,10 +612,39 @@ html, body, .stApp {
     box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
 
+.hero-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+    gap: 1rem;
+    max-width: 1020px;
+    margin-top: 2.2rem;
+}
+
+.hero-kpi {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.hero-kpi strong {
+    display: block;
+    color: var(--cyan);
+    font-size: 1.55rem;
+    font-weight: 900;
+}
+
+.hero-kpi span {
+    display: block;
+    color: rgba(246,251,255,0.72);
+    margin-top: 0.25rem;
+    line-height: 1.45;
+}
+
 .section-head {
     text-align: center;
     margin: 5rem auto 2rem;
-    max-width: 940px;
+    max-width: 980px;
 }
 
 .section-tag {
@@ -590,7 +670,8 @@ html, body, .stApp {
 
 .glass-card,
 .info-panel,
-.contact-item-card {
+.contact-item-card,
+.chain-step {
     height: 100%;
     padding: 1.45rem;
     border-radius: 28px;
@@ -605,9 +686,27 @@ html, body, .stApp {
     min-height: 245px;
 }
 
+.chain-step {
+    min-height: 230px;
+    position: relative;
+    overflow: hidden;
+}
+
+.chain-step::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    bottom: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(37,244,238,0.16), transparent 70%);
+}
+
 .glass-card:hover,
 .info-panel:hover,
-.contact-item-card:hover {
+.contact-item-card:hover,
+.chain-step:hover {
     transform: translateY(-7px);
     border-color: rgba(37,244,238,0.48);
     box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
@@ -618,9 +717,23 @@ html, body, .stApp {
     margin-bottom: 0.8rem;
 }
 
+.chain-num {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--cyan), var(--orange));
+    color: #05111e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    margin-bottom: 1rem;
+}
+
 .glass-card h3,
 .info-panel h3,
-.contact-item-card h3 {
+.contact-item-card h3,
+.chain-step h3 {
     color: #fff;
     margin-bottom: 0.7rem;
     font-size: 1.22rem;
@@ -629,7 +742,8 @@ html, body, .stApp {
 
 .glass-card p,
 .info-panel p,
-.contact-item-card p {
+.contact-item-card p,
+.chain-step p {
     color: rgba(246,251,255,0.74);
     line-height: 1.75;
 }
@@ -640,7 +754,7 @@ html, body, .stApp {
     background: rgba(255,255,255,0.075);
     border: 1px solid rgba(255,255,255,0.13);
     text-align: center;
-    min-height: 120px;
+    min-height: 125px;
 }
 
 .metric-box h3 {
@@ -651,14 +765,22 @@ html, body, .stApp {
 }
 
 .metric-box p {
-    color: rgba(246,251,255,0.68);
+    color: rgba(246,251,255,0.70);
     margin: 0.3rem 0 0;
+}
+
+.metric-box small {
+    color: rgba(255,207,154,0.95);
+    display: block;
+    margin-top: 0.35rem;
+    line-height: 1.45;
 }
 
 .recommend-result,
 .order-result,
 .vip-panel,
-.lock-panel {
+.lock-panel,
+.design-panel {
     padding: 1.45rem;
     border-radius: 26px;
     background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
@@ -676,7 +798,8 @@ html, body, .stApp {
 .recommend-result h3,
 .order-result h3,
 .vip-panel h3,
-.lock-panel h3 {
+.lock-panel h3,
+.design-panel h3 {
     margin-top: 0;
     color: var(--cyan);
     font-weight: 900;
@@ -685,7 +808,8 @@ html, body, .stApp {
 .recommend-result p,
 .order-result p,
 .vip-panel p,
-.lock-panel p {
+.lock-panel p,
+.design-panel p {
     color: rgba(246,251,255,0.78);
     line-height: 1.72;
 }
@@ -746,6 +870,12 @@ hr {
     border-color: rgba(255,255,255,0.12);
 }
 
+@media (max-width: 900px) {
+    .hero-kpis {
+        grid-template-columns: repeat(2, minmax(130px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
     .block-container {
         padding-left: 1rem;
@@ -780,6 +910,10 @@ hr {
     .hero h1 {
         font-size: 3rem;
     }
+
+    .hero-kpis {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 """)
@@ -792,15 +926,16 @@ hr {
 safe_markdown(
     """
 <div class="navbar">
-    <div class="nav-logo">♻️ 倾城幻艺 · 青橙焕艺 AI平台</div>
+    <div class="nav-logo">♻️ 倾城幻艺 · 青橙焕艺技术服务平台</div>
     <div class="nav-links">
         <a href="#intro">项目简介</a>
+        <a href="#pain">行业痛点</a>
         <a href="#factory">原料工厂</a>
         <a href="#database">工艺数据库</a>
-        <a href="#recommend">AI推荐</a>
+        <a href="#recommend">AI匹配</a>
         <a href="#shop">产品商城</a>
-        <a href="#vip">开通VIP</a>
-        <a href="#finance">财务预测</a>
+        <a href="#vip">VIP服务</a>
+        <a href="#finance">财务模型</a>
         <a href="#contact">联系我们</a>
     </div>
 </div>
@@ -816,17 +951,24 @@ safe_markdown(
     """
 <div class="hero">
     <div class="hero-content">
-        <div class="hero-tag">GREEN LOW-CARBON · GLASS RECYCLING · AI DATABASE · ART PRODUCT</div>
+        <div class="hero-tag">LOW-TEMPERATURE FUSION · AI DESIGN · B2B2C PLATFORM · GREEN MATERIAL</div>
         <h1>倾城幻艺 · 青橙焕艺</h1>
         <h2>
-            面向高校创新创业项目的新文科类绿色艺术平台。系统围绕废旧玻璃再生、热熔工艺实验、
-            AI工艺数据库、公共艺术产品、高净值客户定制与VIP会员服务，形成从“上游原料采购”
-            到“中游工坊设计生产”，再到“下游产品销售与会员增值服务”的商业闭环。
+            面向玻璃产业绿色转型的再生玻璃低温热熔技术服务平台。系统围绕工业玻璃废料回收、
+            低温热熔工艺、AI智能设计、再生玻璃艺术板材、公共空间装置、文创销售与技术服务，
+            构建从“废料处理”到“材料增值”的数字化商业闭环。
         </h2>
         <div class="hero-buttons">
-            <a class="hero-btn" href="#factory">对接原料工厂</a>
-            <a class="hero-btn-ghost" href="#database">查看工艺数据库</a>
+            <a class="hero-btn" href="#factory">进入原料对接</a>
+            <a class="hero-btn-ghost" href="#database">查看工艺数据</a>
+            <a class="hero-btn-ghost" href="#recommend">体验AI匹配</a>
             <a class="hero-btn-ghost" href="#vip">开通VIP服务</a>
+        </div>
+        <div class="hero-kpis">
+            <div class="hero-kpi"><strong>1400℃ → 700℃</strong><span>低温热熔路径，降低传统高温工艺门槛</span></div>
+            <div class="hero-kpi"><strong>50+款</strong><span>家居、文创与公共空间产品开发基础</span></div>
+            <div class="hero-kpi"><strong>80%-90%</strong><span>工业废料原料成本压缩展示模型</span></div>
+            <div class="hero-kpi"><strong>B2B2C</strong><span>原料、生产、设计、销售与服务闭环</span></div>
         </div>
     </div>
 </div>
@@ -843,7 +985,7 @@ safe_markdown('<div id="intro"></div>')
 section_title(
     "PROJECT INTRODUCTION",
     "项目简介",
-    "项目以废旧玻璃再生为基础，以AI工艺数据库和艺术设计能力为支撑，探索绿色材料、公共艺术和商业转化融合路径。"
+    "以低温热熔再生玻璃技术为核心，以再生玻璃材料产品与技术服务平台为主营方向，连接废料回收、工艺研发、智能设计、板材生产、场景应用和数据服务。"
 )
 
 c1, c2, c3 = st.columns(3)
@@ -851,22 +993,22 @@ c1, c2, c3 = st.columns(3)
 with c1:
     glass_card(
         "♻️",
-        "绿色低碳材料再生",
-        "将废旧玻璃、边角料玻璃与回收玻璃重新导入艺术生产流程，减少资源浪费，符合绿色低碳、循环经济和可持续设计方向。"
+        "工业废料高值转化",
+        "将玻璃厂废料、建筑玻璃边角料和校园回收玻璃重新导入艺术生产流程，实现从低值废料到高附加值材料产品的转化。"
     )
 
 with c2:
     glass_card(
         "🔥",
-        "青汐工坊热熔实验",
-        "围绕760℃、780℃、800℃等温度开展烧制实验，记录颗粒感、体积感、透光度和过热风险，形成可解释的工艺经验。"
+        "低温热熔工艺体系",
+        "围绕700℃—800℃低温热熔区间进行参数控制，减少传统高温烧制带来的高能耗、高成本和高碳排放压力。"
     )
 
 with c3:
     glass_card(
         "🤖",
-        "AI工艺数据库",
-        "将实验记录、图片样例、温度参数和效果评分结构化，面向工艺推荐、产品设计、客户定制和技术服务平台进行延展。"
+        "AI智能设计模块",
+        "围绕废料颜色、颗粒尺度、熔融温度、肌理效果和应用场景建立参数模型，辅助生成设计方案和工艺方案。"
     )
 
 c4, c5, c6 = st.columns(3)
@@ -874,23 +1016,110 @@ c4, c5, c6 = st.columns(3)
 with c4:
     glass_card(
         "🏛️",
-        "公共艺术产品",
-        "围绕校园、社区、商业空间、文旅场景设计玻璃公共艺术装置，提升项目从手工艺品到空间产品的商业高度。"
+        "再生玻璃艺术板材",
+        "主线产品面向家居建材、商业空间、企业展厅、文旅文创和公共艺术装置，强化产品可销售与可交付能力。"
     )
 
 with c5:
     glass_card(
-        "🛍️",
-        "产品销售闭环",
-        "普通用户可购买文创产品，VIP客户可解锁高端定制产品，平台通过商品销售、会员服务和设计服务形成收入来源。"
+        "🔗",
+        "技术服务平台",
+        "向玻璃企业、设计机构、园区和环保运营方提供工艺包、配方数据库、样品打样、供应链撮合和专家诊断服务。"
     )
 
 with c6:
     glass_card(
         "💼",
-        "商业化成长路径",
-        "项目从单一作品销售拓展为技术平台、产品体系、客户服务、盈利模型和未来3—5年增长规划。"
+        "复合收入结构",
+        "形成产品销售、技术服务、平台会员和定制交付协同增长的收入结构，增强项目持续经营能力。"
     )
+
+
+# =========================================================
+# 行业痛点
+# =========================================================
+
+safe_markdown('<div id="pain"></div>')
+
+section_title(
+    "INDUSTRY PAIN POINTS",
+    "行业痛点与解决路径",
+    "围绕高成本、高能耗、同质化、传播局限、上下游信息割裂和工艺试错风险，展示平台的实际切入点。"
+)
+
+p1, p2, p3 = st.columns(3)
+
+with p1:
+    glass_card(
+        "⚠️",
+        "高成本与高环境负荷",
+        "废旧玻璃回收分拣、清洗、运输成本高，传统高温热熔依赖高能耗生产路径，压缩企业利润空间。"
+    )
+
+with p2:
+    glass_card(
+        "🎨",
+        "产品同质化与美学缺失",
+        "普通再生玻璃产品容易停留在低价、低识别度和基础器物层面，难以形成设计溢价和品牌价值。"
+    )
+
+with p3:
+    glass_card(
+        "🧩",
+        "上下游信息割裂",
+        "回收端、生产端、设计端和市场端缺少统一数据平台，工艺参数无法共享，生产试错依赖经验判断。"
+    )
+
+p4, p5, p6 = st.columns(3)
+
+with p4:
+    glass_card(
+        "📉",
+        "传播链条断裂",
+        "消费者难以理解废料回收、低温热熔和艺术设计过程，产品价值容易被简化为普通玻璃制品。"
+    )
+
+with p5:
+    glass_card(
+        "🧠",
+        "智能决策不足",
+        "中小工坊缺少工艺数据库、参数匹配和风险预警工具，难以前置判断开裂、过熔、透光不足等风险。"
+    )
+
+with p6:
+    glass_card(
+        "✅",
+        "平台化破局",
+        "青橙焕艺以工艺数据库、AI匹配、产品展示、原料对接和会员服务串联全链路，降低协作与试错成本。"
+    )
+
+
+# =========================================================
+# B2B2C链路
+# =========================================================
+
+section_title(
+    "B2B2C DIGITAL LOOP",
+    "B2B2C数字化循环链路",
+    "平台将B端玻璃厂废料、再生加工、设计服务与C端产品购买连成一体，形成可展示、可交易、可复用的数据闭环。"
+)
+
+s1, s2, s3, s4, s5 = st.columns(5)
+
+with s1:
+    chain_step("01", "上游废料进入", "玻璃工厂、回收站、校园回收点发布废料类型、重量、颜色、杂质等级和库存数据。")
+
+with s2:
+    chain_step("02", "平台估价分级", "根据玻璃类型、纯度、用途和采购重量估算原料成本、清洗成本和物流成本。")
+
+with s3:
+    chain_step("03", "AI工艺匹配", "输入材料、厚度、颗粒尺度和目标效果，匹配温度区间、保温时间与风险等级。")
+
+with s4:
+    chain_step("04", "工坊生产交付", "青汐工坊完成小样验证、板材热熔、产品打样、定制生产与质量记录。")
+
+with s5:
+    chain_step("05", "销售与数据回流", "普通商品、VIP高端商品和技术服务订单形成销售闭环，效果数据继续回流工艺库。")
 
 
 # =========================================================
@@ -902,7 +1131,7 @@ safe_markdown('<div id="factory"></div>')
 section_title(
     "UPSTREAM FACTORY CONNECTION",
     "上游原料工厂对接",
-    "平台模拟对接原料工厂，完成废旧玻璃原料采购、质量筛选、用途匹配和成本估算，突出商业链路的上游基础。"
+    "平台模拟原料供需对接，完成废旧玻璃原料采购、质量筛选、用途匹配和成本估算，突出供应链基础。"
 )
 
 factory_col1, factory_col2 = st.columns([1.15, 0.85])
@@ -946,6 +1175,7 @@ with factory_col1:
         "采购用途",
         [
             "热熔实验",
+            "再生玻璃板材",
             "文创产品量产",
             "灯具与透光产品",
             "公共艺术装置",
@@ -965,12 +1195,14 @@ with factory_col1:
     }
 
     grade_factor = 1.45 if purity.startswith("A级") else 1.15 if purity.startswith("B级") else 0.85
-    scene_factor = 1.35 if use_scene in ["公共艺术装置", "VIP高端定制"] else 1.0
+    scene_factor = 1.38 if use_scene in ["公共艺术装置", "VIP高端定制", "再生玻璃板材"] else 1.0
     unit_price = base_price_map.get(glass_type, 2.0) * grade_factor * scene_factor
     raw_cost = round(unit_price * weight, 2)
     cleaning_cost = round(weight * 0.65, 2)
     transport_cost = round(80 + weight * 0.18, 2)
     total_cost = round(raw_cost + cleaning_cost + transport_cost, 2)
+    estimated_new_material_cost = round(total_cost / 0.22, 2)
+    saved_cost = round(max(estimated_new_material_cost - total_cost, 0), 2)
 
     safe_markdown(
         f"""
@@ -985,6 +1217,7 @@ with factory_col1:
     <p><b>清洗筛选成本：</b>{cleaning_cost:.2f} 元</p>
     <p><b>物流成本：</b>{transport_cost:.2f} 元</p>
     <p><b>预计采购总成本：</b>{total_cost:.2f} 元</p>
+    <p><b>相较新料采购的成本优势展示：</b>约节省 {saved_cost:.2f} 元</p>
 </div>
 """
     )
@@ -1004,15 +1237,9 @@ with factory_col1:
         st.success("已提交原料采购需求，当前记录已加入平台采购台账。")
 
 with factory_col2:
-    info_panel(
-        "为什么要展示上游原料工厂？",
-        "创业项目不仅要讲作品，还要讲供应链。原料采购模块可以说明项目不是停留在手工展示，而是具备原料来源、成本控制、批量生产和后续盈利的商业基础。"
-    )
-
-    info_panel(
-        "供应链表达方式",
-        "平台将废旧玻璃来源分为城市回收、工厂边角料、校园回收和定向采购四类，并通过清洗、分级、筛选和热熔实验建立稳定的再生玻璃供应体系。"
-    )
+    metric_box("80%-90%", "原料成本压缩模型", "以工业废料直供替代高价原生材料")
+    metric_box("12个月", "盈亏平衡展示目标", "以轻资产、代工、会员和服务收入提升周转")
+    metric_box("2.5次/年", "资产周转展示目标", "轻资产平台化运营，提高资金效率")
 
     if st.session_state.factory_orders:
         st.markdown("### 已提交采购记录")
@@ -1020,32 +1247,39 @@ with factory_col2:
 
 
 # =========================================================
-# 青汐工坊温度说明
+# 温度工艺说明
 # =========================================================
 
 section_title(
     "FIRING TEMPERATURE KNOWLEDGE",
-    "青汐工坊温度说明",
-    "将项目自己的烧制经验展示出来，突出工艺积累和可复现性。"
+    "低温热熔工艺说明",
+    "将项目自己的烧制经验展示出来，突出工艺积累、低温路径和参数可复现性。"
 )
 
-t1, t2, t3 = st.columns(3)
+t1, t2, t3, t4 = st.columns(4)
 
 with t1:
+    glass_card(
+        "700℃",
+        "低温边界区",
+        "适合初步熔结和小样探索，能保留较明显颗粒结构，但融合度和结构强度需要重点验证。"
+    )
+
+with t2:
     glass_card(
         "760℃",
         "推荐展示温度",
         "整体表现较稳定，颗粒感、体积感和透光度较均衡，适合花瓶、装饰画、灯具小样和商业样品。"
     )
 
-with t2:
+with t3:
     glass_card(
         "780℃",
         "偏高风险温度",
         "玻璃融合程度增强，但部分样品会出现颗粒边界变弱、体积感下降的问题，适合做对照实验。"
     )
 
-with t3:
+with t4:
     glass_card(
         "800℃",
         "过热警示温度",
@@ -1132,7 +1366,7 @@ else:
     <h3>温度趋势结论</h3>
     <p><b>较优温度：</b>{best_temp_value}℃</p>
     <p><b>平均综合质量分：</b>{best_score}</p>
-    <p>平台将实验数据转化为后续AI推荐、客户定制和工艺服务的数据库基础。</p>
+    <p>平台将实验数据转化为后续AI匹配、客户定制和工艺服务的数据库基础。</p>
 </div>
 """
             )
@@ -1269,6 +1503,152 @@ else:
 
 
 # =========================================================
+# AI 产品推荐
+# =========================================================
+
+safe_markdown('<div id="recommend"></div>')
+
+section_title(
+    "AI PROCESS MATCHING",
+    "AI工艺与产品匹配",
+    "用户选择产品类型、材料、厚度、颗粒尺度和目标效果后，系统输出推荐温度区间、风险提示和产品设计方案。"
+)
+
+r1, r2 = st.columns([1.1, 0.9])
+
+with r1:
+    product_type = st.selectbox(
+        "请选择产品类型",
+        ["再生玻璃艺术板材", "花瓶", "灯具", "装饰画", "艺术摆件", "公共艺术装置", "综合文创产品"]
+    )
+
+    material = st.selectbox(
+        "请选择材料类型",
+        ["透明玻璃", "彩色玻璃", "混合玻璃", "建筑平板玻璃", "其他材料"]
+    )
+
+    thickness = st.selectbox(
+        "请选择材料厚度",
+        ["薄层 3-5mm", "中层 6-10mm", "厚层 10mm以上"]
+    )
+
+    particle = st.selectbox(
+        "请选择颗粒尺度",
+        ["细颗粒", "中颗粒", "粗颗粒"]
+    )
+
+    target_effect = st.selectbox(
+        "请选择目标效果",
+        ["颗粒感明显", "透光度强", "体积感强", "综合艺术效果"]
+    )
+
+    temp = st.slider("计划烧制温度 / ℃", 680, 850, 760, 5)
+
+    rec = recommend(
+        product_type,
+        material,
+        target_effect,
+        temp,
+        thickness,
+        particle
+    )
+
+    safe_markdown(
+        f"""
+<div class="recommend-result">
+    <h3>AI匹配结果</h3>
+    <p><b>用户选择产品：</b>{product_type}</p>
+    <p><b>匹配工艺温度区间：</b>{rec["base_temp"]}</p>
+    <p><b>方案保温时间：</b>{rec["hold_time"]}</p>
+    <p><b>风险等级：</b>{rec["risk_level"]}</p>
+    <p><b>温度风险提示：</b>{rec["risk"]}</p>
+    <p><b>产品设计方案：</b>{rec["product_tip"]}</p>
+    <p><b>目标效果方案：</b>{rec["effect_tip"]}</p>
+    <p><b>材料方案：</b>{rec["material_tip"]}</p>
+    <p><b>厚度方案：</b>{rec["thickness_tip"]}</p>
+    <p><b>颗粒方案：</b>{rec["particle_tip"]}</p>
+    <p><b>低温路径说明：</b>{rec["energy_compare"]}</p>
+    <p><b>综合推荐分：</b>{rec["score"]} / 100</p>
+</div>
+"""
+    )
+
+    st.progress(rec["score"] / 100)
+
+with r2:
+    recommend_img = resolve_image("22")
+
+    if not recommend_img.exists():
+        recommend_img = resolve_image("5")
+
+    image_card(
+        recommend_img,
+        "效果参考",
+        "用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在AI匹配系统旁作为视觉引导。"
+    )
+
+
+# =========================================================
+# AI智能设计模拟
+# =========================================================
+
+section_title(
+    "AI DESIGN SIMULATION",
+    "AI智能设计模拟",
+    "围绕废料颜色、场景需求和产品定位生成设计方向，展示参数输入、效果描述、工艺方案方案的产品化能力。"
+)
+
+d1, d2 = st.columns([1, 1])
+
+with d1:
+    theme = st.selectbox(
+        "选择设计主题",
+        ["冰川裂痕", "城市记忆", "海岸流光", "校园绿洲", "企业低碳展陈"]
+    )
+
+    color_style = st.selectbox(
+        "选择色彩方向",
+        ["蓝绿色", "琥珀橙色", "透明白色", "混合彩色", "黑白灰极简"]
+    )
+
+    scene = st.selectbox(
+        "选择应用场景",
+        ["家居软装", "商业空间", "企业展厅", "文旅文创", "公共艺术装置", "校园美育课程"]
+    )
+
+    size_level = st.selectbox(
+        "选择产品尺度",
+        ["小型饰品", "中型摆件", "板材样品", "空间装置"]
+    )
+
+    design_score = 82
+    if scene in ["企业展厅", "公共艺术装置"]:
+        design_score += 6
+    if size_level in ["板材样品", "空间装置"]:
+        design_score += 4
+    if color_style in ["蓝绿色", "透明白色"]:
+        design_score += 3
+    design_score = min(design_score, 96)
+
+with d2:
+    safe_markdown(
+        f"""
+<div class="design-panel">
+    <h3>智能设计方向</h3>
+    <p><b>设计主题：</b>{theme}</p>
+    <p><b>色彩方向：</b>{color_style}</p>
+    <p><b>应用场景：</b>{scene}</p>
+    <p><b>产品尺度：</b>{size_level}</p>
+    <p><b>设计说明：</b>以“{theme}”为视觉叙事，将{color_style}废玻璃颗粒通过低温热熔形成自然流动肌理，适配{scene}场景中的展示、陈设与绿色传播需求。</p>
+    <p><b>工艺方案：</b>先完成30cm小样打样，记录温度、保温时间、颗粒尺度和成品透光度，再进入放大生产。</p>
+    <p><b>方案匹配度：</b>{design_score} / 100</p>
+</div>
+"""
+    )
+    st.progress(design_score / 100)
+
+
+# =========================================================
 # 普通产品商城
 # =========================================================
 
@@ -1294,8 +1674,8 @@ product_list = [
         "desc": "利用透明玻璃和浅色玻璃形成柔和透光效果。"
     },
     {
-        "name": "玻璃装饰画",
-        "price": 198,
+        "name": "再生玻璃板材样品",
+        "price": 298,
         "img": "3",
         "desc": "突出颗粒感、色彩层次和绿色再生材料的艺术表达。"
     },
@@ -1305,9 +1685,15 @@ product_list = [
         "img": "4",
         "desc": "适合作为校园纪念品、伴手礼和活动周边。"
     },
+    {
+        "name": "再生玻璃杯器",
+        "price": 128,
+        "img": "5",
+        "desc": "适合生活美学场景，强调环保材料和日用价值。"
+    },
 ]
 
-product_cols = st.columns(4)
+product_cols = st.columns(5)
 
 for idx, product in enumerate(product_list):
     with product_cols[idx]:
@@ -1334,75 +1720,6 @@ for idx, product in enumerate(product_list):
 
 
 # =========================================================
-# AI 产品推荐
-# =========================================================
-
-safe_markdown('<div id="recommend"></div>')
-
-section_title(
-    "AI PRODUCT RECOMMENDATION",
-    "AI工艺与产品推荐",
-    "用户选择产品类型、材料和目标效果后，系统输出推荐温度区间、风险提示和产品设计建议。"
-)
-
-r1, r2 = st.columns([1.1, 0.9])
-
-with r1:
-    product_type = st.selectbox(
-        "请选择产品类型",
-        ["花瓶", "灯具", "装饰画", "艺术摆件", "公共艺术装置", "综合文创产品"]
-    )
-
-    material = st.selectbox(
-        "请选择材料类型",
-        ["透明玻璃", "彩色玻璃", "混合玻璃", "其他材料"]
-    )
-
-    target_effect = st.selectbox(
-        "请选择目标效果",
-        ["颗粒感明显", "透光度强", "体积感强", "综合艺术效果"]
-    )
-
-    temp = st.slider("计划烧制温度 / ℃", 700, 850, 760, 5)
-
-    temp_range, risk, score, product_tip, effect_tip, material_tip = recommend(
-        product_type,
-        material,
-        target_effect,
-        temp
-    )
-
-    safe_markdown(
-        f"""
-<div class="recommend-result">
-    <h3>AI推荐结果</h3>
-    <p><b>用户选择产品：</b>{product_type}</p>
-    <p><b>推荐工艺温度区间：</b>{temp_range}</p>
-    <p><b>温度风险提示：</b>{risk}</p>
-    <p><b>产品设计建议：</b>{product_tip}</p>
-    <p><b>目标效果建议：</b>{effect_tip}</p>
-    <p><b>材料建议：</b>{material_tip}</p>
-    <p><b>综合推荐分：</b>{score} / 100</p>
-</div>
-"""
-    )
-
-    st.progress(score / 100)
-
-with r2:
-    recommend_img = resolve_image("22")
-
-    if not recommend_img.exists():
-        recommend_img = resolve_image("5")
-
-    image_card(
-        recommend_img,
-        "推荐效果参考",
-        "用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
-    )
-
-
-# =========================================================
 # VIP开通页面
 # =========================================================
 
@@ -1411,7 +1728,7 @@ safe_markdown('<div id="vip"></div>')
 section_title(
     "VIP MEMBER CHANNEL",
     "VIP付费通道",
-    "普通用户只能看到开通入口；只有购买VIP后，才会显示VIP专属产品和高端服务页面。"
+    "普通用户只能看到开通入口；只有购买VIP后，才会显示VIP专属产品、深度参数服务和高端定制页面。"
 )
 
 if not st.session_state.vip_unlocked:
@@ -1503,7 +1820,7 @@ else:
 <div class="vip-panel">
     <h3>VIP专区已解锁</h3>
     <p><b>当前会员状态：</b>{st.session_state.vip_level}</p>
-    <p>你已开通VIP，现在可以查看并购买VIP专属高端产品和定制服务。</p>
+    <p>你已开通VIP，现在可以查看并购买VIP专属高端产品、深度参数服务和定制服务。</p>
 </div>
 """
     )
@@ -1521,7 +1838,7 @@ else:
 if st.session_state.vip_unlocked:
     section_title(
         "VIP PREMIUM PRODUCTS",
-        "VIP高端产品购买区",
+        "VIP高端产品与技术服务",
         "该区域只有购买VIP后才显示。普通用户无法看到这里的产品、价格和服务内容。"
     )
 
@@ -1536,13 +1853,13 @@ if st.session_state.vip_unlocked:
             "name": "再生玻璃公共艺术方案",
             "price": 6800,
             "img": "22",
-            "desc": "适合校园、社区、商业空间展示，包含设计方案、材料建议和小样制作。"
+            "desc": "适合校园、社区、商业空间展示，包含设计方案、材料方案和小样制作。"
         },
         {
             "name": "企业ESG绿色艺术礼盒",
             "price": 3980,
             "img": "3",
-            "desc": "面向企业ESG活动、公益展示和客户礼品，突出绿色低碳与艺术价值。"
+            "desc": "面向企业ESG活动、绿色展厅和客户礼品，突出绿色低碳与艺术价值。"
         },
     ]
 
@@ -1572,22 +1889,23 @@ if st.session_state.vip_unlocked:
                 st.success(f"已加入购物车：{product['name']} × {qty}")
 
     section_title(
-        "VIP DEEP SERVICE",
-        "VIP深度服务申请",
-        "VIP用户可以进一步提交定制需求，适合展示高净值客户合作、公共艺术项目和企业服务场景。"
+        "TECH SERVICE APPLICATION",
+        "技术服务申请",
+        "VIP用户可以提交工艺数据包、企业诊断、样品打样、公共艺术和企业绿色展陈需求。"
     )
 
     service_col1, service_col2 = st.columns([1, 1])
 
     with service_col1:
         service_type = st.selectbox(
-            "选择VIP服务类型",
+            "选择服务类型",
             [
-                "高端艺术摆件定制",
+                "低温热熔工艺数据包",
+                "企业废料工艺诊断",
+                "样品打样与小试服务",
                 "公共艺术装置设计",
-                "企业ESG礼品方案",
-                "校园环保艺术课程",
-                "文旅空间玻璃艺术方案"
+                "企业ESG绿色展厅方案",
+                "校园环保艺术课程"
             ]
         )
 
@@ -1602,23 +1920,35 @@ if st.session_state.vip_unlocked:
         )
 
         demand = st.text_area(
-            "填写定制需求",
-            placeholder="例如：希望使用蓝绿色玻璃，做一个适合公司前台展示的环保艺术装置。"
+            "填写服务需求",
+            placeholder="例如：企业有一批蓝绿色建筑玻璃边角料，希望开发一套用于展厅墙面的再生玻璃艺术板材。"
         )
 
-        if st.button("提交VIP定制需求", use_container_width=True):
-            st.success("VIP定制需求已提交。展示版不会真实发送数据，正式上线可对接后台订单系统。")
+        if st.button("提交技术服务需求", use_container_width=True):
+            st.session_state.service_orders.append(
+                {
+                    "服务类型": service_type,
+                    "预算区间": budget,
+                    "需求描述": demand,
+                    "提交时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+            )
+            st.success("技术服务需求已提交。展示版不会真实发送数据，正式上线可对接后台订单系统。")
 
     with service_col2:
         info_panel(
-            "VIP深度服务价值",
-            "该模块可以说明项目不仅销售小型文创产品，还可以进一步面向机构客户、商业空间和高净值客户提供定制化服务。"
+            "服务价值",
+            "技术服务从单一商品销售升级为企业级解决方案，能够承接工艺改造、样品打样、数据包输出和空间项目交付。"
         )
 
         info_panel(
-            "高价值服务来源",
-            "VIP服务重点强调高客单价、项目制收入、设计服务费和技术服务费，增强项目的营收空间。"
+            "高价值来源",
+            "重点强调高客单价、项目制收入、设计服务费、工艺咨询费和数据服务费，增强项目营收空间。"
         )
+
+        if st.session_state.service_orders:
+            st.markdown("### 已提交服务记录")
+            st.dataframe(pd.DataFrame(st.session_state.service_orders), use_container_width=True, height=220)
 
 
 # =========================================================
@@ -1671,10 +2001,10 @@ else:
 section_title(
     "PLATFORM BUSINESS MODEL",
     "平台模式与商业闭环",
-    "项目从单一作品展示升级为技术服务平台、会员平台和产品交易平台。"
+    "项目从单一作品展示升级为技术服务平台、会员平台、产品交易平台和数据资产平台。"
 )
 
-b1, b2, b3 = st.columns(3)
+b1, b2, b3, b4 = st.columns(4)
 
 with b1:
     glass_card(
@@ -1687,7 +2017,7 @@ with b2:
     glass_card(
         "🧠",
         "AI数据库服务",
-        "常规数据开放用于展示，深度参数、工艺建议、批量方案和定制模型作为付费服务，增强技术壁垒。"
+        "常规数据开放用于展示，深度参数、工艺方案、批量方案和定制模型作为付费服务，增强技术壁垒。"
     )
 
 with b3:
@@ -1697,82 +2027,52 @@ with b3:
         "通过基础会员、高级会员和机构会员分层收费，叠加商品销售、设计服务、公共艺术项目和企业ESG定制。"
     )
 
+with b4:
+    glass_card(
+        "📦",
+        "定制交付收入",
+        "围绕企业展厅、文旅空间、公共艺术、校园课程和高端礼品进行项目制交付，提升客单价。"
+    )
+
 
 # =========================================================
-# 财务预测
+# 财务模型
 # =========================================================
 
 safe_markdown('<div id="finance"></div>')
 
 section_title(
-    "FINANCIAL FORECAST",
-    "财务预测展示",
-    "以再生玻璃文创产品、VIP高端定制服务、公共艺术与技术服务为三大核心业务，展示项目盈利模型。"
+    "FINANCIAL MODEL",
+    "财务模型展示",
+    "以文创产品销售、企业定制订单、设计版权授权、平台会员和技术服务为核心收入来源，展示项目的轻资产增长路径。"
 )
 
 finance_data = pd.DataFrame(
     [
-        {"业务类型": "再生玻璃文创产品", "预计收入万元": 55, "预计成本万元": 36, "预计利润万元": 19},
-        {"业务类型": "VIP高端定制服务", "预计收入万元": 42, "预计成本万元": 27, "预计利润万元": 15},
-        {"业务类型": "公共艺术与技术服务", "预计收入万元": 24, "预计成本万元": 18, "预计利润万元": 6},
+        {"收入板块": "再生玻璃文创产品销售", "2026预计收入万元": 10, "收入占比%": 65},
+        {"收入板块": "企业定制订单", "2026预计收入万元": 3, "收入占比%": 20},
+        {"收入板块": "设计版权授权", "2026预计收入万元": 2, "收入占比%": 15},
     ]
 )
-
-finance_data["净利润率"] = (finance_data["预计利润万元"] / finance_data["预计收入万元"] * 100).round(1)
 
 st.dataframe(finance_data, use_container_width=True, height=180)
 
 f1, f2, f3, f4 = st.columns(4)
 
 with f1:
-    metric_box("121万", "2026年预计收入")
+    metric_box("15万", "2026年预计营收", "三大收入板块联动")
 
 with f2:
-    metric_box("40万", "2026年预计利润")
+    metric_box("120%", "年度增长展示目标", "校企协同驱动现金流闭环")
 
 with f3:
-    metric_box("20%", "单位成本下降目标")
+    metric_box("25万+", "2028年营收展示目标", "区域拓展与品牌溢价驱动")
 
 with f4:
-    metric_box("30%+", "目标净利润率")
+    metric_box("30%+", "中长期净利润率目标", "模块化生产后成本继续下降")
 
-st.bar_chart(finance_data.set_index("业务类型")[["预计收入万元", "预计利润万元"]])
+st.bar_chart(finance_data.set_index("收入板块")[["2026预计收入万元"]])
 
-
-# =========================================================
-# 项目优化建议
-# =========================================================
-
-section_title(
-    "PROJECT OPTIMIZATION",
-    "项目优化建议",
-    "围绕产品定位、商业模式、用户分层和平台内容继续完善项目。"
-)
-
-with st.expander("01 项目痛点如何优化", expanded=True):
-    st.write(
-        "建议从产品同质化、传播局限、认知壁垒三个角度展开。不要只说项目做了玻璃产品，而要强调传统玻璃再生产品缺少数据体系、设计转化和高端场景。"
-    )
-
-with st.expander("02 解决方案如何完善"):
-    st.write(
-        "可以表述为：项目以AI工艺数据库为核心，用实验数据降低工艺不确定性，用设计人才提升产品审美，用平台模式连接原料、工坊、设计师和客户。"
-    )
-
-with st.expander("03 商业结构如何增强"):
-    st.write(
-        "项目需要突出主线产品、营收来源和规模化可能。建议主打：再生玻璃文创产品、VIP高端定制、公共艺术与技术服务三条收入线。"
-    )
-
-with st.expander("04 内容结构如何调整"):
-    st.write(
-        "商业化内容应减少单纯公益服务叙述，增加高净值客户合作、公共艺术案例、企业ESG定制和VIP会员服务，突出盈利能力。"
-    )
-
-with st.expander("05 近期任务"):
-    st.write(
-        "1. 确定项目发展方向；2. 整理项目资料；3. 完善含商学院成员的团队；4. 继续完善商业模型、产品体系和平台交互。"
-    )
 
 
 # =========================================================
@@ -1804,8 +2104,8 @@ with cc1:
 <div class="contact-item-card">
     <h3>公司定位</h3>
     <p>废旧玻璃再生</p>
-    <p>艺术产品设计</p>
-    <p>绿色低碳创业项目</p>
+    <p>低温热熔工艺</p>
+    <p>艺术材料产品</p>
 </div>
 """
     )
@@ -1816,7 +2116,7 @@ with cc2:
 <div class="contact-item-card">
     <h3>平台方向</h3>
     <p>AI工艺数据库</p>
-    <p>产品推荐系统</p>
+    <p>产品匹配系统</p>
     <p>技术服务平台</p>
 </div>
 """
