@@ -30,7 +30,7 @@ DATA_CANDIDATES = [
 
 
 # =========================================================
-# Session State
+# 状态管理
 # =========================================================
 
 if "cart" not in st.session_state:
@@ -62,6 +62,7 @@ DATA_PATH = find_data_path()
 
 def resolve_image(name: str) -> Path:
     raw = IMAGE_DIR / name
+
     if raw.exists():
         return raw
 
@@ -78,6 +79,7 @@ def img_to_uri(path: Path) -> str:
         return ""
 
     suffix = path.suffix.lower()
+
     if suffix in [".jpg", ".jpeg"]:
         mime = "image/jpeg"
     elif suffix == ".webp":
@@ -95,11 +97,13 @@ def load_data(path: str) -> pd.DataFrame:
 
     if csv_path.exists():
         df = pd.read_csv(csv_path)
+
         for col in df.columns:
             try:
                 df[col] = pd.to_numeric(df[col])
             except Exception:
                 pass
+
         return df
 
     demo_data = [
@@ -181,6 +185,7 @@ def add_to_cart(name: str, price: float, quantity: int, category: str):
 
 def section_title(tag: str, title: str, desc: str = ""):
     desc_html = f"<p>{desc}</p>" if desc else ""
+
     safe_markdown(
         f"""
 <div class="section-head">
@@ -235,7 +240,7 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
 <div class="missing-img">
     <h3>{title}</h3>
     <p>缺少图片：{path.name}</p>
-    <small>请将图片放入项目 images 文件夹；如果没有该图片，也不会影响系统运行。</small>
+    <small>请将图片放入项目 images 文件夹；没有该图片也不会影响系统运行。</small>
 </div>
 """
         )
@@ -377,7 +382,7 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
     elif target_effect == "体积感强":
         effect_tip = "应控制局部堆叠厚度，让玻璃融合但不完全摊平。"
     else:
-        effect_tip = "建议平衡颗粒感、透光度和体积感，适合比赛展示与商业样品。"
+        effect_tip = "建议平衡颗粒感、透光度和体积感，适合商业样品。"
 
     if material == "透明玻璃":
         material_tip = "透明玻璃适合灯具、窗饰和透光艺术板。"
@@ -407,7 +412,6 @@ safe_markdown("""
     --orange: #ff9f43;
     --green: #80ff72;
     --white: #f6fbff;
-    --muted: rgba(246,251,255,0.72);
 }
 
 html, body, .stApp {
@@ -785,7 +789,6 @@ hr {
 # 顶部导航
 # =========================================================
 
-# 注意：普通用户看不到VIP高端商品，但可以看到“开通VIP通道”
 safe_markdown(
     """
 <div class="navbar">
@@ -816,7 +819,7 @@ safe_markdown(
         <div class="hero-tag">GREEN LOW-CARBON · GLASS RECYCLING · AI DATABASE · ART PRODUCT</div>
         <h1>倾城幻艺 · 青橙焕艺</h1>
         <h2>
-            面向高校创新创业大赛的新文科类绿色艺术项目。平台围绕废旧玻璃再生、热熔工艺实验、
+            面向高校创新创业项目的新文科类绿色艺术平台。系统围绕废旧玻璃再生、热熔工艺实验、
             AI工艺数据库、公共艺术产品、高净值客户定制与VIP会员服务，形成从“上游原料采购”
             到“中游工坊设计生产”，再到“下游产品销售与会员增值服务”的商业闭环。
         </h2>
@@ -885,8 +888,8 @@ with c5:
 with c6:
     glass_card(
         "💼",
-        "创新创业展示",
-        "比赛展示重点从单一公益展示转向技术平台、产品体系、客户案例、盈利模型和未来3—5年增长规划。"
+        "商业化成长路径",
+        "项目从单一作品销售拓展为技术平台、产品体系、客户服务、盈利模型和未来3—5年增长规划。"
     )
 
 
@@ -1003,12 +1006,12 @@ with factory_col1:
 with factory_col2:
     info_panel(
         "为什么要展示上游原料工厂？",
-        "创业组答辩不仅要讲作品，还要讲供应链。原料采购模块可以说明项目不是停留在手工展示，而是具备原料来源、成本控制、批量生产和后续盈利的商业基础。"
+        "创业项目不仅要讲作品，还要讲供应链。原料采购模块可以说明项目不是停留在手工展示，而是具备原料来源、成本控制、批量生产和后续盈利的商业基础。"
     )
 
     info_panel(
-        "答辩表达建议",
-        "可以表述为：我们将废旧玻璃来源分为城市回收、工厂边角料、校园回收和定向采购四类，并通过清洗、分级、筛选和热熔实验建立稳定的再生玻璃供应体系。"
+        "供应链表达方式",
+        "平台将废旧玻璃来源分为城市回收、工厂边角料、校园回收和定向采购四类，并通过清洗、分级、筛选和热熔实验建立稳定的再生玻璃供应体系。"
     )
 
     if st.session_state.factory_orders:
@@ -1023,7 +1026,7 @@ with factory_col2:
 section_title(
     "FIRING TEMPERATURE KNOWLEDGE",
     "青汐工坊温度说明",
-    "将你们自己的烧制经验展示出来，突出项目的工艺积累和可复现性。"
+    "将项目自己的烧制经验展示出来，突出工艺积累和可复现性。"
 )
 
 t1, t2, t3 = st.columns(3)
@@ -1032,7 +1035,7 @@ with t1:
     glass_card(
         "760℃",
         "推荐展示温度",
-        "整体表现较稳定，颗粒感、体积感和透光度较均衡，适合花瓶、装饰画、灯具小样和比赛展示样品。"
+        "整体表现较稳定，颗粒感、体积感和透光度较均衡，适合花瓶、装饰画、灯具小样和商业样品。"
     )
 
 with t2:
@@ -1088,8 +1091,10 @@ else:
 
     with m4:
         best_temp = "暂无"
+
         if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
             best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
+
         metric_box(best_temp, "较优温度")
 
     st.markdown("### 实验记录表")
@@ -1112,6 +1117,7 @@ else:
         st.dataframe(mean_df, use_container_width=True, height=220)
 
         chart_col = "overall_quality_score_100"
+
         if chart_col in mean_df.columns:
             st.line_chart(mean_df.set_index("temperature_c")[chart_col])
 
@@ -1126,7 +1132,7 @@ else:
     <h3>温度趋势结论</h3>
     <p><b>较优温度：</b>{best_temp_value}℃</p>
     <p><b>平均综合质量分：</b>{best_score}</p>
-    <p>从展示口径上，可以说明平台不是简单展示作品，而是将实验数据转化为后续AI推荐、客户定制和工艺服务的数据库基础。</p>
+    <p>平台将实验数据转化为后续AI推荐、客户定制和工艺服务的数据库基础。</p>
 </div>
 """
             )
@@ -1157,6 +1163,7 @@ slide_html = ""
 
 for item in scroll_items:
     uri = img_to_uri(item["path"])
+
     if uri:
         slide_html += (
             f'<div class="slide">'
@@ -1383,9 +1390,8 @@ with r1:
     st.progress(score / 100)
 
 with r2:
-    # 不再依赖 images/11
-    # 优先用 22，如果没有就用 5；如果都没有，也只显示占位提示
     recommend_img = resolve_image("22")
+
     if not recommend_img.exists():
         recommend_img = resolve_image("5")
 
@@ -1452,6 +1458,7 @@ if not st.session_state.vip_unlocked:
         )
 
         vip_price = 99
+
         if selected_vip.startswith("高级"):
             vip_price = 299
         elif selected_vip.startswith("机构"):
@@ -1486,8 +1493,8 @@ if not st.session_state.vip_unlocked:
         )
 
         info_panel(
-            "答辩展示话术",
-            "我们把平台用户分为普通用户和VIP用户。普通用户购买标准文创产品，VIP用户购买高端定制、公共艺术方案和深度工艺服务，从而形成分层收费模式。"
+            "用户分层逻辑",
+            "平台将用户分为普通用户和VIP用户。普通用户购买标准文创产品，VIP用户购买高端定制、公共艺术方案和深度工艺服务，从而形成分层收费模式。"
         )
 
 else:
@@ -1509,8 +1516,6 @@ else:
 
 # =========================================================
 # VIP高端产品区
-# 关键逻辑：只有 st.session_state.vip_unlocked == True 时才会显示
-# 普通用户完全看不到这一块的商品内容
 # =========================================================
 
 if st.session_state.vip_unlocked:
@@ -1607,12 +1612,12 @@ if st.session_state.vip_unlocked:
     with service_col2:
         info_panel(
             "VIP深度服务价值",
-            "该模块可以在答辩中说明项目不仅销售小型文创产品，还可以进一步面向机构客户、商业空间和高净值客户提供定制化服务。"
+            "该模块可以说明项目不仅销售小型文创产品，还可以进一步面向机构客户、商业空间和高净值客户提供定制化服务。"
         )
 
         info_panel(
-            "商业赛道表达",
-            "展示VIP服务时，可以重点强调高客单价、项目制收入、设计服务费和技术服务费，增强创业组的营收想象力。"
+            "高价值服务来源",
+            "VIP服务重点强调高客单价、项目制收入、设计服务费和技术服务费，增强项目的营收空间。"
         )
 
 
@@ -1623,7 +1628,7 @@ if st.session_state.vip_unlocked:
 section_title(
     "SHOPPING CART",
     "购物车与订单汇总",
-    "汇总普通商品和VIP商品，便于展示平台从浏览、推荐、会员到购买的商业闭环。"
+    "汇总普通商品和VIP商品，展示平台从浏览、推荐、会员到购买的商业闭环。"
 )
 
 if st.session_state.cart:
@@ -1666,7 +1671,7 @@ else:
 section_title(
     "PLATFORM BUSINESS MODEL",
     "平台模式与商业闭环",
-    "结合会议建议，将项目从单一作品展示升级为技术服务平台、会员平台和产品交易平台。"
+    "项目从单一作品展示升级为技术服务平台、会员平台和产品交易平台。"
 )
 
 b1, b2, b3 = st.columns(3)
@@ -1702,7 +1707,7 @@ safe_markdown('<div id="finance"></div>')
 section_title(
     "FINANCIAL FORECAST",
     "财务预测展示",
-    "根据会议内容，将2026年三大核心业务合计盈利40万元、单位成本下降20%、净利润率提升到30%以上作为展示目标。"
+    "以再生玻璃文创产品、VIP高端定制服务、公共艺术与技术服务为三大核心业务，展示项目盈利模型。"
 )
 
 finance_data = pd.DataFrame(
@@ -1735,38 +1740,38 @@ st.bar_chart(finance_data.set_index("业务类型")[["预计收入万元", "预�
 
 
 # =========================================================
-# 答辩建议
+# 项目优化建议
 # =========================================================
 
 section_title(
-    "PITCH SUGGESTIONS",
-    "答辩展示建议",
-    "围绕会议纪要中的痛点、赛道选择和展示建议，对平台答辩内容进行强化。"
+    "PROJECT OPTIMIZATION",
+    "项目优化建议",
+    "围绕产品定位、商业模式、用户分层和平台内容继续完善项目。"
 )
 
-with st.expander("01 项目痛点如何讲", expanded=True):
+with st.expander("01 项目痛点如何优化", expanded=True):
     st.write(
-        "建议从产品同质化、传播局限、认知壁垒三个角度展开。不要只说我们做了玻璃产品，而要强调传统玻璃再生产品缺少数据体系、设计转化和高端场景。"
+        "建议从产品同质化、传播局限、认知壁垒三个角度展开。不要只说项目做了玻璃产品，而要强调传统玻璃再生产品缺少数据体系、设计转化和高端场景。"
     )
 
-with st.expander("02 解决方案如何讲"):
+with st.expander("02 解决方案如何完善"):
     st.write(
-        "可以表达为：我们以AI工艺数据库为核心，用实验数据降低工艺不确定性，用设计人才提升产品审美，用平台模式连接原料、工坊、设计师和客户。"
+        "可以表述为：项目以AI工艺数据库为核心，用实验数据降低工艺不确定性，用设计人才提升产品审美，用平台模式连接原料、工坊、设计师和客户。"
     )
 
-with st.expander("03 创业组如何讲"):
+with st.expander("03 商业结构如何增强"):
     st.write(
-        "创业组要突出主线产品、营收来源和规模化可能。建议主打：再生玻璃文创产品 + VIP高端定制 + 公共艺术/技术服务三条收入线。"
+        "项目需要突出主线产品、营收来源和规模化可能。建议主打：再生玻璃文创产品、VIP高端定制、公共艺术与技术服务三条收入线。"
     )
 
-with st.expander("04 展示内容如何调整"):
+with st.expander("04 内容结构如何调整"):
     st.write(
-        "商业赛道展示时，应减少单纯社区服务内容，增加高净值客户合作、公共艺术案例、企业ESG定制和VIP会员服务，突出盈利能力。"
+        "商业化内容应减少单纯公益服务叙述，增加高净值客户合作、公共艺术案例、企业ESG定制和VIP会员服务，突出盈利能力。"
     )
 
-with st.expander("05 近期待办"):
+with st.expander("05 近期任务"):
     st.write(
-        "1. 回去与戴主任商量确定参赛方向；2. 给任老师传项目资料；3. 完善含商学院成员的团队；4. 进一步打磨答辩稿，减少口语化和不确定表述。"
+        "1. 确定项目发展方向；2. 整理项目资料；3. 完善含商学院成员的团队；4. 继续完善商业模型、产品体系和平台交互。"
     )
 
 
