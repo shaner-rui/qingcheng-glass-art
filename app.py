@@ -102,15 +102,63 @@ def load_data(path: str) -> pd.DataFrame:
                 pass
         return df
 
-    # 没有CSV时，自动生成一份展示用数据，避免页面空白
     demo_data = [
-        {"temperature_c": 760, "success_score": 88, "particle_score": 90, "volume_score": 86, "transparency_score": 82, "overheat_score": 12, "overall_quality_score_100": 88},
-        {"temperature_c": 760, "success_score": 86, "particle_score": 88, "volume_score": 84, "transparency_score": 85, "overheat_score": 15, "overall_quality_score_100": 86},
-        {"temperature_c": 780, "success_score": 74, "particle_score": 68, "volume_score": 70, "transparency_score": 76, "overheat_score": 35, "overall_quality_score_100": 73},
-        {"temperature_c": 780, "success_score": 70, "particle_score": 64, "volume_score": 67, "transparency_score": 73, "overheat_score": 42, "overall_quality_score_100": 69},
-        {"temperature_c": 800, "success_score": 55, "particle_score": 40, "volume_score": 42, "transparency_score": 78, "overheat_score": 72, "overall_quality_score_100": 54},
-        {"temperature_c": 800, "success_score": 52, "particle_score": 36, "volume_score": 39, "transparency_score": 75, "overheat_score": 78, "overall_quality_score_100": 51},
+        {
+            "temperature_c": 760,
+            "success_score": 88,
+            "particle_score": 90,
+            "volume_score": 86,
+            "transparency_score": 82,
+            "overheat_score": 12,
+            "overall_quality_score_100": 88
+        },
+        {
+            "temperature_c": 760,
+            "success_score": 86,
+            "particle_score": 88,
+            "volume_score": 84,
+            "transparency_score": 85,
+            "overheat_score": 15,
+            "overall_quality_score_100": 86
+        },
+        {
+            "temperature_c": 780,
+            "success_score": 74,
+            "particle_score": 68,
+            "volume_score": 70,
+            "transparency_score": 76,
+            "overheat_score": 35,
+            "overall_quality_score_100": 73
+        },
+        {
+            "temperature_c": 780,
+            "success_score": 70,
+            "particle_score": 64,
+            "volume_score": 67,
+            "transparency_score": 73,
+            "overheat_score": 42,
+            "overall_quality_score_100": 69
+        },
+        {
+            "temperature_c": 800,
+            "success_score": 55,
+            "particle_score": 40,
+            "volume_score": 42,
+            "transparency_score": 78,
+            "overheat_score": 72,
+            "overall_quality_score_100": 54
+        },
+        {
+            "temperature_c": 800,
+            "success_score": 52,
+            "particle_score": 36,
+            "volume_score": 39,
+            "transparency_score": 75,
+            "overheat_score": 78,
+            "overall_quality_score_100": 51
+        },
     ]
+
     return pd.DataFrame(demo_data)
 
 
@@ -119,14 +167,16 @@ def safe_markdown(html: str):
 
 
 def add_to_cart(name: str, price: float, quantity: int, category: str):
-    st.session_state.cart.append({
-        "商品名称": name,
-        "分类": category,
-        "单价": price,
-        "数量": quantity,
-        "小计": round(price * quantity, 2),
-        "加入时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
+    st.session_state.cart.append(
+        {
+            "商品名称": name,
+            "分类": category,
+            "单价": price,
+            "数量": quantity,
+            "小计": round(price * quantity, 2),
+            "加入时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+    )
 
 
 def section_title(tag: str, title: str, desc: str = ""):
@@ -185,7 +235,7 @@ def image_card(path: Path, title: str, desc: str, note_label: str = "", note_tex
 <div class="missing-img">
     <h3>{title}</h3>
     <p>缺少图片：{path.name}</p>
-    <small>请将图片放入项目 images 文件夹。</small>
+    <small>请将图片放入项目 images 文件夹；如果没有该图片，也不会影响系统运行。</small>
 </div>
 """
         )
@@ -207,6 +257,7 @@ body {{
     background: transparent;
     font-family: "Noto Sans SC", Arial, sans-serif;
 }}
+
 .image-card {{
     position: relative;
     height: 350px;
@@ -217,19 +268,23 @@ body {{
     background: rgba(255,255,255,0.08);
     transition: 0.28s ease;
 }}
+
 .image-card:hover {{
     transform: translateY(-7px);
     box-shadow: 0 0 34px rgba(255,159,67,0.24), 0 24px 70px rgba(0,0,0,0.42);
 }}
+
 .image-card img {{
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: 0.6s ease;
 }}
+
 .image-card:hover img {{
     transform: scale(1.06);
 }}
+
 .image-mask {{
     position: absolute;
     left: 0;
@@ -238,12 +293,14 @@ body {{
     padding: 1.25rem;
     background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.45), transparent);
 }}
+
 .image-mask h3 {{
     margin: 0;
     color: white;
     font-size: 1.35rem;
     font-weight: 900;
 }}
+
 .image-mask p {{
     color: rgba(255,255,255,0.86);
     margin: 0.45rem 0 0;
@@ -251,12 +308,14 @@ body {{
     font-size: 0.96rem;
     font-weight: 700;
 }}
+
 .image-note {{
     margin-top: 0.55rem;
     color: #ffcf9a;
     font-weight: 900;
     font-size: 0.9rem;
 }}
+
 .image-note span {{
     color: #ffe4c4;
 }}
@@ -594,7 +653,8 @@ html, body, .stApp {
 
 .recommend-result,
 .order-result,
-.vip-panel {
+.vip-panel,
+.lock-panel {
     padding: 1.45rem;
     border-radius: 26px;
     background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
@@ -603,9 +663,16 @@ html, body, .stApp {
     box-shadow: 0 18px 52px rgba(0,0,0,0.22);
 }
 
+.lock-panel {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(255,159,67,0.13), rgba(37,244,238,0.08));
+}
+
 .recommend-result h3,
 .order-result h3,
-.vip-panel h3 {
+.vip-panel h3,
+.lock-panel h3 {
     margin-top: 0;
     color: var(--cyan);
     font-weight: 900;
@@ -613,7 +680,8 @@ html, body, .stApp {
 
 .recommend-result p,
 .order-result p,
-.vip-panel p {
+.vip-panel p,
+.lock-panel p {
     color: rgba(246,251,255,0.78);
     line-height: 1.72;
 }
@@ -629,6 +697,7 @@ html, body, .stApp {
     justify-content: center;
     color: rgba(246,251,255,0.78);
     text-align: center;
+    padding: 1rem;
 }
 
 .contact-shell {
@@ -716,6 +785,7 @@ hr {
 # 顶部导航
 # =========================================================
 
+# 注意：普通用户看不到VIP高端商品，但可以看到“开通VIP通道”
 safe_markdown(
     """
 <div class="navbar">
@@ -726,7 +796,7 @@ safe_markdown(
         <a href="#database">工艺数据库</a>
         <a href="#recommend">AI推荐</a>
         <a href="#shop">产品商城</a>
-        <a href="#vip">VIP通道</a>
+        <a href="#vip">开通VIP</a>
         <a href="#finance">财务预测</a>
         <a href="#contact">联系我们</a>
     </div>
@@ -753,7 +823,7 @@ safe_markdown(
         <div class="hero-buttons">
             <a class="hero-btn" href="#factory">对接原料工厂</a>
             <a class="hero-btn-ghost" href="#database">查看工艺数据库</a>
-            <a class="hero-btn-ghost" href="#vip">进入VIP通道</a>
+            <a class="hero-btn-ghost" href="#vip">开通VIP服务</a>
         </div>
     </div>
 </div>
@@ -774,18 +844,21 @@ section_title(
 )
 
 c1, c2, c3 = st.columns(3)
+
 with c1:
     glass_card(
         "♻️",
         "绿色低碳材料再生",
         "将废旧玻璃、边角料玻璃与回收玻璃重新导入艺术生产流程，减少资源浪费，符合绿色低碳、循环经济和可持续设计方向。"
     )
+
 with c2:
     glass_card(
         "🔥",
         "青汐工坊热熔实验",
         "围绕760℃、780℃、800℃等温度开展烧制实验，记录颗粒感、体积感、透光度和过热风险，形成可解释的工艺经验。"
     )
+
 with c3:
     glass_card(
         "🤖",
@@ -794,18 +867,21 @@ with c3:
     )
 
 c4, c5, c6 = st.columns(3)
+
 with c4:
     glass_card(
         "🏛️",
         "公共艺术产品",
         "围绕校园、社区、商业空间、文旅场景设计玻璃公共艺术装置，提升项目从手工艺品到空间产品的商业高度。"
     )
+
 with c5:
     glass_card(
         "🛍️",
         "产品销售闭环",
-        "普通用户可购买文创产品，VIP客户可购买高端定制产品，平台通过商品销售、会员服务和设计服务形成收入来源。"
+        "普通用户可购买文创产品，VIP客户可解锁高端定制产品，平台通过商品销售、会员服务和设计服务形成收入来源。"
     )
+
 with c6:
     glass_card(
         "💼",
@@ -911,15 +987,17 @@ with factory_col1:
     )
 
     if st.button("提交原料采购需求", use_container_width=True):
-        st.session_state.factory_orders.append({
-            "供应来源": supplier,
-            "玻璃类型": glass_type,
-            "原料等级": purity,
-            "采购用途": use_scene,
-            "重量kg": weight,
-            "预计总成本": total_cost,
-            "提交时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
+        st.session_state.factory_orders.append(
+            {
+                "供应来源": supplier,
+                "玻璃类型": glass_type,
+                "原料等级": purity,
+                "采购用途": use_scene,
+                "重量kg": weight,
+                "预计总成本": total_cost,
+                "提交时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        )
         st.success("已提交原料采购需求，当前记录已加入平台采购台账。")
 
 with factory_col2:
@@ -991,6 +1069,7 @@ else:
     selected_temp = st.multiselect("选择温度", temps, default=temps)
 
     show_df = df.copy()
+
     if selected_temp and "temperature_c" in show_df.columns:
         show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
 
@@ -1075,6 +1154,7 @@ scroll_items = [
 ]
 
 slide_html = ""
+
 for item in scroll_items:
     uri = img_to_uri(item["path"])
     if uri:
@@ -1101,6 +1181,7 @@ if slide_html:
     background: rgba(255,255,255,0.06);
     box-shadow: 0 24px 70px rgba(0,0,0,0.35);
 }}
+
 .scroll-track {{
     display: flex;
     gap: 24px;
@@ -1108,9 +1189,11 @@ if slide_html:
     padding: 24px;
     animation: scrollX 34s linear infinite;
 }}
+
 .scroll-wrapper:hover .scroll-track {{
     animation-play-state: paused;
 }}
+
 .slide {{
     position: relative;
     width: 420px;
@@ -1121,11 +1204,13 @@ if slide_html:
     box-shadow: 0 18px 50px rgba(0,0,0,0.35);
     background: rgba(255,255,255,0.08);
 }}
+
 .slide img {{
     width: 100%;
     height: 100%;
     object-fit: cover;
 }}
+
 .slide-caption {{
     position: absolute;
     left: 0;
@@ -1135,16 +1220,19 @@ if slide_html:
     background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
     color: white;
 }}
+
 .slide-caption strong {{
     display: block;
     font-size: 18px;
     margin-bottom: 4px;
 }}
+
 .slide-caption span {{
     display: block;
     color: rgba(255,255,255,0.78);
     font-size: 14px;
 }}
+
 .slide-caption em {{
     display: block;
     color: #ffcf9a;
@@ -1153,11 +1241,13 @@ if slide_html:
     margin-top: 5px;
     font-weight: 700;
 }}
+
 @keyframes scrollX {{
     from {{ transform: translateX(0); }}
     to {{ transform: translateX(-50%); }}
 }}
 </style>
+
 <div class="scroll-wrapper">
     <div class="scroll-track">
         {slide_html}
@@ -1168,19 +1258,19 @@ if slide_html:
         height=350
     )
 else:
-    st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。")
+    st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。没有图片也不会影响页面运行。")
 
 
 # =========================================================
-# 产品展示
+# 普通产品商城
 # =========================================================
 
 safe_markdown('<div id="shop"></div>')
 
 section_title(
-    "PRODUCT SHOP",
+    "NORMAL PRODUCT SHOP",
     "普通产品购买区",
-    "面向普通消费者展示可销售产品，形成文创销售、体验课程和普通定制的基础收入。"
+    "普通用户只能看到基础文创产品和普通商品，暂时看不到VIP高端商品。"
 )
 
 product_list = [
@@ -1221,6 +1311,7 @@ for idx, product in enumerate(product_list):
             "价格",
             f"{product['price']} 元"
         )
+
         qty = st.number_input(
             f"{product['name']}数量",
             min_value=1,
@@ -1229,6 +1320,7 @@ for idx, product in enumerate(product_list):
             step=1,
             key=f"normal_qty_{idx}"
         )
+
         if st.button(f"加入购物车 · {product['name']}", key=f"add_normal_{idx}", use_container_width=True):
             add_to_cart(product["name"], product["price"], qty, "普通商品")
             st.success(f"已加入购物车：{product['name']} × {qty}")
@@ -1267,7 +1359,10 @@ with r1:
     temp = st.slider("计划烧制温度 / ℃", 700, 850, 760, 5)
 
     temp_range, risk, score, product_tip, effect_tip, material_tip = recommend(
-        product_type, material, target_effect, temp
+        product_type,
+        material,
+        target_effect,
+        temp
     )
 
     safe_markdown(
@@ -1288,9 +1383,12 @@ with r1:
     st.progress(score / 100)
 
 with r2:
+    # 不再依赖 images/11
+    # 优先用 22，如果没有就用 5；如果都没有，也只显示占位提示
     recommend_img = resolve_image("22")
     if not recommend_img.exists():
-        recommend_img = resolve_image("11")
+        recommend_img = resolve_image("5")
+
     image_card(
         recommend_img,
         "推荐效果参考",
@@ -1299,7 +1397,7 @@ with r2:
 
 
 # =========================================================
-# VIP通道
+# VIP开通页面
 # =========================================================
 
 safe_markdown('<div id="vip"></div>')
@@ -1307,102 +1405,121 @@ safe_markdown('<div id="vip"></div>')
 section_title(
     "VIP MEMBER CHANNEL",
     "VIP付费通道",
-    "VIP通道用于展示平台会员制盈利模式。普通用户只能浏览基础产品，VIP用户可进入高端定制、公共艺术和深度工艺服务页面。"
-)
-
-vip_col1, vip_col2, vip_col3 = st.columns(3)
-
-with vip_col1:
-    glass_card(
-        "⭐",
-        "基础会员",
-        "适合普通消费者，解锁部分工艺说明、普通产品优惠和基础定制咨询。展示价格：99元/月。"
-    )
-
-with vip_col2:
-    glass_card(
-        "💎",
-        "高级会员",
-        "适合高净值客户和设计工作室，解锁高端产品购买、深度定制方案和优先排产。展示价格：299元/月。"
-    )
-
-with vip_col3:
-    glass_card(
-        "🏛️",
-        "机构会员",
-        "适合学校、社区、商业空间和文旅项目，解锁公共艺术装置方案、批量设计服务和项目顾问支持。展示价格：999元/月。"
-    )
-
-st.markdown("### 开通VIP")
-
-pay_col1, pay_col2 = st.columns([1, 1])
-
-with pay_col1:
-    selected_vip = st.selectbox(
-        "选择VIP类型",
-        ["基础会员 / 99元", "高级会员 / 299元", "机构会员 / 999元"]
-    )
-
-    vip_price = 99
-    if selected_vip.startswith("高级"):
-        vip_price = 299
-    elif selected_vip.startswith("机构"):
-        vip_price = 999
-
-    pay_name = st.text_input("购买人 / 单位名称", value="演示用户")
-    pay_phone = st.text_input("联系电话", value="13800000000")
-
-    safe_markdown(
-        f"""
-<div class="vip-panel">
-    <h3>VIP订单预览</h3>
-    <p><b>会员类型：</b>{selected_vip}</p>
-    <p><b>支付金额：</b>{vip_price} 元</p>
-    <p><b>说明：</b>此处为创新创业项目展示版，采用模拟支付逻辑。正式上线时可对接微信支付、支付宝或平台订单系统。</p>
-</div>
-"""
-    )
-
-    if st.button("模拟支付并开通VIP", use_container_width=True):
-        st.session_state.vip_unlocked = True
-        st.session_state.vip_level = selected_vip
-        st.success(f"VIP已开通：{selected_vip}")
-
-with pay_col2:
-    if st.session_state.vip_unlocked:
-        st.success(f"当前状态：已开通 {st.session_state.vip_level}")
-        info_panel(
-            "已解锁内容",
-            "你现在可以进入VIP高端产品页面，购买高端定制产品、公共艺术装置方案和深度工艺服务。"
-        )
-    else:
-        st.warning("当前状态：未开通VIP。请先完成模拟支付，才可以进入下方VIP高端产品购买区。")
-        info_panel(
-            "为什么设置VIP门槛？",
-            "该模块用于展示平台模式和会员制盈利逻辑。普通用户购买标准产品，VIP用户购买高端产品、深度服务和定制方案，能够增强创业组答辩中的商业想象空间。"
-        )
-
-
-# =========================================================
-# VIP高端产品购买
-# =========================================================
-
-section_title(
-    "VIP PREMIUM PRODUCTS",
-    "VIP高端产品购买区",
-    "未开通VIP时不能继续进入高端产品页面；开通后可购买更高价值的定制产品和服务。"
+    "普通用户只能看到开通入口；只有购买VIP后，才会显示VIP专属产品和高端服务页面。"
 )
 
 if not st.session_state.vip_unlocked:
     safe_markdown(
         """
-<div class="vip-panel">
-    <h3>页面已锁定</h3>
-    <p>该区域为VIP专属页面。请先在上方开通VIP通道，再继续浏览和购买高端产品。</p>
+<div class="lock-panel">
+    <h3>VIP专区当前未解锁</h3>
+    <p>普通用户看不到VIP高端商品和VIP专属服务。请先开通VIP，系统才会显示下方VIP专区。</p>
 </div>
 """
     )
+
+    vip_col1, vip_col2, vip_col3 = st.columns(3)
+
+    with vip_col1:
+        glass_card(
+            "⭐",
+            "基础会员",
+            "适合普通消费者，解锁基础定制咨询、部分工艺说明和普通产品优惠。展示价格：99元/月。"
+        )
+
+    with vip_col2:
+        glass_card(
+            "💎",
+            "高级会员",
+            "适合高净值客户和设计工作室，解锁高端产品购买、深度定制方案和优先排产。展示价格：299元/月。"
+        )
+
+    with vip_col3:
+        glass_card(
+            "🏛️",
+            "机构会员",
+            "适合学校、社区、商业空间和文旅项目，解锁公共艺术装置方案、批量设计服务和项目顾问支持。展示价格：999元/月。"
+        )
+
+    st.markdown("### 开通VIP")
+
+    pay_col1, pay_col2 = st.columns([1, 1])
+
+    with pay_col1:
+        selected_vip = st.selectbox(
+            "选择VIP类型",
+            ["基础会员 / 99元", "高级会员 / 299元", "机构会员 / 999元"]
+        )
+
+        vip_price = 99
+        if selected_vip.startswith("高级"):
+            vip_price = 299
+        elif selected_vip.startswith("机构"):
+            vip_price = 999
+
+        pay_name = st.text_input("购买人 / 单位名称", value="演示用户")
+        pay_phone = st.text_input("联系电话", value="13800000000")
+
+        safe_markdown(
+            f"""
+<div class="vip-panel">
+    <h3>VIP订单预览</h3>
+    <p><b>购买人：</b>{pay_name}</p>
+    <p><b>联系电话：</b>{pay_phone}</p>
+    <p><b>会员类型：</b>{selected_vip}</p>
+    <p><b>支付金额：</b>{vip_price} 元</p>
+    <p><b>说明：</b>此处为创新创业项目展示版，采用模拟支付逻辑。正式上线时可对接微信支付、支付宝或平台订单系统。</p>
+</div>
+"""
+        )
+
+        if st.button("模拟支付并开通VIP", use_container_width=True):
+            st.session_state.vip_unlocked = True
+            st.session_state.vip_level = selected_vip
+            st.success(f"VIP已开通：{selected_vip}")
+            st.rerun()
+
+    with pay_col2:
+        info_panel(
+            "为什么设置VIP门槛？",
+            "该模块用于展示平台模式和会员制盈利逻辑。普通用户只能浏览基础商品，VIP用户付费后才能进入高端产品、定制方案和公共艺术服务页面。"
+        )
+
+        info_panel(
+            "答辩展示话术",
+            "我们把平台用户分为普通用户和VIP用户。普通用户购买标准文创产品，VIP用户购买高端定制、公共艺术方案和深度工艺服务，从而形成分层收费模式。"
+        )
+
 else:
+    safe_markdown(
+        f"""
+<div class="vip-panel">
+    <h3>VIP专区已解锁</h3>
+    <p><b>当前会员状态：</b>{st.session_state.vip_level}</p>
+    <p>你已开通VIP，现在可以查看并购买VIP专属高端产品和定制服务。</p>
+</div>
+"""
+    )
+
+    if st.button("退出VIP演示状态", use_container_width=True):
+        st.session_state.vip_unlocked = False
+        st.session_state.vip_level = "未开通"
+        st.rerun()
+
+
+# =========================================================
+# VIP高端产品区
+# 关键逻辑：只有 st.session_state.vip_unlocked == True 时才会显示
+# 普通用户完全看不到这一块的商品内容
+# =========================================================
+
+if st.session_state.vip_unlocked:
+    section_title(
+        "VIP PREMIUM PRODUCTS",
+        "VIP高端产品购买区",
+        "该区域只有购买VIP后才显示。普通用户无法看到这里的产品、价格和服务内容。"
+    )
+
     premium_products = [
         {
             "name": "高端定制玻璃艺术摆件",
@@ -1411,15 +1528,15 @@ else:
             "desc": "面向高净值客户、办公室陈设和礼品场景，提供颜色、造型和主题定制。"
         },
         {
-            "name": "再生玻璃公共艺术小型方案",
+            "name": "再生玻璃公共艺术方案",
             "price": 6800,
-            "img": "11",
+            "img": "22",
             "desc": "适合校园、社区、商业空间展示，包含设计方案、材料建议和小样制作。"
         },
         {
             "name": "企业ESG绿色艺术礼盒",
             "price": 3980,
-            "img": "22",
+            "img": "3",
             "desc": "面向企业ESG活动、公益展示和客户礼品，突出绿色低碳与艺术价值。"
         },
     ]
@@ -1435,6 +1552,7 @@ else:
                 "VIP价格",
                 f"{product['price']} 元"
             )
+
             qty = st.number_input(
                 f"{product['name']}数量",
                 min_value=1,
@@ -1443,9 +1561,59 @@ else:
                 step=1,
                 key=f"vip_qty_{idx}"
             )
+
             if st.button(f"VIP购买 · {product['name']}", key=f"add_vip_{idx}", use_container_width=True):
                 add_to_cart(product["name"], product["price"], qty, "VIP高端商品")
                 st.success(f"已加入购物车：{product['name']} × {qty}")
+
+    section_title(
+        "VIP DEEP SERVICE",
+        "VIP深度服务申请",
+        "VIP用户可以进一步提交定制需求，适合展示高净值客户合作、公共艺术项目和企业服务场景。"
+    )
+
+    service_col1, service_col2 = st.columns([1, 1])
+
+    with service_col1:
+        service_type = st.selectbox(
+            "选择VIP服务类型",
+            [
+                "高端艺术摆件定制",
+                "公共艺术装置设计",
+                "企业ESG礼品方案",
+                "校园环保艺术课程",
+                "文旅空间玻璃艺术方案"
+            ]
+        )
+
+        budget = st.selectbox(
+            "预算区间",
+            [
+                "1000元 - 3000元",
+                "3000元 - 8000元",
+                "8000元 - 20000元",
+                "20000元以上"
+            ]
+        )
+
+        demand = st.text_area(
+            "填写定制需求",
+            placeholder="例如：希望使用蓝绿色玻璃，做一个适合公司前台展示的环保艺术装置。"
+        )
+
+        if st.button("提交VIP定制需求", use_container_width=True):
+            st.success("VIP定制需求已提交。展示版不会真实发送数据，正式上线可对接后台订单系统。")
+
+    with service_col2:
+        info_panel(
+            "VIP深度服务价值",
+            "该模块可以在答辩中说明项目不仅销售小型文创产品，还可以进一步面向机构客户、商业空间和高净值客户提供定制化服务。"
+        )
+
+        info_panel(
+            "商业赛道表达",
+            "展示VIP服务时，可以重点强调高客单价、项目制收入、设计服务费和技术服务费，增强创业组的营收想象力。"
+        )
 
 
 # =========================================================
@@ -1465,14 +1633,20 @@ if st.session_state.cart:
     st.dataframe(cart_df, use_container_width=True, height=260)
 
     c_total1, c_total2, c_total3 = st.columns(3)
+
     with c_total1:
         metric_box(f"{len(cart_df)}", "订单条目")
+
     with c_total2:
         metric_box(f"{cart_df['数量'].sum()}", "商品总数量")
+
     with c_total3:
         metric_box(f"{total_amount:.2f}元", "订单总金额")
 
-    remark = st.text_area("订单备注", placeholder="例如：希望颜色偏蓝绿色；用于办公室陈设；需要开发票等。")
+    remark = st.text_area(
+        "订单备注",
+        placeholder="例如：希望颜色偏蓝绿色；用于办公室陈设；需要开发票等。"
+    )
 
     if st.button("提交订单", use_container_width=True):
         st.success("订单已提交。展示版不会产生真实支付，正式上线可对接订单后台与支付接口。")
@@ -1480,8 +1654,9 @@ if st.session_state.cart:
     if st.button("清空购物车", use_container_width=True):
         st.session_state.cart = []
         st.rerun()
+
 else:
-    st.info("购物车暂无商品。可以在普通产品购买区或VIP高端产品区加入商品。")
+    st.info("购物车暂无商品。可以在普通产品购买区加入商品；开通VIP后可以购买VIP高端商品。")
 
 
 # =========================================================
@@ -1530,11 +1705,13 @@ section_title(
     "根据会议内容，将2026年三大核心业务合计盈利40万元、单位成本下降20%、净利润率提升到30%以上作为展示目标。"
 )
 
-finance_data = pd.DataFrame([
-    {"业务类型": "再生玻璃文创产品", "预计收入万元": 55, "预计成本万元": 36, "预计利润万元": 19},
-    {"业务类型": "VIP高端定制服务", "预计收入万元": 42, "预计成本万元": 27, "预计利润万元": 15},
-    {"业务类型": "公共艺术与技术服务", "预计收入万元": 24, "预计成本万元": 18, "预计利润万元": 6},
-])
+finance_data = pd.DataFrame(
+    [
+        {"业务类型": "再生玻璃文创产品", "预计收入万元": 55, "预计成本万元": 36, "预计利润万元": 19},
+        {"业务类型": "VIP高端定制服务", "预计收入万元": 42, "预计成本万元": 27, "预计利润万元": 15},
+        {"业务类型": "公共艺术与技术服务", "预计收入万元": 24, "预计成本万元": 18, "预计利润万元": 6},
+    ]
+)
 
 finance_data["净利润率"] = (finance_data["预计利润万元"] / finance_data["预计收入万元"] * 100).round(1)
 
@@ -1544,10 +1721,13 @@ f1, f2, f3, f4 = st.columns(4)
 
 with f1:
     metric_box("121万", "2026年预计收入")
+
 with f2:
     metric_box("40万", "2026年预计利润")
+
 with f3:
     metric_box("20%", "单位成本下降目标")
+
 with f4:
     metric_box("30%+", "目标净利润率")
 
