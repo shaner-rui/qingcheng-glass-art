@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 import streamlit as st
@@ -11,20 +12,14 @@ import streamlit.components.v1 as components
 # =========================================================
 
 st.set_page_config(
-    page_title="青橙焕艺 | Glass Recycling AI Platform",
+    page_title="倾城幻艺 | 青橙焕艺玻璃再生AI平台",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-
-# =========================================================
-# 路径配置
-# =========================================================
-
 APP_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = APP_DIR.parent if APP_DIR.name.lower() == "src" else APP_DIR
-
 IMAGE_DIR = PROJECT_DIR / "images"
 
 DATA_CANDIDATES = [
@@ -34,7 +29,28 @@ DATA_CANDIDATES = [
 ]
 
 
-def find_data_path():
+# =========================================================
+# Session State
+# =========================================================
+
+if "cart" not in st.session_state:
+    st.session_state.cart = []
+
+if "vip_unlocked" not in st.session_state:
+    st.session_state.vip_unlocked = False
+
+if "vip_level" not in st.session_state:
+    st.session_state.vip_level = "未开通"
+
+if "factory_orders" not in st.session_state:
+    st.session_state.factory_orders = []
+
+
+# =========================================================
+# 工具函数
+# =========================================================
+
+def find_data_path() -> Path:
     for path in DATA_CANDIDATES:
         if path.exists():
             return path
@@ -44,13 +60,8 @@ def find_data_path():
 DATA_PATH = find_data_path()
 
 
-# =========================================================
-# 工具函数
-# =========================================================
-
 def resolve_image(name: str) -> Path:
     raw = IMAGE_DIR / name
-
     if raw.exists():
         return raw
 
@@ -67,7 +78,6 @@ def img_to_uri(path: Path) -> str:
         return ""
 
     suffix = path.suffix.lower()
-
     if suffix in [".jpg", ".jpeg"]:
         mime = "image/jpeg"
     elif suffix == ".webp":
@@ -80,132 +90,113 @@ def img_to_uri(path: Path) -> str:
 
 
 @st.cache_data(ttl=300)
-def load_data(path: str):
+def load_data(path: str) -> pd.DataFrame:
     csv_path = Path(path)
 
-    if not csv_path.exists():
-        return pd.DataFrame()
+    if csv_path.exists():
+        df = pd.read_csv(csv_path)
+        for col in df.columns:
+            try:
+                df[col] = pd.to_numeric(df[col])
+            except Exception:
+                pass
+        return df
 
-    df = pd.read_csv(csv_path)
-
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors="ignore")
-
-    return df
+    # 没有CSV时，自动生成一份展示用数据，避免页面空白
+    demo_data = [
+        {"temperature_c": 760, "success_score": 88, "particle_score": 90, "volume_score": 86, "transparency_score": 82, "overheat_score": 12, "overall_quality_score_100": 88},
+        {"temperature_c": 760, "success_score": 86, "particle_score": 88, "volume_score": 84, "transparency_score": 85, "overheat_score": 15, "overall_quality_score_100": 86},
+        {"temperature_c": 780, "success_score": 74, "particle_score": 68, "volume_score": 70, "transparency_score": 76, "overheat_score": 35, "overall_quality_score_100": 73},
+        {"temperature_c": 780, "success_score": 70, "particle_score": 64, "volume_score": 67, "transparency_score": 73, "overheat_score": 42, "overall_quality_score_100": 69},
+        {"temperature_c": 800, "success_score": 55, "particle_score": 40, "volume_score": 42, "transparency_score": 78, "overheat_score": 72, "overall_quality_score_100": 54},
+        {"temperature_c": 800, "success_score": 52, "particle_score": 36, "volume_score": 39, "transparency_score": 75, "overheat_score": 78, "overall_quality_score_100": 51},
+    ]
+    return pd.DataFrame(demo_data)
 
 
 def safe_markdown(html: str):
     st.markdown(str(html).strip(), unsafe_allow_html=True)
 
 
-def section_title(tag: str = "", title: str = "", desc: str = "", *args, **kwargs):
-    desc_html = f"<p>{desc}</p>" if desc else ""
+def add_to_cart(name: str, price: float, quantity: int, category: str):
+    st.session_state.cart.append({
+        "商品名称": name,
+        "分类": category,
+        "单价": price,
+        "数量": quantity,
+        "小计": round(price * quantity, 2),
+        "加入时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
 
-    html = (
-        f'<div class="section-head">'
-        f'<div class="section-tag">{tag}</div>'
-        f'<h2>{title}</h2>'
-        f'{desc_html}'
-        f'</div>'
+
+def section_title(tag: str, title: str, desc: str = ""):
+    desc_html = f"<p>{desc}</p>" if desc else ""
+    safe_markdown(
+        f"""
+<div class="section-head">
+    <div class="section-tag">{tag}</div>
+    <h2>{title}</h2>
+    {desc_html}
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def glass_card(icon: str, title: str, text: str):
-    html = (
-        f'<div class="glass-card">'
-        f'<div class="icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{text}</p>'
-        f'</div>'
+    safe_markdown(
+        f"""
+<div class="glass-card">
+    <div class="icon">{icon}</div>
+    <h3>{title}</h3>
+    <p>{text}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
-def advantage_card(icon: str, title: str, text: str):
-    html = (
-        f'<div class="advantage-card">'
-        f'<div class="advantage-icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{text}</p>'
-        f'</div>'
+def metric_box(value: str, label: str):
+    safe_markdown(
+        f"""
+<div class="metric-box">
+    <h3>{value}</h3>
+    <p>{label}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
-def contact_card(icon: str, title: str, line1: str, line2: str, line3: str):
-    html = (
-        f'<div class="contact-item-card">'
-        f'<div class="contact-icon">{icon}</div>'
-        f'<h3>{title}</h3>'
-        f'<p>{line1}</p>'
-        f'<p>{line2}</p>'
-        f'<p>{line3}</p>'
-        f'</div>'
+def info_panel(title: str, body: str):
+    safe_markdown(
+        f"""
+<div class="info-panel">
+    <h3>{title}</h3>
+    <p>{body}</p>
+</div>
+"""
     )
-    safe_markdown(html)
 
 
 def image_card(path: Path, title: str, desc: str, note_label: str = "", note_text: str = ""):
     uri = img_to_uri(path)
 
     if not uri:
-        html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
-body {{
-    margin: 0;
-    background: transparent;
-    font-family: "Noto Sans SC", Arial, sans-serif;
-}}
-.image-card {{
-    height: 360px;
-    border-radius: 30px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: rgba(246,251,255,0.82);
-    box-sizing: border-box;
-}}
-.image-card h3 {{
-    color: white;
-    margin: 0 0 10px 0;
-}}
-.image-card p {{
-    margin: 0 0 6px 0;
-}}
-small {{
-    color: rgba(246,251,255,0.65);
-}}
-</style>
-</head>
-<body>
-<div class="image-card">
-    <div>
-        <h3>{title}</h3>
-        <p>缺少图片：{path.name}</p>
-        <small>请确认图片已放入 images 文件夹</small>
-    </div>
+        safe_markdown(
+            f"""
+<div class="missing-img">
+    <h3>{title}</h3>
+    <p>缺少图片：{path.name}</p>
+    <small>请将图片放入项目 images 文件夹。</small>
 </div>
-</body>
-</html>
 """
-        components.html(html, height=390)
+        )
         return
 
     note_html = ""
     if note_label and note_text:
         note_html = f'<div class="image-note"><span>{note_label}：</span>{note_text}</div>'
 
-    html = f"""
+    components.html(
+        f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -216,72 +207,58 @@ body {{
     background: transparent;
     font-family: "Noto Sans SC", Arial, sans-serif;
 }}
-
 .image-card {{
     position: relative;
-    height: 360px;
-    border-radius: 30px;
+    height: 350px;
+    border-radius: 28px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    background: rgba(255,255,255,0.07);
-    transition: 0.3s ease;
-    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
+    transition: 0.28s ease;
 }}
-
 .image-card:hover {{
-    transform: translateY(-8px);
-    box-shadow: 0 0 36px rgba(255,159,67,0.22), 0 24px 70px rgba(0,0,0,0.4);
+    transform: translateY(-7px);
+    box-shadow: 0 0 34px rgba(255,159,67,0.24), 0 24px 70px rgba(0,0,0,0.42);
 }}
-
 .image-card img {{
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
     transition: 0.6s ease;
 }}
-
 .image-card:hover img {{
-    transform: scale(1.08);
+    transform: scale(1.06);
 }}
-
 .image-mask {{
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 1.35rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.86), rgba(0,0,0,0.42), transparent);
-    box-sizing: border-box;
+    padding: 1.25rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.45), transparent);
 }}
-
 .image-mask h3 {{
     margin: 0;
-    color: #ffffff;
-    font-size: 1.45rem;
+    color: white;
+    font-size: 1.35rem;
     font-weight: 900;
-    line-height: 1.25;
 }}
-
 .image-mask p {{
     color: rgba(255,255,255,0.86);
     margin: 0.45rem 0 0;
     line-height: 1.55;
+    font-size: 0.96rem;
     font-weight: 700;
-    font-size: 1rem;
 }}
-
 .image-note {{
-    margin-top: 0.65rem;
+    margin-top: 0.55rem;
     color: #ffcf9a;
     font-weight: 900;
-    font-size: 0.92rem;
-    line-height: 1.45;
+    font-size: 0.9rem;
 }}
-
 .image-note span {{
-    color: #ffe2bd;
+    color: #ffe4c4;
 }}
 </style>
 </head>
@@ -296,39 +273,9 @@ body {{
 </div>
 </body>
 </html>
-"""
-    components.html(html, height=390)
-
-
-def before_after_pair(temp: int, before_name: str, after_name: str, maker: str, result_desc: str):
-    html = (
-        f'<div class="pair-title">'
-        f'<span>{temp}℃</span>'
-        f'<p>{result_desc}</p>'
-        f'<div>制作人员：{maker}</div>'
-        f'</div>'
+""",
+        height=370
     )
-    safe_markdown(html)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        image_card(
-            resolve_image(before_name),
-            f"{temp}℃ · 烧制前",
-            f"{temp}qian：热熔前的玻璃颗粒与材料组合状态。",
-            "制作人员",
-            maker
-        )
-
-    with col2:
-        image_card(
-            resolve_image(after_name),
-            f"{temp}℃ · 烧制后",
-            f"{temp}hou：经过热熔后的成型状态与视觉效果。",
-            "制作人员",
-            maker
-        )
 
 
 def recommend(product_type: str, material: str, target_effect: str, temp: int):
@@ -341,6 +288,9 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
     elif product_type == "装饰画":
         base_temp = "750℃ - 765℃"
         product_tip = "装饰画适合保留颗粒边界和色彩层次，温度不宜过高。"
+    elif product_type == "公共艺术装置":
+        base_temp = "760℃ - 775℃"
+        product_tip = "公共艺术装置需要兼顾强度、造型和视觉冲击力，建议先小样验证再放大制作。"
     elif product_type == "艺术摆件":
         base_temp = "760℃ - 775℃"
         product_tip = "艺术摆件可适当增强体积感，但要避免温度过高造成形态塌陷。"
@@ -352,7 +302,7 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
         risk = "当前温度偏高，容易导致玻璃过度熔融，颗粒感和体积感下降。建议明显降温。"
         score = 45
     elif 775 <= temp < 790:
-        risk = "当前温度仍偏高，颗粒边界可能变弱，建议向 760℃ 附近调整。"
+        risk = "当前温度仍偏高，颗粒边界可能变弱，建议向760℃附近调整。"
         score = 62
     elif 755 <= temp < 775:
         risk = "当前温度较适中，适合形成颗粒感、体积感和较好的透光表现。"
@@ -368,7 +318,7 @@ def recommend(product_type: str, material: str, target_effect: str, temp: int):
     elif target_effect == "体积感强":
         effect_tip = "应控制局部堆叠厚度，让玻璃融合但不完全摊平。"
     else:
-        effect_tip = "建议平衡颗粒感、透光度和体积感，适合比赛展示。"
+        effect_tip = "建议平衡颗粒感、透光度和体积感，适合比赛展示与商业样品。"
 
     if material == "透明玻璃":
         material_tip = "透明玻璃适合灯具、窗饰和透光艺术板。"
@@ -396,7 +346,9 @@ safe_markdown("""
 :root {
     --cyan: #25f4ee;
     --orange: #ff9f43;
+    --green: #80ff72;
     --white: #f6fbff;
+    --muted: rgba(246,251,255,0.72);
 }
 
 html, body, .stApp {
@@ -406,15 +358,15 @@ html, body, .stApp {
 
 .stApp {
     background:
-        radial-gradient(circle at 8% 10%, rgba(37,244,238,0.28), transparent 25%),
-        radial-gradient(circle at 88% 13%, rgba(255,159,67,0.25), transparent 25%),
-        radial-gradient(circle at 50% 95%, rgba(37,244,238,0.16), transparent 35%),
+        radial-gradient(circle at 8% 10%, rgba(37,244,238,0.27), transparent 25%),
+        radial-gradient(circle at 88% 13%, rgba(255,159,67,0.23), transparent 25%),
+        radial-gradient(circle at 50% 96%, rgba(128,255,114,0.10), transparent 35%),
         linear-gradient(135deg, #020711 0%, #071827 48%, #14101f 100%);
     color: var(--white);
 }
 
 .block-container {
-    max-width: 1280px;
+    max-width: 1320px;
     padding-top: 1rem;
     padding-bottom: 5rem;
 }
@@ -423,16 +375,16 @@ html, body, .stApp {
     position: sticky;
     top: 0;
     z-index: 999;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.25rem;
     padding: 0.75rem 1.2rem;
     border-radius: 999px;
-    background: rgba(6, 19, 31, 0.72);
+    background: rgba(6, 19, 31, 0.76);
     border: 1px solid rgba(255,255,255,0.13);
     backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 14px 42px rgba(0,0,0,0.25);
+    box-shadow: 0 14px 42px rgba(0,0,0,0.26);
 }
 
 .nav-logo {
@@ -444,10 +396,10 @@ html, body, .stApp {
 }
 
 .nav-links a {
-    color: rgba(246,251,255,0.82) !important;
+    color: rgba(246,251,255,0.84) !important;
     text-decoration: none;
-    margin-left: 1.2rem;
-    font-size: 0.92rem;
+    margin-left: 1.05rem;
+    font-size: 0.9rem;
     transition: 0.25s;
 }
 
@@ -459,15 +411,27 @@ html, body, .stApp {
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 620px;
-    border-radius: 36px;
-    padding: 5rem 3rem;
+    min-height: 640px;
+    border-radius: 38px;
+    padding: 5.2rem 3rem;
     background:
         linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
-        rgba(255,255,255,0.045);
+        rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(18px);
     box-shadow: 0 28px 90px rgba(0,0,0,0.38);
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    right: -120px;
+    top: -120px;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,159,67,0.42), transparent 70%);
+    filter: blur(4px);
 }
 
 .hero h1 {
@@ -482,9 +446,10 @@ html, body, .stApp {
 
 .hero h2 {
     margin-top: 1.2rem;
-    font-size: clamp(1.05rem, 2vw, 1.45rem);
-    line-height: 1.85;
-    color: rgba(246,251,255,0.82);
+    max-width: 980px;
+    font-size: clamp(1.05rem, 2vw, 1.42rem);
+    line-height: 1.9;
+    color: rgba(246,251,255,0.83);
     font-weight: 500;
 }
 
@@ -495,7 +460,7 @@ html, body, .stApp {
     color: var(--cyan);
     background: rgba(37,244,238,0.1);
     border: 1px solid rgba(37,244,238,0.32);
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 0.12em;
     margin-bottom: 1.5rem;
 }
@@ -536,7 +501,7 @@ html, body, .stApp {
 .section-head {
     text-align: center;
     margin: 5rem auto 2rem;
-    max-width: 880px;
+    max-width: 940px;
 }
 
 .section-tag {
@@ -556,15 +521,15 @@ html, body, .stApp {
 }
 
 .section-head p {
-    color: rgba(246,251,255,0.68);
-    line-height: 1.8;
+    color: rgba(246,251,255,0.70);
+    line-height: 1.85;
 }
 
 .glass-card,
-.advantage-card,
+.info-panel,
 .contact-item-card {
     height: 100%;
-    padding: 1.5rem;
+    padding: 1.45rem;
     border-radius: 28px;
     background: rgba(255,255,255,0.075);
     border: 1px solid rgba(255,255,255,0.14);
@@ -574,80 +539,52 @@ html, body, .stApp {
 }
 
 .glass-card {
-    min-height: 260px;
-}
-
-.advantage-card {
-    min-height: 250px;
+    min-height: 245px;
 }
 
 .glass-card:hover,
-.advantage-card:hover,
+.info-panel:hover,
 .contact-item-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-7px);
     border-color: rgba(37,244,238,0.48);
     box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
 }
 
-.icon,
-.advantage-icon,
-.contact-icon {
+.icon {
     font-size: 2.5rem;
     margin-bottom: 0.8rem;
 }
 
 .glass-card h3,
-.advantage-card h3,
+.info-panel h3,
 .contact-item-card h3 {
     color: #fff;
     margin-bottom: 0.7rem;
-    font-size: 1.25rem;
+    font-size: 1.22rem;
+    font-weight: 900;
 }
 
 .glass-card p,
-.advantage-card p,
+.info-panel p,
 .contact-item-card p {
-    color: rgba(246,251,255,0.72);
+    color: rgba(246,251,255,0.74);
     line-height: 1.75;
 }
 
-.pair-title {
-    margin: 2.2rem 0 1rem;
-    padding: 1.2rem 1.4rem;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.14);
-}
-
-.pair-title span {
-    font-size: 1.75rem;
-    font-weight: 900;
-    color: var(--cyan);
-}
-
-.pair-title p {
-    margin: 0.35rem 0;
-    color: rgba(246,251,255,0.78);
-    line-height: 1.7;
-}
-
-.pair-title div {
-    color: #ffcf9a;
-    font-weight: 800;
-}
-
 .metric-box {
-    padding: 1.2rem;
+    padding: 1.15rem;
     border-radius: 22px;
     background: rgba(255,255,255,0.075);
     border: 1px solid rgba(255,255,255,0.13);
     text-align: center;
+    min-height: 120px;
 }
 
 .metric-box h3 {
     color: var(--cyan);
     margin: 0;
     font-size: 2rem;
+    font-weight: 900;
 }
 
 .metric-box p {
@@ -655,22 +592,43 @@ html, body, .stApp {
     margin: 0.3rem 0 0;
 }
 
-.recommend-result {
-    padding: 1.4rem;
+.recommend-result,
+.order-result,
+.vip-panel {
+    padding: 1.45rem;
     border-radius: 26px;
     background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
     border: 1px solid rgba(255,255,255,0.16);
     margin-top: 1rem;
+    box-shadow: 0 18px 52px rgba(0,0,0,0.22);
 }
 
-.recommend-result h3 {
+.recommend-result h3,
+.order-result h3,
+.vip-panel h3 {
     margin-top: 0;
     color: var(--cyan);
+    font-weight: 900;
 }
 
-.recommend-result p {
+.recommend-result p,
+.order-result p,
+.vip-panel p {
     color: rgba(246,251,255,0.78);
-    line-height: 1.7;
+    line-height: 1.72;
+}
+
+.missing-img {
+    height: 350px;
+    border-radius: 28px;
+    border: 1px dashed rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(246,251,255,0.78);
+    text-align: center;
 }
 
 .contact-shell {
@@ -699,9 +657,20 @@ html, body, .stApp {
 
 .stSlider label,
 .stSelectbox label,
-.stMultiSelect label {
-    color: rgba(246,251,255,0.82) !important;
+.stMultiSelect label,
+.stNumberInput label,
+.stTextInput label,
+.stTextArea label {
+    color: rgba(246,251,255,0.84) !important;
     font-weight: 800 !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: #25f4ee;
+}
+
+hr {
+    border-color: rgba(255,255,255,0.12);
 }
 
 @media (max-width: 768px) {
@@ -748,19 +717,21 @@ html, body, .stApp {
 # =========================================================
 
 safe_markdown(
-    '<div class="navbar">'
-    '<div class="nav-logo">♻️ 青橙焕艺 | 青汐造物</div>'
-    '<div class="nav-links">'
-    '<a href="#intro">项目简介</a>'
-    '<a href="#database">工艺数据库</a>'
-    '<a href="#gallery">烧制对比</a>'
-    '<a href="#industry">行业产品</a>'
-    '<a href="#advantage">项目优势</a>'
-    '<a href="#recommend">产品推荐</a>'
-    '<a href="#future">后期展望</a>'
-    '<a href="#contact">联系我们</a>'
-    '</div>'
-    '</div>'
+    """
+<div class="navbar">
+    <div class="nav-logo">♻️ 倾城幻艺 · 青橙焕艺 AI平台</div>
+    <div class="nav-links">
+        <a href="#intro">项目简介</a>
+        <a href="#factory">原料工厂</a>
+        <a href="#database">工艺数据库</a>
+        <a href="#recommend">AI推荐</a>
+        <a href="#shop">产品商城</a>
+        <a href="#vip">VIP通道</a>
+        <a href="#finance">财务预测</a>
+        <a href="#contact">联系我们</a>
+    </div>
+</div>
+"""
 )
 
 
@@ -769,23 +740,24 @@ safe_markdown(
 # =========================================================
 
 safe_markdown(
-    '<div class="hero">'
-    '<div class="hero-content">'
-    '<div class="hero-tag">GREEN DESIGN · AI DATA · GLASS ART · QINGXI CREATION</div>'
-    '<h1>青橙焕艺</h1>'
-    '<h2>'
-    '由青汐造物打造，依托青汐工坊开展废旧玻璃热熔再生、艺术设计与工艺数据分析。'
-    '项目将废旧玻璃回收、热熔工艺实验、烧制前后对比、艺术产品转化、'
-    '数据可视化与 AI 推荐系统结合，为大学生创新创业大赛提供一个兼具环保价值、'
-    '科技感和商业展示力的数字化平台。'
-    '</h2>'
-    '<div class="hero-buttons">'
-    '<a class="hero-btn" href="#database">预览工艺数据库</a>'
-    '<a class="hero-btn-ghost" href="#gallery">查看烧制对比</a>'
-    '<a class="hero-btn-ghost" href="#recommend">体验产品推荐</a>'
-    '</div>'
-    '</div>'
-    '</div>'
+    """
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-tag">GREEN LOW-CARBON · GLASS RECYCLING · AI DATABASE · ART PRODUCT</div>
+        <h1>倾城幻艺 · 青橙焕艺</h1>
+        <h2>
+            面向高校创新创业大赛的新文科类绿色艺术项目。平台围绕废旧玻璃再生、热熔工艺实验、
+            AI工艺数据库、公共艺术产品、高净值客户定制与VIP会员服务，形成从“上游原料采购”
+            到“中游工坊设计生产”，再到“下游产品销售与会员增值服务”的商业闭环。
+        </h2>
+        <div class="hero-buttons">
+            <a class="hero-btn" href="#factory">对接原料工厂</a>
+            <a class="hero-btn-ghost" href="#database">查看工艺数据库</a>
+            <a class="hero-btn-ghost" href="#vip">进入VIP通道</a>
+        </div>
+    </div>
+</div>
+"""
 )
 
 
@@ -798,53 +770,205 @@ safe_markdown('<div id="intro"></div>')
 section_title(
     "PROJECT INTRODUCTION",
     "项目简介",
-    "青汐造物以青汐工坊为线下实验与艺术转化空间，建立从废弃材料、热熔实验、烧制前后记录、艺术设计到数据推荐的完整创新创业链路。"
+    "项目以废旧玻璃再生为基础，以AI工艺数据库和艺术设计能力为支撑，探索绿色材料、公共艺术和商业转化融合路径。"
 )
 
 c1, c2, c3 = st.columns(3)
-
 with c1:
     glass_card(
         "♻️",
-        "废旧玻璃再生",
-        "以废弃玻璃、边角料玻璃、透明和彩色玻璃为基础材料，通过清洗、筛选、组合和热熔烧制，重新赋予废弃材料可展示、可销售、可设计的价值。"
+        "绿色低碳材料再生",
+        "将废旧玻璃、边角料玻璃与回收玻璃重新导入艺术生产流程，减少资源浪费，符合绿色低碳、循环经济和可持续设计方向。"
     )
-
 with c2:
     glass_card(
         "🔥",
-        "青汐工坊实验",
-        "依托青汐工坊开展热熔工艺实验，对800℃、780℃、760℃等烧制条件下的颗粒感、体积感、透光度和综合效果进行结构化记录。"
+        "青汐工坊热熔实验",
+        "围绕760℃、780℃、800℃等温度开展烧制实验，记录颗粒感、体积感、透光度和过热风险，形成可解释的工艺经验。"
     )
-
 with c3:
     glass_card(
-        "📷",
-        "烧制前后对比",
-        "通过760℃、780℃、800℃三组烧制前后照片，直观展示温度变化对玻璃融合程度、颗粒保留和视觉效果的影响。"
+        "🤖",
+        "AI工艺数据库",
+        "将实验记录、图片样例、温度参数和效果评分结构化，面向工艺推荐、产品设计、客户定制和技术服务平台进行延展。"
     )
 
 c4, c5, c6 = st.columns(3)
-
 with c4:
     glass_card(
-        "🎨",
-        "艺术产品转化",
-        "青汐造物将实验样品进一步转化为花瓶、灯具、装饰画、艺术摆件和校园文创产品，增强项目的审美表达和商业落地空间。"
+        "🏛️",
+        "公共艺术产品",
+        "围绕校园、社区、商业空间、文旅场景设计玻璃公共艺术装置，提升项目从手工艺品到空间产品的商业高度。"
     )
-
 with c5:
     glass_card(
-        "📊",
-        "数据可视化分析",
-        "将实验结果转化为可筛选、可统计、可分析的CSV数据，支持温度趋势、质量分变化、多指标对比和后续机器学习建模。"
+        "🛍️",
+        "产品销售闭环",
+        "普通用户可购买文创产品，VIP客户可购买高端定制产品，平台通过商品销售、会员服务和设计服务形成收入来源。"
     )
-
 with c6:
     glass_card(
-        "🤖",
-        "AI工艺推荐",
-        "面向用户选择的产品类型、材料和目标效果，输出推荐温度区间、风险提示和产品设计建议，提高项目科技感与交互性。"
+        "💼",
+        "创新创业展示",
+        "比赛展示重点从单一公益展示转向技术平台、产品体系、客户案例、盈利模型和未来3—5年增长规划。"
+    )
+
+
+# =========================================================
+# 上游原料工厂对接
+# =========================================================
+
+safe_markdown('<div id="factory"></div>')
+
+section_title(
+    "UPSTREAM FACTORY CONNECTION",
+    "上游原料工厂对接",
+    "平台模拟对接原料工厂，完成废旧玻璃原料采购、质量筛选、用途匹配和成本估算，突出商业链路的上游基础。"
+)
+
+factory_col1, factory_col2 = st.columns([1.15, 0.85])
+
+with factory_col1:
+    st.markdown("### 原料采购交互")
+
+    supplier = st.selectbox(
+        "选择原料来源",
+        [
+            "城市玻璃回收站",
+            "建筑玻璃边角料工厂",
+            "酒瓶与饮料瓶回收企业",
+            "彩色玻璃加工厂",
+            "校园废玻璃回收点"
+        ]
+    )
+
+    glass_type = st.selectbox(
+        "选择玻璃类型",
+        [
+            "透明玻璃",
+            "彩色玻璃",
+            "混合玻璃",
+            "建筑平板玻璃",
+            "瓶罐玻璃",
+            "实验小样材料包"
+        ]
+    )
+
+    purity = st.selectbox(
+        "原料等级",
+        [
+            "A级：杂质少，适合高端艺术产品",
+            "B级：杂质可控，适合普通文创产品",
+            "C级：需要二次筛选，适合实验与教学"
+        ]
+    )
+
+    use_scene = st.selectbox(
+        "采购用途",
+        [
+            "热熔实验",
+            "文创产品量产",
+            "灯具与透光产品",
+            "公共艺术装置",
+            "VIP高端定制"
+        ]
+    )
+
+    weight = st.number_input("采购重量 / kg", min_value=1, max_value=10000, value=50, step=5)
+
+    base_price_map = {
+        "透明玻璃": 1.8,
+        "彩色玻璃": 3.2,
+        "混合玻璃": 2.4,
+        "建筑平板玻璃": 1.5,
+        "瓶罐玻璃": 1.2,
+        "实验小样材料包": 6.8,
+    }
+
+    grade_factor = 1.45 if purity.startswith("A级") else 1.15 if purity.startswith("B级") else 0.85
+    scene_factor = 1.35 if use_scene in ["公共艺术装置", "VIP高端定制"] else 1.0
+    unit_price = base_price_map.get(glass_type, 2.0) * grade_factor * scene_factor
+    raw_cost = round(unit_price * weight, 2)
+    cleaning_cost = round(weight * 0.65, 2)
+    transport_cost = round(80 + weight * 0.18, 2)
+    total_cost = round(raw_cost + cleaning_cost + transport_cost, 2)
+
+    safe_markdown(
+        f"""
+<div class="order-result">
+    <h3>原料采购估算</h3>
+    <p><b>供应来源：</b>{supplier}</p>
+    <p><b>玻璃类型：</b>{glass_type}</p>
+    <p><b>采购用途：</b>{use_scene}</p>
+    <p><b>采购重量：</b>{weight} kg</p>
+    <p><b>原料单价估算：</b>{unit_price:.2f} 元/kg</p>
+    <p><b>原料成本：</b>{raw_cost:.2f} 元</p>
+    <p><b>清洗筛选成本：</b>{cleaning_cost:.2f} 元</p>
+    <p><b>物流成本：</b>{transport_cost:.2f} 元</p>
+    <p><b>预计采购总成本：</b>{total_cost:.2f} 元</p>
+</div>
+"""
+    )
+
+    if st.button("提交原料采购需求", use_container_width=True):
+        st.session_state.factory_orders.append({
+            "供应来源": supplier,
+            "玻璃类型": glass_type,
+            "原料等级": purity,
+            "采购用途": use_scene,
+            "重量kg": weight,
+            "预计总成本": total_cost,
+            "提交时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+        st.success("已提交原料采购需求，当前记录已加入平台采购台账。")
+
+with factory_col2:
+    info_panel(
+        "为什么要展示上游原料工厂？",
+        "创业组答辩不仅要讲作品，还要讲供应链。原料采购模块可以说明项目不是停留在手工展示，而是具备原料来源、成本控制、批量生产和后续盈利的商业基础。"
+    )
+
+    info_panel(
+        "答辩表达建议",
+        "可以表述为：我们将废旧玻璃来源分为城市回收、工厂边角料、校园回收和定向采购四类，并通过清洗、分级、筛选和热熔实验建立稳定的再生玻璃供应体系。"
+    )
+
+    if st.session_state.factory_orders:
+        st.markdown("### 已提交采购记录")
+        st.dataframe(pd.DataFrame(st.session_state.factory_orders), use_container_width=True, height=220)
+
+
+# =========================================================
+# 青汐工坊温度说明
+# =========================================================
+
+section_title(
+    "FIRING TEMPERATURE KNOWLEDGE",
+    "青汐工坊温度说明",
+    "将你们自己的烧制经验展示出来，突出项目的工艺积累和可复现性。"
+)
+
+t1, t2, t3 = st.columns(3)
+
+with t1:
+    glass_card(
+        "760℃",
+        "推荐展示温度",
+        "整体表现较稳定，颗粒感、体积感和透光度较均衡，适合花瓶、装饰画、灯具小样和比赛展示样品。"
+    )
+
+with t2:
+    glass_card(
+        "780℃",
+        "偏高风险温度",
+        "玻璃融合程度增强，但部分样品会出现颗粒边界变弱、体积感下降的问题，适合做对照实验。"
+    )
+
+with t3:
+    glass_card(
+        "800℃",
+        "过热警示温度",
+        "容易出现过度熔融，颗粒感和体积感明显减弱，可用于说明温度控制的重要性。"
     )
 
 
@@ -855,43 +979,42 @@ with c6:
 safe_markdown('<div id="database"></div>')
 
 section_title(
-    "SPACE DATABASE PREVIEW",
-    "预览玻璃热熔工艺数据库",
-    "基于青汐工坊真实烧制记录整理，聚焦温度、实验轮次、颗粒感、体积感、透光度和综合质量分。"
+    "PROCESS DATABASE PREVIEW",
+    "玻璃热熔工艺数据库",
+    "数据库将实验温度、质量分、颗粒感、体积感、透光度和过热风险转化为可筛选、可分析、可推荐的数据资产。"
 )
 
 if df.empty:
-    st.warning(f"没有找到 glass_experiment_numeric_only.csv。当前尝试路径：{DATA_PATH}")
+    st.warning(f"没有找到数据文件，当前尝试路径：{DATA_PATH}")
 else:
     temps = sorted(df["temperature_c"].dropna().unique()) if "temperature_c" in df.columns else []
     selected_temp = st.multiselect("选择温度", temps, default=temps)
 
     show_df = df.copy()
-
     if selected_temp and "temperature_c" in show_df.columns:
         show_df = show_df[show_df["temperature_c"].isin(selected_temp)]
 
     m1, m2, m3, m4 = st.columns(4)
 
     with m1:
-        safe_markdown(f'<div class="metric-box"><h3>{len(show_df)}</h3><p>实验记录</p></div>')
+        metric_box(str(len(show_df)), "实验记录")
 
     with m2:
         avg_temp = round(show_df["temperature_c"].mean(), 1) if "temperature_c" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_temp}℃</h3><p>平均温度</p></div>')
+        metric_box(f"{avg_temp}℃", "平均温度")
 
     with m3:
         avg_quality = round(show_df["overall_quality_score_100"].mean(), 1) if "overall_quality_score_100" in show_df.columns and len(show_df) else 0
-        safe_markdown(f'<div class="metric-box"><h3>{avg_quality}</h3><p>平均质量分</p></div>')
+        metric_box(str(avg_quality), "平均质量分")
 
     with m4:
         best_temp = "暂无"
         if "temperature_c" in show_df.columns and "overall_quality_score_100" in show_df.columns and len(show_df):
             best_temp = f"{int(show_df.groupby('temperature_c')['overall_quality_score_100'].mean().idxmax())}℃"
-        safe_markdown(f'<div class="metric-box"><h3>{best_temp}</h3><p>较优温度</p></div>')
+        metric_box(best_temp, "较优温度")
 
-    st.markdown("### 表格形式内容")
-    st.dataframe(show_df, use_container_width=True, height=360)
+    st.markdown("### 实验记录表")
+    st.dataframe(show_df, use_container_width=True, height=330)
 
     numeric_cols = [
         col for col in [
@@ -909,33 +1032,37 @@ else:
         mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
         st.dataframe(mean_df, use_container_width=True, height=220)
 
+        chart_col = "overall_quality_score_100"
+        if chart_col in mean_df.columns:
+            st.line_chart(mean_df.set_index("temperature_c")[chart_col])
+
         if "overall_quality_score_100" in mean_df.columns and len(mean_df):
             best_row = mean_df.loc[mean_df["overall_quality_score_100"].idxmax()]
-            best_temp = int(best_row["temperature_c"])
+            best_temp_value = int(best_row["temperature_c"])
             best_score = round(best_row["overall_quality_score_100"], 1)
 
             safe_markdown(
                 f"""
 <div class="recommend-result">
     <h3>温度趋势结论</h3>
-    <p><b>较优温度：</b>{best_temp}℃</p>
+    <p><b>较优温度：</b>{best_temp_value}℃</p>
     <p><b>平均综合质量分：</b>{best_score}</p>
-    <p>手机端已关闭交互折线图展示，避免微信内置浏览器加载卡顿；电脑端可继续扩展完整趋势图展示。</p>
+    <p>从展示口径上，可以说明平台不是简单展示作品，而是将实验数据转化为后续AI推荐、客户定制和工艺服务的数据库基础。</p>
 </div>
 """
             )
 
 
 # =========================================================
-# 烧制前后动态滚动照片
+# 烧制前后动态展示
 # =========================================================
 
 safe_markdown('<div id="gallery"></div>')
 
 section_title(
-    "FIRING COMPARISON",
+    "BEFORE & AFTER DISPLAY",
     "烧制前后照片展示",
-    "围绕760℃、780℃、800℃三组温度，将烧制前 qian 与烧制后 hou 进行动态展示，突出不同温度下玻璃状态的变化。"
+    "围绕760℃、780℃、800℃三组温度，将烧制前 qian 与烧制后 hou 进行动态展示。"
 )
 
 scroll_items = [
@@ -948,7 +1075,6 @@ scroll_items = [
 ]
 
 slide_html = ""
-
 for item in scroll_items:
     uri = img_to_uri(item["path"])
     if uri:
@@ -980,7 +1106,7 @@ if slide_html:
     gap: 24px;
     width: max-content;
     padding: 24px;
-    animation: scrollX 30s linear infinite;
+    animation: scrollX 34s linear infinite;
 }}
 .scroll-wrapper:hover .scroll-track {{
     animation-play-state: paused;
@@ -1046,114 +1172,78 @@ else:
 
 
 # =========================================================
-# 烧制前后对比
+# 产品展示
 # =========================================================
+
+safe_markdown('<div id="shop"></div>')
 
 section_title(
-    "BEFORE & AFTER",
-    "烧制前后的对比",
-    "根据图片文件名中的数字识别温度，qian表示烧制前，hou表示烧制后。"
+    "PRODUCT SHOP",
+    "普通产品购买区",
+    "面向普通消费者展示可销售产品，形成文创销售、体验课程和普通定制的基础收入。"
 )
 
-tab760, tab780, tab800 = st.tabs(["760℃ 对比", "780℃ 对比", "800℃ 对比"])
+product_list = [
+    {
+        "name": "再生玻璃花器",
+        "price": 168,
+        "img": "1",
+        "desc": "适合桌面陈设、花艺搭配和校园文创展示。"
+    },
+    {
+        "name": "透光玻璃小夜灯",
+        "price": 238,
+        "img": "2",
+        "desc": "利用透明玻璃和浅色玻璃形成柔和透光效果。"
+    },
+    {
+        "name": "玻璃装饰画",
+        "price": 198,
+        "img": "3",
+        "desc": "突出颗粒感、色彩层次和绿色再生材料的艺术表达。"
+    },
+    {
+        "name": "玻璃文创饰品",
+        "price": 88,
+        "img": "4",
+        "desc": "适合作为校园纪念品、伴手礼和活动周边。"
+    },
+]
 
-with tab760:
-    before_after_pair(
-        760,
-        "760qian",
-        "760hou",
-        "李雨豪、芦子晴、刘鑫悦、刘关伟、闫续、高艺萌等",
-        "760℃组整体表现较好，多次出现“温度适中，颗粒感明显”，后期也出现“透光度强，有明显体积感”的结果。"
-    )
+product_cols = st.columns(4)
 
-with tab780:
-    before_after_pair(
-        780,
-        "780qian",
-        "780hou",
-        "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹等",
-        "780℃组仍表现出温度偏高问题，部分样品出现颗粒感和体积感不足，个别样品透光效果一般。"
-    )
-
-with tab800:
-    before_after_pair(
-        800,
-        "800qian",
-        "800hou",
-        "芦子晴、刘鑫悦、刘关伟、田思雨、高艺丹、李若冰等",
-        "800℃组温度过高，多次出现“没有颗粒感和体积感”，说明过度熔融会削弱玻璃颗粒肌理。"
-    )
-
-
-# =========================================================
-# 玻璃行业产品展示
-# =========================================================
-
-safe_markdown('<div id="industry"></div>')
-
-section_title(
-    "GLASS INDUSTRY PRODUCTS",
-    "玻璃行业产品展示",
-    "以下图片用于展示玻璃行业常见产品形态与市场应用方向，作为青汐造物后续产品设计参考。"
-)
-
-p1, p2, p3 = st.columns(3)
-
-with p1:
-    image_card(resolve_image("1"), "家居器皿方向", "展示玻璃材料在家居器皿、桌面陈设和生活收纳中的行业应用可能。")
-
-with p2:
-    image_card(resolve_image("2"), "透光灯具方向", "展示玻璃材料在灯具、氛围照明和空间装饰中的行业化应用。")
-
-with p3:
-    image_card(resolve_image("3"), "花器摆件方向", "展示玻璃材料在花瓶、花器、家居软装和陈列摆件中的产品形态。")
-
-p4, p5 = st.columns(2)
-
-with p4:
-    image_card(resolve_image("4"), "文创饰品方向", "展示玻璃色彩、珠状元素和轻量化饰品在文创产品中的延展空间。")
-
-with p5:
-    image_card(resolve_image("5"), "生活器物方向", "展示玻璃材料在烛台、香薰容器、桌面器物等生活场景中的商业化方向。")
+for idx, product in enumerate(product_list):
+    with product_cols[idx]:
+        image_card(
+            resolve_image(product["img"]),
+            product["name"],
+            product["desc"],
+            "价格",
+            f"{product['price']} 元"
+        )
+        qty = st.number_input(
+            f"{product['name']}数量",
+            min_value=1,
+            max_value=99,
+            value=1,
+            step=1,
+            key=f"normal_qty_{idx}"
+        )
+        if st.button(f"加入购物车 · {product['name']}", key=f"add_normal_{idx}", use_container_width=True):
+            add_to_cart(product["name"], product["price"], qty, "普通商品")
+            st.success(f"已加入购物车：{product['name']} × {qty}")
 
 
 # =========================================================
-# 项目优势
-# =========================================================
-
-safe_markdown('<div id="advantage"></div>')
-
-section_title(
-    "PROJECT ADVANTAGES",
-    "项目优势",
-    "从环保、工艺、展示和产品转化四个维度体现青汐造物的项目价值。"
-)
-
-a1, a2, a3, a4 = st.columns(4)
-
-with a1:
-    advantage_card("🌱", "绿色低碳", "减少废旧玻璃浪费，体现循环经济、环保教育和可持续设计理念。")
-
-with a2:
-    advantage_card("🧪", "工坊实验可复现", "依托青汐工坊记录温度、实验轮次和效果评分，便于后续复盘、优化和扩展。")
-
-with a3:
-    advantage_card("📷", "对比展示直观", "烧制前后照片能够直观展示温度变化对玻璃形态、颗粒感和体积感的影响。")
-
-with a4:
-    advantage_card("🛍️", "产品可转化", "结合玻璃行业产品形态，可延伸为灯具、花瓶、装饰画、摆件和校园文创。")
-
-
-# =========================================================
-# 产品推荐系统
+# AI 产品推荐
 # =========================================================
 
 safe_markdown('<div id="recommend"></div>')
 
 section_title(
-    "PRODUCT RECOMMENDATION",
-    "为用户提供特定产品推荐",
-    "用户先选择想制作的产品类型，再输入材料和目标效果，系统输出推荐工艺方案。"
+    "AI PRODUCT RECOMMENDATION",
+    "AI工艺与产品推荐",
+    "用户选择产品类型、材料和目标效果后，系统输出推荐温度区间、风险提示和产品设计建议。"
 )
 
 r1, r2 = st.columns([1.1, 0.9])
@@ -1161,7 +1251,7 @@ r1, r2 = st.columns([1.1, 0.9])
 with r1:
     product_type = st.selectbox(
         "请选择产品类型",
-        ["花瓶", "灯具", "装饰画", "艺术摆件", "综合文创产品"]
+        ["花瓶", "灯具", "装饰画", "艺术摆件", "公共艺术装置", "综合文创产品"]
     )
 
     material = st.selectbox(
@@ -1181,62 +1271,322 @@ with r1:
     )
 
     safe_markdown(
-        f'<div class="recommend-result">'
-        f'<h3>AI 推荐结果</h3>'
-        f'<p><b>用户选择产品：</b>{product_type}</p>'
-        f'<p><b>推荐工艺温度区间：</b>{temp_range}</p>'
-        f'<p><b>温度风险提示：</b>{risk}</p>'
-        f'<p><b>产品设计建议：</b>{product_tip}</p>'
-        f'<p><b>目标效果建议：</b>{effect_tip}</p>'
-        f'<p><b>材料建议：</b>{material_tip}</p>'
-        f'<p><b>综合推荐分：</b>{score} / 100</p>'
-        f'</div>'
+        f"""
+<div class="recommend-result">
+    <h3>AI推荐结果</h3>
+    <p><b>用户选择产品：</b>{product_type}</p>
+    <p><b>推荐工艺温度区间：</b>{temp_range}</p>
+    <p><b>温度风险提示：</b>{risk}</p>
+    <p><b>产品设计建议：</b>{product_tip}</p>
+    <p><b>目标效果建议：</b>{effect_tip}</p>
+    <p><b>材料建议：</b>{material_tip}</p>
+    <p><b>综合推荐分：</b>{score} / 100</p>
+</div>
+"""
     )
 
     st.progress(score / 100)
 
-recommend_img = resolve_image("22")
-if not recommend_img.exists():
-    recommend_img = resolve_image("11")
-
 with r2:
+    recommend_img = resolve_image("22")
+    if not recommend_img.exists():
+        recommend_img = resolve_image("11")
     image_card(
         recommend_img,
         "推荐效果参考",
-        "该图用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
+        "用于辅助展示热熔玻璃的发光、透光和材料转化效果，适合放在产品推荐系统旁作为视觉引导。"
     )
 
 
 # =========================================================
-# 后期展望
+# VIP通道
 # =========================================================
 
-safe_markdown('<div id="future"></div>')
+safe_markdown('<div id="vip"></div>')
 
 section_title(
-    "FUTURE VISION",
-    "后期展望",
-    "围绕数据规模、AI模型、产品体系和商业落地继续升级青汐造物的再生玻璃艺术平台。"
+    "VIP MEMBER CHANNEL",
+    "VIP付费通道",
+    "VIP通道用于展示平台会员制盈利模式。普通用户只能浏览基础产品，VIP用户可进入高端定制、公共艺术和深度工艺服务页面。"
 )
 
-with st.expander("01 建立更完整的玻璃热熔工艺数据库", expanded=True):
-    st.write(
-        "青汐工坊后续将继续补充保温时间、升温曲线、玻璃厚度、颗粒大小、颜色组合、摆放方式等参数，让数据库从展示型数据逐步升级为可建模数据。"
+vip_col1, vip_col2, vip_col3 = st.columns(3)
+
+with vip_col1:
+    glass_card(
+        "⭐",
+        "基础会员",
+        "适合普通消费者，解锁部分工艺说明、普通产品优惠和基础定制咨询。展示价格：99元/月。"
     )
 
-with st.expander("02 从规则推荐升级为机器学习推荐"):
-    st.write(
-        "当前系统基于真实实验规律和规则进行推荐，后续青汐造物可使用回归模型或分类模型预测综合质量分，并自动生成最佳烧制方案。"
+with vip_col2:
+    glass_card(
+        "💎",
+        "高级会员",
+        "适合高净值客户和设计工作室，解锁高端产品购买、深度定制方案和优先排产。展示价格：299元/月。"
     )
 
-with st.expander("03 扩展更多再生玻璃产品类型"):
-    st.write(
-        "产品可参考玻璃行业现有器皿、灯具、花器、饰品和生活器物形态，进一步扩展到校园纪念品、公共艺术装置、家居软装和文旅文创产品。"
+with vip_col3:
+    glass_card(
+        "🏛️",
+        "机构会员",
+        "适合学校、社区、商业空间和文旅项目，解锁公共艺术装置方案、批量设计服务和项目顾问支持。展示价格：999元/月。"
     )
 
-with st.expander("04 打造青汐工坊体验与商业闭环"):
+st.markdown("### 开通VIP")
+
+pay_col1, pay_col2 = st.columns([1, 1])
+
+with pay_col1:
+    selected_vip = st.selectbox(
+        "选择VIP类型",
+        ["基础会员 / 99元", "高级会员 / 299元", "机构会员 / 999元"]
+    )
+
+    vip_price = 99
+    if selected_vip.startswith("高级"):
+        vip_price = 299
+    elif selected_vip.startswith("机构"):
+        vip_price = 999
+
+    pay_name = st.text_input("购买人 / 单位名称", value="演示用户")
+    pay_phone = st.text_input("联系电话", value="13800000000")
+
+    safe_markdown(
+        f"""
+<div class="vip-panel">
+    <h3>VIP订单预览</h3>
+    <p><b>会员类型：</b>{selected_vip}</p>
+    <p><b>支付金额：</b>{vip_price} 元</p>
+    <p><b>说明：</b>此处为创新创业项目展示版，采用模拟支付逻辑。正式上线时可对接微信支付、支付宝或平台订单系统。</p>
+</div>
+"""
+    )
+
+    if st.button("模拟支付并开通VIP", use_container_width=True):
+        st.session_state.vip_unlocked = True
+        st.session_state.vip_level = selected_vip
+        st.success(f"VIP已开通：{selected_vip}")
+
+with pay_col2:
+    if st.session_state.vip_unlocked:
+        st.success(f"当前状态：已开通 {st.session_state.vip_level}")
+        info_panel(
+            "已解锁内容",
+            "你现在可以进入VIP高端产品页面，购买高端定制产品、公共艺术装置方案和深度工艺服务。"
+        )
+    else:
+        st.warning("当前状态：未开通VIP。请先完成模拟支付，才可以进入下方VIP高端产品购买区。")
+        info_panel(
+            "为什么设置VIP门槛？",
+            "该模块用于展示平台模式和会员制盈利逻辑。普通用户购买标准产品，VIP用户购买高端产品、深度服务和定制方案，能够增强创业组答辩中的商业想象空间。"
+        )
+
+
+# =========================================================
+# VIP高端产品购买
+# =========================================================
+
+section_title(
+    "VIP PREMIUM PRODUCTS",
+    "VIP高端产品购买区",
+    "未开通VIP时不能继续进入高端产品页面；开通后可购买更高价值的定制产品和服务。"
+)
+
+if not st.session_state.vip_unlocked:
+    safe_markdown(
+        """
+<div class="vip-panel">
+    <h3>页面已锁定</h3>
+    <p>该区域为VIP专属页面。请先在上方开通VIP通道，再继续浏览和购买高端产品。</p>
+</div>
+"""
+    )
+else:
+    premium_products = [
+        {
+            "name": "高端定制玻璃艺术摆件",
+            "price": 1280,
+            "img": "5",
+            "desc": "面向高净值客户、办公室陈设和礼品场景，提供颜色、造型和主题定制。"
+        },
+        {
+            "name": "再生玻璃公共艺术小型方案",
+            "price": 6800,
+            "img": "11",
+            "desc": "适合校园、社区、商业空间展示，包含设计方案、材料建议和小样制作。"
+        },
+        {
+            "name": "企业ESG绿色艺术礼盒",
+            "price": 3980,
+            "img": "22",
+            "desc": "面向企业ESG活动、公益展示和客户礼品，突出绿色低碳与艺术价值。"
+        },
+    ]
+
+    premium_cols = st.columns(3)
+
+    for idx, product in enumerate(premium_products):
+        with premium_cols[idx]:
+            image_card(
+                resolve_image(product["img"]),
+                product["name"],
+                product["desc"],
+                "VIP价格",
+                f"{product['price']} 元"
+            )
+            qty = st.number_input(
+                f"{product['name']}数量",
+                min_value=1,
+                max_value=20,
+                value=1,
+                step=1,
+                key=f"vip_qty_{idx}"
+            )
+            if st.button(f"VIP购买 · {product['name']}", key=f"add_vip_{idx}", use_container_width=True):
+                add_to_cart(product["name"], product["price"], qty, "VIP高端商品")
+                st.success(f"已加入购物车：{product['name']} × {qty}")
+
+
+# =========================================================
+# 购物车
+# =========================================================
+
+section_title(
+    "SHOPPING CART",
+    "购物车与订单汇总",
+    "汇总普通商品和VIP商品，便于展示平台从浏览、推荐、会员到购买的商业闭环。"
+)
+
+if st.session_state.cart:
+    cart_df = pd.DataFrame(st.session_state.cart)
+    total_amount = round(cart_df["小计"].sum(), 2)
+
+    st.dataframe(cart_df, use_container_width=True, height=260)
+
+    c_total1, c_total2, c_total3 = st.columns(3)
+    with c_total1:
+        metric_box(f"{len(cart_df)}", "订单条目")
+    with c_total2:
+        metric_box(f"{cart_df['数量'].sum()}", "商品总数量")
+    with c_total3:
+        metric_box(f"{total_amount:.2f}元", "订单总金额")
+
+    remark = st.text_area("订单备注", placeholder="例如：希望颜色偏蓝绿色；用于办公室陈设；需要开发票等。")
+
+    if st.button("提交订单", use_container_width=True):
+        st.success("订单已提交。展示版不会产生真实支付，正式上线可对接订单后台与支付接口。")
+
+    if st.button("清空购物车", use_container_width=True):
+        st.session_state.cart = []
+        st.rerun()
+else:
+    st.info("购物车暂无商品。可以在普通产品购买区或VIP高端产品区加入商品。")
+
+
+# =========================================================
+# 平台模式
+# =========================================================
+
+section_title(
+    "PLATFORM BUSINESS MODEL",
+    "平台模式与商业闭环",
+    "结合会议建议，将项目从单一作品展示升级为技术服务平台、会员平台和产品交易平台。"
+)
+
+b1, b2, b3 = st.columns(3)
+
+with b1:
+    glass_card(
+        "🔗",
+        "技术撮合交易",
+        "平台一端连接原料工厂、回收渠道和设计师，另一端连接消费者、机构客户和空间项目方，形成技术与需求撮合。"
+    )
+
+with b2:
+    glass_card(
+        "🧠",
+        "AI数据库服务",
+        "常规数据开放用于展示，深度参数、工艺建议、批量方案和定制模型作为付费服务，增强技术壁垒。"
+    )
+
+with b3:
+    glass_card(
+        "💳",
+        "会员制盈利",
+        "通过基础会员、高级会员和机构会员分层收费，叠加商品销售、设计服务、公共艺术项目和企业ESG定制。"
+    )
+
+
+# =========================================================
+# 财务预测
+# =========================================================
+
+safe_markdown('<div id="finance"></div>')
+
+section_title(
+    "FINANCIAL FORECAST",
+    "财务预测展示",
+    "根据会议内容，将2026年三大核心业务合计盈利40万元、单位成本下降20%、净利润率提升到30%以上作为展示目标。"
+)
+
+finance_data = pd.DataFrame([
+    {"业务类型": "再生玻璃文创产品", "预计收入万元": 55, "预计成本万元": 36, "预计利润万元": 19},
+    {"业务类型": "VIP高端定制服务", "预计收入万元": 42, "预计成本万元": 27, "预计利润万元": 15},
+    {"业务类型": "公共艺术与技术服务", "预计收入万元": 24, "预计成本万元": 18, "预计利润万元": 6},
+])
+
+finance_data["净利润率"] = (finance_data["预计利润万元"] / finance_data["预计收入万元"] * 100).round(1)
+
+st.dataframe(finance_data, use_container_width=True, height=180)
+
+f1, f2, f3, f4 = st.columns(4)
+
+with f1:
+    metric_box("121万", "2026年预计收入")
+with f2:
+    metric_box("40万", "2026年预计利润")
+with f3:
+    metric_box("20%", "单位成本下降目标")
+with f4:
+    metric_box("30%+", "目标净利润率")
+
+st.bar_chart(finance_data.set_index("业务类型")[["预计收入万元", "预计利润万元"]])
+
+
+# =========================================================
+# 答辩建议
+# =========================================================
+
+section_title(
+    "PITCH SUGGESTIONS",
+    "答辩展示建议",
+    "围绕会议纪要中的痛点、赛道选择和展示建议，对平台答辩内容进行强化。"
+)
+
+with st.expander("01 项目痛点如何讲", expanded=True):
     st.write(
-        "结合校园废玻璃回收、青汐工坊手作体验课程、线上展示平台和文创销售，形成环保教育、艺术体验和创业转化的闭环。"
+        "建议从产品同质化、传播局限、认知壁垒三个角度展开。不要只说我们做了玻璃产品，而要强调传统玻璃再生产品缺少数据体系、设计转化和高端场景。"
+    )
+
+with st.expander("02 解决方案如何讲"):
+    st.write(
+        "可以表达为：我们以AI工艺数据库为核心，用实验数据降低工艺不确定性，用设计人才提升产品审美，用平台模式连接原料、工坊、设计师和客户。"
+    )
+
+with st.expander("03 创业组如何讲"):
+    st.write(
+        "创业组要突出主线产品、营收来源和规模化可能。建议主打：再生玻璃文创产品 + VIP高端定制 + 公共艺术/技术服务三条收入线。"
+    )
+
+with st.expander("04 展示内容如何调整"):
+    st.write(
+        "商业赛道展示时，应减少单纯社区服务内容，增加高净值客户合作、公共艺术案例、企业ESG定制和VIP会员服务，突出盈利能力。"
+    )
+
+with st.expander("05 近期待办"):
+    st.write(
+        "1. 回去与戴主任商量确定参赛方向；2. 给任老师传项目资料；3. 完善含商学院成员的团队；4. 进一步打磨答辩稿，减少口语化和不确定表述。"
     )
 
 
@@ -1253,19 +1603,48 @@ section_title(
 )
 
 safe_markdown(
-    '<div class="contact-shell">'
-    '<h2>青汐造物</h2>'
-    '<p>青汐工坊 · Glass Recycling AI Platform</p>'
-    '</div>'
+    """
+<div class="contact-shell">
+    <h2>倾城幻艺 · 青橙焕艺</h2>
+    <p>青汐工坊 · Glass Recycling AI Platform · 绿色低碳艺术创业项目</p>
+</div>
+"""
 )
 
 cc1, cc2, cc3 = st.columns(3)
 
 with cc1:
-    contact_card("♻️", "公司定位", "青汐造物", "废旧玻璃热熔再生", "艺术产品设计")
+    safe_markdown(
+        """
+<div class="contact-item-card">
+    <h3>公司定位</h3>
+    <p>废旧玻璃再生</p>
+    <p>艺术产品设计</p>
+    <p>绿色低碳创业项目</p>
+</div>
+"""
+    )
 
 with cc2:
-    contact_card("🏛️", "艺术中心", "青汐工坊", "校园环保项目", "艺术工坊展示")
+    safe_markdown(
+        """
+<div class="contact-item-card">
+    <h3>平台方向</h3>
+    <p>AI工艺数据库</p>
+    <p>产品推荐系统</p>
+    <p>技术服务平台</p>
+</div>
+"""
+    )
 
 with cc3:
-    contact_card("🤖", "平台方向", "青橙焕艺项目", "绿色材料再生", "AI推荐系统展示")
+    safe_markdown(
+        """
+<div class="contact-item-card">
+    <h3>商业模式</h3>
+    <p>文创产品销售</p>
+    <p>VIP高端定制</p>
+    <p>公共艺术服务</p>
+</div>
+"""
+    )
