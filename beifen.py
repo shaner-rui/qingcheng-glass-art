@@ -282,18 +282,18 @@ body {{
 
 .image-card {{
     position: relative;
-    height: 460px;
-    border-radius: 32px;
+    height: 350px;
+    border-radius: 28px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 28px 80px rgba(0,0,0,0.40);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
     background: rgba(255,255,255,0.08);
     transition: 0.28s ease;
 }}
 
 .image-card:hover {{
-    transform: translateY(-10px);
-    box-shadow: 0 0 42px rgba(255,159,67,0.28), 0 28px 80px rgba(0,0,0,0.48);
+    transform: translateY(-7px);
+    box-shadow: 0 0 34px rgba(255,159,67,0.24), 0 24px 70px rgba(0,0,0,0.42);
 }}
 
 .image-card img {{
@@ -312,30 +312,30 @@ body {{
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 1.8rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.90), rgba(0,0,0,0.45), transparent);
+    padding: 1.25rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.45), transparent);
 }}
 
 .image-mask h3 {{
     margin: 0;
     color: white;
-    font-size: 1.6rem;
+    font-size: 1.35rem;
     font-weight: 900;
 }}
 
 .image-mask p {{
-    color: rgba(255,255,255,0.88);
-    margin: 0.6rem 0 0;
-    line-height: 1.6;
-    font-size: 1.1rem;
+    color: rgba(255,255,255,0.86);
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+    font-size: 0.96rem;
     font-weight: 700;
 }}
 
 .image-note {{
-    margin-top: 0.65rem;
+    margin-top: 0.55rem;
     color: #ffcf9a;
     font-weight: 900;
-    font-size: 1.05rem;
+    font-size: 0.9rem;
 }}
 
 .image-note span {{
@@ -355,7 +355,7 @@ body {{
 </body>
 </html>
 """,
-        height=480
+        height=370
     )
 
 
@@ -452,7 +452,7 @@ df = load_data(str(DATA_PATH))
 
 
 # =========================================================
-# 全局 CSS（大幅放大版）
+# 全局 CSS
 # =========================================================
 
 safe_markdown("""
@@ -468,7 +468,6 @@ safe_markdown("""
 html, body, .stApp {
     font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
     scroll-behavior: smooth;
-    font-size: 18px;
 }
 
 .stApp {
@@ -481,29 +480,30 @@ html, body, .stApp {
 }
 
 .block-container {
-    max-width: 100%;
-    padding: 1.5rem 2.5rem 6rem 2.5rem;
+    max-width: 1360px;
+    padding-top: 1rem;
+    padding-bottom: 5rem;
 }
 
 .navbar {
     position: sticky;
     top: 0;
     z-index: 999;
-    margin-bottom: 1.8rem;
-    padding: 1rem 2rem;
+    margin-bottom: 1.25rem;
+    padding: 0.78rem 1.2rem;
     border-radius: 999px;
-    background: rgba(6, 19, 31, 0.82);
-    border: 1px solid rgba(255,255,255,0.16);
-    backdrop-filter: blur(24px);
+    background: rgba(6, 19, 31, 0.78);
+    border: 1px solid rgba(255,255,255,0.13);
+    backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.32);
+    box-shadow: 0 14px 42px rgba(0,0,0,0.26);
 }
 
 .nav-logo {
     font-weight: 900;
-    font-size: 1.4rem;
+    font-size: 1.05rem;
     background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -512,28 +512,28 @@ html, body, .stApp {
 .nav-links a {
     color: rgba(246,251,255,0.84) !important;
     text-decoration: none;
-    margin-left: 1.4rem;
-    font-size: 1.05rem;
+    margin-left: 1.05rem;
+    font-size: 0.9rem;
     transition: 0.25s;
 }
 
 .nav-links a:hover {
     color: var(--cyan) !important;
-    text-shadow: 0 0 18px rgba(37,244,238,0.6);
+    text-shadow: 0 0 14px rgba(37,244,238,0.6);
 }
 
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 820px;
-    border-radius: 44px;
-    padding: 6rem 4rem;
+    min-height: 660px;
+    border-radius: 38px;
+    padding: 5.2rem 3rem;
     background:
         linear-gradient(135deg, rgba(37,244,238,0.13), rgba(255,159,67,0.12)),
         rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(18px);
-    box-shadow: 0 32px 100px rgba(0,0,0,0.42);
+    box-shadow: 0 28px 90px rgba(0,0,0,0.38);
 }
 
 .hero::after {
@@ -541,15 +541,15 @@ html, body, .stApp {
     position: absolute;
     right: -120px;
     top: -120px;
-    width: 480px;
-    height: 480px;
+    width: 380px;
+    height: 380px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,159,67,0.42), transparent 70%);
     filter: blur(4px);
 }
 
 .hero h1 {
-    font-size: clamp(4.5rem, 9vw, 8rem);
+    font-size: clamp(3rem, 7vw, 5.8rem);
     line-height: 1.02;
     margin: 0;
     font-weight: 900;
@@ -559,42 +559,40 @@ html, body, .stApp {
 }
 
 .hero h2 {
-    margin-top: 1.6rem;
-    max-width: 1200px;
-    font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-    line-height: 2.0;
+    margin-top: 1.2rem;
+    max-width: 1020px;
+    font-size: clamp(1.05rem, 2vw, 1.42rem);
+    line-height: 1.9;
     color: rgba(246,251,255,0.84);
     font-weight: 500;
 }
 
 .hero-tag {
     display: inline-block;
-    padding: 0.7rem 1.4rem;
+    padding: 0.55rem 1rem;
     border-radius: 999px;
     color: var(--cyan);
-    background: rgba(37,244,238,0.12);
-    border: 1px solid rgba(37,244,238,0.36);
+    background: rgba(37,244,238,0.1);
+    border: 1px solid rgba(37,244,238,0.32);
     font-weight: 900;
     letter-spacing: 0.12em;
-    margin-bottom: 1.8rem;
-    font-size: 1.0rem;
+    margin-bottom: 1.5rem;
 }
 
 .hero-buttons {
     display: flex;
-    gap: 1.4rem;
+    gap: 1rem;
     flex-wrap: wrap;
-    margin-top: 2.4rem;
+    margin-top: 2rem;
 }
 
 .hero-btn,
 .hero-btn-ghost {
-    padding: 1.1rem 1.8rem;
-    border-radius: 20px;
+    padding: 0.9rem 1.3rem;
+    border-radius: 16px;
     text-decoration: none !important;
     font-weight: 900;
     transition: 0.28s;
-    font-size: 1.2rem;
 }
 
 .hero-btn {
@@ -610,56 +608,55 @@ html, body, .stApp {
 
 .hero-btn:hover,
 .hero-btn-ghost:hover {
-    transform: translateY(-6px) scale(1.04);
-    box-shadow: 0 0 36px rgba(37,244,238,0.40);
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 0 28px rgba(37,244,238,0.35);
 }
 
 .hero-kpis {
     display: grid;
-    grid-template-columns: repeat(4, minmax(160px, 1fr));
-    gap: 1.5rem;
-    max-width: 1200px;
-    margin-top: 2.8rem;
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+    gap: 1rem;
+    max-width: 1020px;
+    margin-top: 2.2rem;
 }
 
 .hero-kpi {
-    padding: 1.4rem;
-    border-radius: 26px;
+    padding: 1rem;
+    border-radius: 22px;
     background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.14);
 }
 
 .hero-kpi strong {
     display: block;
     color: var(--cyan);
-    font-size: 2.0rem;
+    font-size: 1.55rem;
     font-weight: 900;
 }
 
 .hero-kpi span {
     display: block;
     color: rgba(246,251,255,0.72);
-    margin-top: 0.35rem;
-    line-height: 1.5;
-    font-size: 1.0rem;
+    margin-top: 0.25rem;
+    line-height: 1.45;
 }
 
 .section-head {
     text-align: center;
-    margin: 6rem auto 2.8rem;
-    max-width: 1200px;
+    margin: 5rem auto 2rem;
+    max-width: 980px;
 }
 
 .section-tag {
     color: var(--cyan);
     font-weight: 900;
-    letter-spacing: 0.25em;
-    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
 }
 
 .section-head h2 {
-    margin: 0.5rem 0;
-    font-size: clamp(2.8rem, 5vw, 4rem);
+    margin: 0.35rem 0;
+    font-size: clamp(2rem, 4vw, 2.8rem);
     font-weight: 900;
     background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
     -webkit-background-clip: text;
@@ -668,10 +665,7 @@ html, body, .stApp {
 
 .section-head p {
     color: rgba(246,251,255,0.70);
-    line-height: 1.9;
-    font-size: 1.15rem;
-    max-width: 1000px;
-    margin: 0 auto;
+    line-height: 1.85;
 }
 
 .glass-card,
@@ -679,21 +673,21 @@ html, body, .stApp {
 .contact-item-card,
 .chain-step {
     height: 100%;
-    padding: 2.0rem;
-    border-radius: 32px;
+    padding: 1.45rem;
+    border-radius: 28px;
     background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.14);
     backdrop-filter: blur(20px);
-    box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+    box-shadow: 0 18px 52px rgba(0,0,0,0.25);
     transition: 0.28s ease;
 }
 
 .glass-card {
-    min-height: 280px;
+    min-height: 245px;
 }
 
 .chain-step {
-    min-height: 270px;
+    min-height: 230px;
     position: relative;
     overflow: hidden;
 }
@@ -703,8 +697,8 @@ html, body, .stApp {
     position: absolute;
     right: -50px;
     bottom: -50px;
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
     border-radius: 999px;
     background: radial-gradient(circle, rgba(37,244,238,0.16), transparent 70%);
 }
@@ -713,28 +707,27 @@ html, body, .stApp {
 .info-panel:hover,
 .contact-item-card:hover,
 .chain-step:hover {
-    transform: translateY(-10px);
+    transform: translateY(-7px);
     border-color: rgba(37,244,238,0.48);
-    box-shadow: 0 0 40px rgba(37,244,238,0.22), 0 22px 60px rgba(0,0,0,0.40);
+    box-shadow: 0 0 32px rgba(37,244,238,0.22), 0 18px 52px rgba(0,0,0,0.35);
 }
 
 .icon {
-    font-size: 3.2rem;
-    margin-bottom: 1.0rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
 }
 
 .chain-num {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
     background: linear-gradient(135deg, var(--cyan), var(--orange));
     color: #05111e;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    font-size: 1.2rem;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
 }
 
 .glass-card h3,
@@ -742,8 +735,8 @@ html, body, .stApp {
 .contact-item-card h3,
 .chain-step h3 {
     color: #fff;
-    margin-bottom: 0.9rem;
-    font-size: 1.5rem;
+    margin-bottom: 0.7rem;
+    font-size: 1.22rem;
     font-weight: 900;
 }
 
@@ -752,38 +745,35 @@ html, body, .stApp {
 .contact-item-card p,
 .chain-step p {
     color: rgba(246,251,255,0.74);
-    line-height: 1.85;
-    font-size: 1.05rem;
+    line-height: 1.75;
 }
 
 .metric-box {
-    padding: 1.6rem;
-    border-radius: 26px;
+    padding: 1.15rem;
+    border-radius: 22px;
     background: rgba(255,255,255,0.075);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.13);
     text-align: center;
-    min-height: 150px;
+    min-height: 125px;
 }
 
 .metric-box h3 {
     color: var(--cyan);
     margin: 0;
-    font-size: 2.8rem;
+    font-size: 2rem;
     font-weight: 900;
 }
 
 .metric-box p {
     color: rgba(246,251,255,0.70);
-    margin: 0.4rem 0 0;
-    font-size: 1.1rem;
+    margin: 0.3rem 0 0;
 }
 
 .metric-box small {
     color: rgba(255,207,154,0.95);
     display: block;
-    margin-top: 0.4rem;
-    line-height: 1.5;
-    font-size: 0.95rem;
+    margin-top: 0.35rem;
+    line-height: 1.45;
 }
 
 .recommend-result,
@@ -791,17 +781,17 @@ html, body, .stApp {
 .vip-panel,
 .lock-panel,
 .design-panel {
-    padding: 2.0rem;
-    border-radius: 30px;
+    padding: 1.45rem;
+    border-radius: 26px;
     background: linear-gradient(135deg, rgba(37,244,238,0.12), rgba(255,159,67,0.10));
     border: 1px solid rgba(255,255,255,0.16);
-    margin-top: 1.2rem;
-    box-shadow: 0 22px 60px rgba(0,0,0,0.26);
+    margin-top: 1rem;
+    box-shadow: 0 18px 52px rgba(0,0,0,0.22);
 }
 
 .lock-panel {
     text-align: center;
-    padding: 2.8rem;
+    padding: 2rem;
     background: linear-gradient(135deg, rgba(255,159,67,0.13), rgba(37,244,238,0.08));
 }
 
@@ -813,7 +803,6 @@ html, body, .stApp {
     margin-top: 0;
     color: var(--cyan);
     font-weight: 900;
-    font-size: 1.6rem;
 }
 
 .recommend-result p,
@@ -822,13 +811,12 @@ html, body, .stApp {
 .lock-panel p,
 .design-panel p {
     color: rgba(246,251,255,0.78);
-    line-height: 1.8;
-    font-size: 1.05rem;
+    line-height: 1.72;
 }
 
 .missing-img {
-    height: 460px;
-    border-radius: 32px;
+    height: 350px;
+    border-radius: 28px;
     border: 1px dashed rgba(255,255,255,0.25);
     background: rgba(255,255,255,0.06);
     display: flex;
@@ -837,22 +825,22 @@ html, body, .stApp {
     justify-content: center;
     color: rgba(246,251,255,0.78);
     text-align: center;
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .contact-shell {
-    padding: 3.8rem 3rem;
-    border-radius: 40px;
+    padding: 2.8rem 2.2rem;
+    border-radius: 34px;
     background: rgba(255,255,255,0.065);
     border: 1px solid rgba(255,255,255,0.16);
     backdrop-filter: blur(20px);
     text-align: center;
-    box-shadow: 0 28px 80px rgba(0,0,0,0.32);
-    margin-top: 1.5rem;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+    margin-top: 1rem;
 }
 
 .contact-shell h2 {
-    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     margin: 0;
     background: linear-gradient(90deg, var(--cyan), #fff, var(--orange));
     -webkit-background-clip: text;
@@ -861,8 +849,7 @@ html, body, .stApp {
 
 .contact-shell p {
     color: rgba(246,251,255,0.72);
-    margin-top: 0.8rem;
-    font-size: 1.2rem;
+    margin-top: 0.6rem;
 }
 
 .stSlider label,
@@ -873,12 +860,10 @@ html, body, .stApp {
 .stTextArea label {
     color: rgba(246,251,255,0.84) !important;
     font-weight: 800 !important;
-    font-size: 1.05rem !important;
 }
 
 [data-testid="stMetricValue"] {
     color: #25f4ee;
-    font-size: 2.2rem !important;
 }
 
 hr {
@@ -887,44 +872,43 @@ hr {
 
 @media (max-width: 900px) {
     .hero-kpis {
-        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        grid-template-columns: repeat(2, minmax(130px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
     .block-container {
-        padding-left: 1.2rem;
-        padding-right: 1.2rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     .navbar {
-        border-radius: 24px;
+        border-radius: 20px;
         align-items: flex-start;
         flex-direction: column;
-        gap: 0.8rem;
-        padding: 1rem 1.2rem;
+        gap: 0.6rem;
     }
 
     .nav-links {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.6rem;
+        gap: 0.55rem;
     }
 
     .nav-links a {
         margin-left: 0;
-        margin-right: 0.6rem;
-        font-size: 0.95rem;
+        margin-right: 0.4rem;
+        font-size: 0.82rem;
     }
 
     .hero {
         min-height: auto;
-        padding: 3.5rem 1.5rem;
-        border-radius: 30px;
+        padding: 3rem 1.3rem;
+        border-radius: 26px;
     }
 
     .hero h1 {
-        font-size: 3.6rem;
+        font-size: 3rem;
     }
 
     .hero-kpis {
@@ -1433,18 +1417,18 @@ if slide_html:
 .scroll-wrapper {{
     width: 100%;
     overflow: hidden;
-    border-radius: 36px;
-    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.16);
     background: rgba(255,255,255,0.06);
-    box-shadow: 0 28px 80px rgba(0,0,0,0.38);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35);
 }}
 
 .scroll-track {{
     display: flex;
-    gap: 28px;
+    gap: 24px;
     width: max-content;
-    padding: 28px;
-    animation: scrollX 36s linear infinite;
+    padding: 24px;
+    animation: scrollX 34s linear infinite;
 }}
 
 .scroll-wrapper:hover .scroll-track {{
@@ -1453,12 +1437,12 @@ if slide_html:
 
 .slide {{
     position: relative;
-    width: 520px;
-    height: 340px;
+    width: 420px;
+    height: 280px;
     flex: 0 0 auto;
-    border-radius: 28px;
+    border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.40);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
     background: rgba(255,255,255,0.08);
 }}
 
@@ -1473,29 +1457,29 @@ if slide_html:
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 22px;
-    background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.18), transparent);
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.84), rgba(0,0,0,0.18), transparent);
     color: white;
 }}
 
 .slide-caption strong {{
     display: block;
-    font-size: 22px;
-    margin-bottom: 5px;
+    font-size: 18px;
+    margin-bottom: 4px;
 }}
 
 .slide-caption span {{
     display: block;
     color: rgba(255,255,255,0.78);
-    font-size: 16px;
+    font-size: 14px;
 }}
 
 .slide-caption em {{
     display: block;
     color: #ffcf9a;
     font-style: normal;
-    font-size: 15px;
-    margin-top: 6px;
+    font-size: 13px;
+    margin-top: 5px;
     font-weight: 700;
 }}
 
@@ -1512,7 +1496,7 @@ if slide_html:
     </div>
 </div>
 """,
-        height=400
+        height=350
     )
 else:
     st.info("请确认 images 文件夹中存在 760qian、760hou、780qian、780hou、800qian、800hou。没有图片也不会影响页面运行。")
