@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
+import altair as alt
 
 
 # =========================================================
@@ -1338,8 +1339,31 @@ else:
         mean_df = show_df.groupby("temperature_c")[numeric_cols].mean().round(2).reset_index()
         st.dataframe(mean_df, use_container_width=True, height=180)
 
-        if "overall_quality_score_100" in mean_df.columns:
-            st.line_chart(mean_df.set_index("temperature_c")["overall_quality_score_100"])
+        # 使用 Altair 绘制折线图，禁用 tooltip 避免移动端悬浮框跟随问题
+        chart_col = "overall_quality_score_100"
+        if chart_col in mean_df.columns:
+            line_chart = alt.Chart(mean_df).mark_line(
+                point=True,
+                color='#25f4ee'
+            ).encode(
+                x=alt.X('temperature_c:Q', title='温度 (°C)'),
+                y=alt.Y(f'{chart_col}:Q', title='平均综合质量分'),
+                tooltip=alt.value(None)  # 明确禁用 tooltip
+            ).properties(
+                width='container',
+                height=250,
+                background='transparent'
+            ).configure(
+                axis={
+                    'labelColor': 'rgba(246,251,255,0.7)',
+                    'titleColor': 'rgba(246,251,255,0.9)',
+                    'gridColor': 'rgba(255,255,255,0.1)'
+                },
+                view={
+                    'stroke': 'transparent'
+                }
+            )
+            st.altair_chart(line_chart, use_container_width=True)
 
         if "overall_quality_score_100" in mean_df.columns and len(mean_df):
             best_row = mean_df.loc[mean_df["overall_quality_score_100"].idxmax()]
