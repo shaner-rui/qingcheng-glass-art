@@ -1553,14 +1553,14 @@ with r1:
         particle
     )
 
-    # 放大综合推荐分和计划烧制温度的字号
+    # 突出显示计划烧制温度和综合推荐分，综合推荐分略小于温度，且保持在同行显示
     safe_markdown(
         f"""
 <div class="recommend-result">
     <h3>AI匹配结果</h3>
     <p><b>用户选择产品：</b>{product_type}</p>
     <p><b>匹配工艺温度区间：</b>{rec["base_temp"]}</p>
-    <p style="font-size: 3.5rem; font-weight: 900; color: var(--cyan); margin: 0.4rem 0;">
+    <p style="font-size: 3.2rem; font-weight: 900; color: var(--cyan); margin: 0.4rem 0; line-height: 1.2;">
         计划烧制温度：{temp}℃
     </p>
     <p><b>方案保温时间：</b>{rec["hold_time"]}</p>
@@ -1572,7 +1572,7 @@ with r1:
     <p><b>厚度方案：</b>{rec["thickness_tip"]}</p>
     <p><b>颗粒方案：</b>{rec["particle_tip"]}</p>
     <p><b>低温路径说明：</b>{rec["energy_compare"]}</p>
-    <p style="font-size: 4rem; font-weight: 900; color: var(--orange); margin: 0.4rem 0;">
+    <p style="font-size: 2.8rem; font-weight: 900; color: var(--orange); margin: 0.4rem 0; line-height: 1.2; white-space: nowrap;">
         综合推荐分：{rec["score"]} / 100
     </p>
 </div>
